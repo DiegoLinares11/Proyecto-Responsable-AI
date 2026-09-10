@@ -1,0 +1,19 @@
+# Normalización de fin de línea.
+#
+# Los .sh tienen que llegar con LF a cualquier máquina: un script con CRLF
+# falla en macOS y en Linux con "bad interpreter: /usr/bin/env bash^M", y el
+# error no dice nada útil sobre la causa. Lo mismo vale para el SQL, que se
+# alimenta a psql desde esos mismos scripts.
+
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.sql  text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
