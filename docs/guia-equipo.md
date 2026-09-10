@@ -94,7 +94,21 @@ el mismo día.
 npm run typecheck
 npm run lint
 npm test
+./scripts/probar_rls.sh
 ```
+
+El último levanta un PostgreSQL desechable, aplica las migraciones y comprueba
+las políticas de fila. **Cualquier cambio a `supabase/migrations/` tiene que
+correrlo**, porque una política mal escrita no falla ruidosamente: falla
+dejando pasar. Y si el cambio agrega una regla de acceso, agrega también su
+prueba en `tests/rls/` — la suite es la única forma de saber que la regla sigue
+ahí dentro de tres semanas.
+
+Un detalle de RLS que conviene tener presente al escribir esas pruebas: un
+`update` o un `delete` que no alcanza ninguna fila **no lanza error**, afecta
+cero filas y devuelve éxito. Solo el `insert` y el `with check` levantan
+excepción. Código que asuma "no hubo error, entonces se guardó" tiene un fallo
+silencioso.
 
 Y para cambios en la Fase 4 o 5, además la corrida del red team, con el
 resultado pegado en la descripción del PR. Un cambio al chatbot que baja la

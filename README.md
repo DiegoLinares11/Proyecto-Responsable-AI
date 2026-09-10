@@ -82,5 +82,33 @@ para el modelo.
 
 ## Estado
 
-Fase 0 completa: el plan, las decisiones de arquitectura y el esqueleto del
-repositorio. Todavía no hay lógica implementada.
+**Fase 0** completa: plan, decisiones de arquitectura y esqueleto del repo.
+
+**Fase 1** completa: esquema de base, roles, permisos, silencios y las
+políticas de fila, con 27 pruebas que las verifican. Todavía sin aplicar a un
+proyecto de Supabase remoto — ver más abajo.
+
+```bash
+./scripts/probar_rls.sh
+```
+
+Ese comando levanta un clúster PostgreSQL desechable, aplica las cinco
+migraciones y corre la suite de RLS. No necesita Docker, ni proyecto remoto, ni
+toca ninguna base existente de la máquina.
+
+Lo que las pruebas comprueban, entre otras cosas: que un lector no puede
+insertar una noticia, que un publicador no puede insertarla ya como
+`verificada` ni firmarla a nombre de otro, que nadie se cambia el rol a sí
+mismo, que un borrador ajeno no se lee, que un silenciado de comentar sí puede
+reaccionar, y que nadie escribe en la bitácora de auditoría desde el cliente.
+
+### Pendiente para aplicar en remoto
+
+El proyecto de Supabase que estaba enlazado (`ejneudrdwflzfqakuzwp`) ya no
+existe. Para desplegar el esquema hace falta crear uno nuevo y aplicar las
+migraciones:
+
+```bash
+npx supabase link --project-ref <ref-del-proyecto-nuevo>
+npx supabase db push
+```

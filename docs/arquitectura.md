@@ -92,7 +92,27 @@ Capa 4  bitácora (decisiones, tokens, latencia)
 usuario
 ```
 
-## Esquema de base (borrador de la Fase 1)
+## Esquema de base (Fase 1, implementado)
+
+Las migraciones están en `supabase/migrations/` y las pruebas de sus políticas
+en `tests/rls/`. Se corren contra un clúster desechable con
+`./scripts/probar_rls.sh`, sin necesidad de proyecto remoto ni de Docker.
+
+Tres cosas salieron distintas de este borrador al implementarlo, y quedan
+anotadas porque cambian cómo se lee el esquema:
+
+- **Los comentarios se separaron de las interacciones.** Lecturas y reacciones
+  son un hecho binario con una restricción de unicidad que sirve de tope
+  anti-manipulación; los comentarios llevan texto y se moderan. Juntarlos
+  obligaba a que la restricción tuviera una excepción, justo en la tabla que
+  cuenta votos.
+- **El correo se protege por columna, no por fila.** El feed necesita mostrar
+  el nombre de cualquier autor, así que la fila es legible; el correo no se
+  otorga. RLS decide qué filas, los privilegios de columna deciden qué campos.
+- **La bitácora del chatbot no se escribe desde el cliente.** `mensajes` y
+  `conversaciones` solo tienen política de lectura. Si el cliente pudiera
+  insertar, el auditado escribiría su propia auditoría.
+
 
 | Tabla | Qué guarda | Notas |
 |---|---|---|
@@ -104,7 +124,8 @@ usuario
 | `fuentes` | Dominio, credibilidad, nivel, **justificación** | Curado a mano; es opinión editorial |
 | `noticias` | Contenido, autor, estado, componentes del puntaje | Cada componente por separado |
 | `validaciones` | Una fila por señal por noticia | El desglose que se le muestra al usuario |
-| `interacciones` | Quién, qué noticia, qué tipo, cuándo | Único por usuario/noticia/tipo |
+| `interacciones` | Lecturas y reacciones: quién, qué noticia, cuándo | Único por usuario/noticia/tipo — ese índice **es** el tope anti-manipulación |
+| `comentarios` | Texto, autor, si está oculto | Separada de `interacciones`: lleva texto y se modera |
 | `pesos_ranking` | Configuración de la fórmula, con historial | Cambiar un peso deja rastro |
 | `conversaciones` y `mensajes` | Historial del chatbot | Con política de retención |
 | `auditoria` | Append-only: qué decidió el sistema y por qué | Sin `update` ni `delete` |
