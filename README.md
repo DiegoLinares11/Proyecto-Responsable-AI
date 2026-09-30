@@ -95,14 +95,19 @@ deterministas, cero tokens, verificado contra Supabase y contra las APIs reales.
 **Fase 3** completa: el ranking de relevancia, con su calibración medida sobre
 datos sembrados y registrada en el historial de pesos.
 
-Falta la Fase 6 para conectar las dos cosas a una interfaz.
+**Fase 4** completa: el chatbot con sus cinco capas, los dos proveedores de
+modelo y la bitácora. Probado contra el sistema real — el caso de la linked list
+responde la noticia y niega el código.
+
+Falta el red team de la Fase 5 y la interfaz de la Fase 6.
 
 ```bash
-npm test              # 123 pruebas de validación y ranking
+npm test              # 177 pruebas de validación, ranking y chatbot
 npm run test:rls      # 34 de las políticas de fila
 npm run typecheck
 
-node scripts/mostrar_feed.mjs   # el feed ordenado, con el desglose de cada posición
+node scripts/mostrar_feed.mjs     # el feed ordenado, con el desglose de cada posición
+node scripts/probar_chatbot.mjs   # el chatbot contra las noticias reales
 ```
 
 Para ver el ranking sobre datos de demostración, aplicá
