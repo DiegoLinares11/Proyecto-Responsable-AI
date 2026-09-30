@@ -84,9 +84,10 @@ para el modelo.
 
 **Fase 0** completa: plan, decisiones de arquitectura y esqueleto del repo.
 
-**Fase 1** completa: esquema de base, roles, permisos, silencios y las
-políticas de fila, con 27 pruebas que las verifican. Todavía sin aplicar a un
-proyecto de Supabase remoto — ver más abajo.
+**Fase 1** completa y **aplicada en Supabase**: esquema de base, roles,
+permisos, silencios y las políticas de fila, con 31 pruebas que las verifican.
+Los advisors de seguridad del proyecto salen limpios salvo un hallazgo sobre una
+función propia de Supabase.
 
 ```bash
 ./scripts/probar_rls.sh
@@ -102,13 +103,30 @@ insertar una noticia, que un publicador no puede insertarla ya como
 mismo, que un borrador ajeno no se lee, que un silenciado de comentar sí puede
 reaccionar, y que nadie escribe en la bitácora de auditoría desde el cliente.
 
-### Pendiente para aplicar en remoto
+### Para trabajar contra el proyecto real
 
-El proyecto de Supabase que estaba enlazado (`ejneudrdwflzfqakuzwp`) ya no
-existe. Para desplegar el esquema hace falta crear uno nuevo y aplicar las
-migraciones:
+El ref del proyecto y las llaves no se versionan. Copiá `.env.example` a
+`.env.local` y llenalo con lo que aparece en el dashboard de Supabase
+(Project Settings → API); pedile a Diego el ref si no lo tenés.
 
 ```bash
-npx supabase link --project-ref <ref-del-proyecto-nuevo>
+cp .env.example .env.local
+npx supabase link --project-ref <ref>
 npx supabase db push
 ```
+
+Las seis migraciones ya están aplicadas y registradas en el historial, así que
+`db push` no va a reaplicarlas.
+
+### El esquema `interno`
+
+Las funciones que usan las políticas de fila y los triggers **no viven en
+`public`**, sino en un esquema `interno`. PostgREST publica como RPC toda
+función de `public` que el rol pueda ejecutar, así que dejarlas ahí las
+convertía en API sin que nadie lo decidiera.
+
+El primer intento fue revocarles el `EXECUTE`, y no funciona: PostgreSQL
+verifica ese permiso contra el usuario que hace la consulta, así que al
+quitarlo **todas las políticas dejan de evaluar**. La suite de pruebas lo
+detectó en la segunda aserción. El detalle está en
+[la migración que lo corrige](supabase/migrations/20260930120000_cerrar_ejecucion_de_funciones.sql).
