@@ -47,6 +47,22 @@ compara el titular publicado contra el titular real con similitud difusa.
 Atrapa dos cosas: enlaces inventados y noticias donde el titular que se subió
 exagera o tergiversa lo que el artículo original dice.
 
+> **El canal que valida no puede ser el agujero.** Esta señal descarga una URL
+> que escribió el publicador, y eso convierte al servidor en un cliente HTTP a
+> las órdenes de un usuario — un SSRF de manual. Alguien con permiso de publicar
+> podría enviar `url_original` apuntando a `http://169.254.169.254/` (los
+> metadatos de la nube, donde viven credenciales) o a un servicio interno.
+>
+> Tres defensas, en `src/modules/validacion/red-segura.ts`: solo `http` y
+> `https`; se resuelve el nombre y se comprueba que **ninguna** de sus
+> direcciones sea privada (revisar solo el texto del host no sirve, porque un
+> atacante registra un dominio público que resuelve a `127.0.0.1`); y los
+> redireccionamientos se siguen a mano revisando cada salto, porque un destino
+> público que redirige a uno privado es el bypass clásico.
+>
+> En este proyecto el publicador es alguien de confianza, pero «de confianza» no
+> es un control de seguridad: basta una cuenta comprometida.
+
 ### 3. Corroboración independiente
 
 Se extraen las entidades y palabras clave del titular y se consulta **GDELT**
@@ -86,6 +102,20 @@ un número suelto.
 | 45–74 | `en_revision` | Va a la cola de moderación humana |
 | < 45 | `no_verificable` | No se publica; el autor ve el desglose y puede corregir |
 | cualquiera | `desmentida` | Bloqueada por la señal 4, sin importar el resto |
+
+Los máximos por señal suman 100: credibilidad 30, URL 20, corroboración 30,
+coherencia 20. El desmentido no aporta puntos porque **es un veto**: una nota
+que un verificador ya desmintió no se arregla teniendo buena fuente y buena
+redacción. Si se le restaran puntos, una noticia falsa de un medio con
+credibilidad 90 y tres agregadores replicándola podría seguir pasando el umbral.
+
+Dos consecuencias de esa aritmética que vale hacer explícitas, porque se cumplen
+sin necesidad de un `if` que alguien pueda borrar:
+
+- **Una noticia sin URL nunca llega a `verificada`.** Credibilidad y URL suman
+  50 de los 100 puntos, así que el tope alcanzable queda por debajo del umbral.
+- **Una señal indisponible impide la publicación automática**, por alto que sea
+  el puntaje. No se da por corroborada una noticia por falta de datos.
 
 ## La regla que no se negocia
 
