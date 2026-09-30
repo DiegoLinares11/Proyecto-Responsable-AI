@@ -427,7 +427,42 @@ select pg_temp.debe_contar(
   $q$select count(*) where has_schema_privilege('authenticated', 'interno', 'USAGE')$q$,
   1, 'authenticated SI puede, que es lo que las politicas necesitan');
 
+-- ===========================================================================
+-- 10. Las vistas del ranking no son API
+--
+-- Una vista de `public` que el rol pueda leer la publica PostgREST. Estas dos
+-- existen para el trabajo que recalcula el feed, que corre con la llave de
+-- servicio.
+--
+-- Y van con `security_invoker`. Sin eso, una vista corre con los permisos de su
+-- dueño y se salta las políticas de fila de las tablas que consulta: un agujero
+-- que además no se ve, porque la vista funciona — solo muestra de más.
+-- ===========================================================================
+
+\echo ''
+\echo '# 10. vistas del ranking'
+
+select pg_temp.debe_fallar(
+  'select count(*) from public.vista_noticias_ranking',
+  'authenticated NO puede leer la vista de noticias del ranking');
+
+select pg_temp.debe_fallar(
+  'select count(*) from public.vista_interacciones_ranking',
+  'authenticated NO puede leer la vista de interacciones del ranking');
+
 reset role;
+
+select pg_temp.debe_contar($q$
+  select count(*)
+  from pg_views v
+  join pg_class c on c.relname = v.viewname and c.relkind = 'v'
+  where v.schemaname = 'public'
+    and v.viewname like 'vista_%_ranking'
+    and exists (
+      select 1 from pg_options_to_table(c.reloptions)
+      where option_name = 'security_invoker' and option_value = 'true'
+    )
+$q$, 2, 'las 2 vistas tienen security_invoker activo');
 
 \echo ''
 \echo '=== todas las pruebas pasaron ==='
