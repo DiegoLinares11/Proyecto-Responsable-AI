@@ -130,8 +130,25 @@ export type BuscarFuente = (candidatos: string[]) => Promise<FuenteRegistrada | 
 /** Descarga una URL. Debe lanzar si la red falla; devolver si el servidor responde. */
 export type TraerUrl = (url: string) => Promise<RespuestaHttp>;
 
+/**
+ * Lo que se le pide a un proveedor de corroboración.
+ *
+ * Van las dos cosas porque los proveedores no buscan igual: un índice de texto
+ * como GDELT necesita términos sueltos, mientras que comparar contra los
+ * titulares de un feed funciona mucho mejor midiendo el parecido entre los
+ * titulares completos. Medido con notas reales: dos medios cubriendo el mismo
+ * hecho comparten apenas dos o tres palabras clave —demasiado poco para un
+ * conteo— pero sus titulares enteros se parecen de forma clara.
+ */
+export type ConsultaDeCobertura = {
+  /** Términos distintivos, para buscadores que indexan por palabra. */
+  terminos: string[];
+  /** El titular completo, para comparar contra otros titulares. */
+  titulo: string;
+};
+
 /** Busca cobertura del mismo hecho en medios externos. */
-export type BuscarCobertura = (consulta: string) => Promise<ArticuloExterno[]>;
+export type BuscarCobertura = (consulta: ConsultaDeCobertura) => Promise<ArticuloExterno[]>;
 
 /** Busca desmentidos. `null` cuando el verificador no está configurado. */
 export type BuscarDesmentidos = ((consulta: string) => Promise<Desmentido[]>) | null;

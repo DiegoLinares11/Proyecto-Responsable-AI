@@ -29,6 +29,7 @@ export {
   type BuscarDesmentidos,
   type BuscarFuente,
   type ClaveSenal,
+  type ConsultaDeCobertura,
   type Dependencias,
   type Desmentido,
   type EstadoVeredicto,
@@ -56,6 +57,16 @@ export {
   verificarDestinoPermitido,
   DestinoNoPermitido,
 } from "./red-segura.ts";
+
+export {
+  crearBuscadorEnFeeds,
+  leerItemsDeFeed,
+  terminosCoincidentes,
+  type FuenteConFeed,
+  type ItemDeFeed,
+  type ListarFuentesConFeed,
+  type OpcionesFeeds,
+} from "./rss.ts";
 
 export { crearFetchTolerante, type OpcionesFetchTolerante } from "./http-tolerante.ts";
 
