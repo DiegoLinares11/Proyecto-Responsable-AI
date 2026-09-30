@@ -387,6 +387,46 @@ select pg_temp.debe_contar(
   'select count(*) from public.fuentes',
   9, 'cualquier usuario puede leer el registro de fuentes con su justificacion');
 
+-- ===========================================================================
+-- 9. Las funciones internas no son API
+--
+-- PostgREST publica como RPC toda funcion de `public` que el rol pueda
+-- ejecutar. Estas cuatro existen para que las evalúen las políticas, no para
+-- que las llame un cliente. Las pruebas de arriba ya demostraron que las
+-- políticas siguen funcionando después de revocar el permiso: si revocarlo las
+-- hubiera roto, la suite entera habría fallado antes de llegar aquí.
+-- ===========================================================================
+
+\echo ''
+\echo '# 9. superficie de RPC'
+
+-- Lo que PostgREST publica es lo que vive en `public`. Que ahí no quede
+-- ninguna de nuestras funciones es la aserción que cierra el hallazgo de los
+-- advisors. (`rls_auto_enable` es de Supabase y no existe en el shim local.)
+select pg_temp.debe_contar($q$
+  select count(*)
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public'
+    and p.proname <> 'rls_auto_enable'
+$q$, 0, 'no queda ninguna funcion nuestra en el esquema publicado');
+
+select pg_temp.debe_contar($q$
+  select count(*)
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'interno'
+$q$, 8, 'las 8 funciones viven en el esquema interno');
+
+-- Y que el esquema interno no se pueda atravesar sin haber iniciado sesion.
+select pg_temp.debe_contar(
+  $q$select count(*) where has_schema_privilege('anon', 'interno', 'USAGE')$q$,
+  0, 'anon NO puede atravesar el esquema interno');
+
+select pg_temp.debe_contar(
+  $q$select count(*) where has_schema_privilege('authenticated', 'interno', 'USAGE')$q$,
+  1, 'authenticated SI puede, que es lo que las politicas necesitan');
+
 reset role;
 
 \echo ''
