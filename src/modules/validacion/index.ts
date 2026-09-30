@@ -44,6 +44,7 @@ export { evaluarVeracidad, filasDeValidacion } from "./evaluar.ts";
 
 export {
   crearBuscadorDeCobertura,
+  crearBuscadorEnCadena,
   crearBuscadorDeDesmentidos,
   crearBuscadorDeFuentes,
   type ConsultarFuentes,
@@ -55,6 +56,8 @@ export {
   verificarDestinoPermitido,
   DestinoNoPermitido,
 } from "./red-segura.ts";
+
+export { crearFetchTolerante, type OpcionesFetchTolerante } from "./http-tolerante.ts";
 
 export { candidatosDeDominio, candidatosDeUrl, dominioBase, extraerDominio } from "./dominio.ts";
 export { leerMetadatos, type MetadatosDePagina } from "./metadatos.ts";
