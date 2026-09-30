@@ -74,7 +74,40 @@ buen nivel cubriendo lo mismo es una señal fuerte; un solo medio de nivel bajo
 y nadie más, es una señal para dudar.
 
 El conteo es por dominio, no por artículo, para que veinte réplicas de un mismo
-cable no cuenten como veinte confirmaciones.
+cable no cuenten como veinte confirmaciones. El dominio de la propia noticia
+tampoco cuenta: un medio no se corrobora a sí mismo, y sin esa regla cualquier
+nota tendría una confirmación gratis.
+
+> **Medido contra el servicio real, y conviene saberlo antes de perder una
+> tarde.** GDELT tiene dos comportamientos que no se ven con pruebas dobles:
+>
+> 1. **Su saludo TLS tarda entre 10 y 12 segundos.** El `fetch` de Node aborta
+>    la conexión a los 10 y ese límite no se puede subir sin agregar una
+>    dependencia, así que la señal fallaba siempre con
+>    `UND_ERR_CONNECT_TIMEOUT`. Se resolvió con un cliente propio sobre
+>    `node:https` (`src/modules/validacion/http-tolerante.ts`). Para comparar:
+>    el TLS de Prensa Libre, Supabase y GitHub desde la misma máquina tarda
+>    entre 0.10 y 0.23 segundos.
+>
+> 2. **Limita por dirección IP, no por usuario.** Devuelve 429 incluso con 25
+>    segundos entre consultas cuando se le llama desde detrás de una NAT
+>    compartida —una oficina, un campus—, porque el cupo lo consume todo el
+>    edificio. Desde otra red, o ya desplegado, funciona.
+>
+> Por eso el puerto acepta **varios proveedores encadenados**
+> (`crearBuscadorEnCadena`): se prueban en orden y gana el primero que
+> conteste. Cero artículos no hace saltar al siguiente, porque cero es una
+> respuesta —nadie más cubre el hecho— y no un fallo.
+>
+> **Decisión pendiente del equipo:** falta elegir el segundo proveedor. Google
+> News RSS funciona muy bien desde Guatemala (probado: 100 resultados, 19
+> dominios, con Prensa Libre, Soy502, Emisoras Unidas y el Diario de Centro
+> América entre ellos), pero su propio feed declara que el uso está limitado a
+> lectores personales no comerciales. Usarlo como servicio de respaldo en una
+> aplicación va contra eso, y en un proyecto de IA responsable esa es
+> precisamente la clase de atajo que no se toma en silencio. La alternativa
+> limpia es consultar los feeds RSS que cada medio del registro publica para
+> ser sindicado — menos cobertura, permiso explícito. Queda para el informe.
 
 ### 4. Desmentidos conocidos
 
