@@ -89,6 +89,14 @@ Agent SDK, y el crédito de API se reserva para las mediciones formales y el
 despliegue. Ver
 [adr/0005-proveedor-llm-conmutable.md](adr/0005-proveedor-llm-conmutable.md).
 
+> **Medido, y conviene saberlo antes de confiar en un número.** El costo que
+> reporta el modo suscripción NO sirve para el presupuesto. En la primera corrida
+> real, el Agent SDK reportó `$0.10` y «4 tokens de entrada» para una respuesta
+> de 345 tokens de salida — el arnés contabiliza de otra forma y sus cifras no se
+> parecen a lo que cobraría la API por el mismo turno. Es exactamente la razón
+> por la que el ADR 0005 exige que toda medición que vaya al informe corra en
+> modo `api`, que es el único que devuelve consumo real de tokens.
+
 Un punto que conviene tener claro y escribir en el informe: la suscripción
 personal es para desarrollar y probar en local. Una aplicación desplegada que
 atiende usuarios necesita crédito de API. No es un tecnicismo — es una
