@@ -89,15 +89,25 @@ permisos, silencios y las políticas de fila, con 31 pruebas que las verifican.
 Los advisors de seguridad del proyecto salen limpios salvo un hallazgo sobre una
 función propia de Supabase.
 
-**Fase 2** completa: el canal de validación de veracidad, con 52 pruebas. Cinco
-señales deterministas, cero tokens. Todavía sin la ruta que lo conecta a la
-interfaz — eso es Fase 6.
+**Fase 2** completa: el canal de validación de veracidad. Cinco señales
+deterministas, cero tokens, verificado contra Supabase y contra las APIs reales.
+
+**Fase 3** completa: el ranking de relevancia, con su calibración medida sobre
+datos sembrados y registrada en el historial de pesos.
+
+Falta la Fase 6 para conectar las dos cosas a una interfaz.
 
 ```bash
-npm test              # las 52 del canal de validación
-npm run test:rls      # las 31 de las políticas de fila
+npm test              # 123 pruebas de validación y ranking
+npm run test:rls      # 34 de las políticas de fila
 npm run typecheck
+
+node scripts/mostrar_feed.mjs   # el feed ordenado, con el desglose de cada posición
 ```
+
+Para ver el ranking sobre datos de demostración, aplicá
+[`scripts/sembrar_demo.sql`](scripts/sembrar_demo.sql) desde el SQL Editor del
+dashboard (y [`borrar_demo.sql`](scripts/borrar_demo.sql) para limpiarlo).
 
 Sobre las dependencias: **cero en tiempo de ejecución**. Node 24 ejecuta
 TypeScript quitando los tipos, sin compilar, así que las pruebas corren con
