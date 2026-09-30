@@ -99,15 +99,39 @@ nota tendría una confirmación gratis.
 > conteste. Cero artículos no hace saltar al siguiente, porque cero es una
 > respuesta —nadie más cubre el hecho— y no un fallo.
 >
-> **Decisión pendiente del equipo:** falta elegir el segundo proveedor. Google
-> News RSS funciona muy bien desde Guatemala (probado: 100 resultados, 19
-> dominios, con Prensa Libre, Soy502, Emisoras Unidas y el Diario de Centro
-> América entre ellos), pero su propio feed declara que el uso está limitado a
-> lectores personales no comerciales. Usarlo como servicio de respaldo en una
-> aplicación va contra eso, y en un proyecto de IA responsable esa es
-> precisamente la clase de atajo que no se toma en silencio. La alternativa
-> limpia es consultar los feeds RSS que cada medio del registro publica para
-> ser sindicado — menos cobertura, permiso explícito. Queda para el informe.
+#### El segundo proveedor: los feeds del propio registro
+
+Se evaluó **Google News RSS**, que funciona muy bien desde Guatemala — probado:
+100 resultados y 19 dominios, con Prensa Libre, Soy502, Emisoras Unidas y el
+Diario de Centro América entre ellos. Se **descartó**: su propio feed declara
+que el uso está limitado a lectores personales no comerciales, y usarlo como
+servicio de respaldo dentro de una aplicación va contra eso. En un proyecto
+sobre IA responsable, tomar ese atajo y no decirlo habría sido incoherente con
+el tema del trabajo.
+
+Se eligió consultar **los feeds RSS que cada medio del registro publica por su
+cuenta**. Un RSS existe justamente para que alguien lo lea: el permiso es
+explícito. De las nueve fuentes sembradas, seis publican feed; Reuters y AP los
+cerraron hace años y Soy502 no ofrece ninguno, así que quedan con `url_rss`
+nulo y no participan de esta vía.
+
+Dos límites que hay que decir en el informe:
+
+- **Solo se corrobora contra los medios del registro.** Si un hecho lo cubre un
+  medio que nadie agregó a `fuentes`, esta vía no lo ve. A cambio, cada
+  corroboración viene de una fuente cuya credibilidad el equipo ya evaluó y
+  escribió.
+- **Un feed es una ventana móvil.** La Hora publica 10 entradas, República 25,
+  Prensa Libre 99. Una noticia solo se puede corroborar por esta vía mientras
+  siga cerca de la cabeza del feed de otro medio. Para notas de hace una semana,
+  no sirve.
+
+La comparación es entre **titulares completos**, no por conteo de palabras
+clave. Se midió con notas reales: dos medios cubriendo el mismo hecho comparten
+apenas dos o tres palabras clave —demasiado poco para un conteo que no dispare
+falsos positivos— pero sus titulares enteros se parecen de forma clara. El
+umbral está calibrado contra pares reales que viven en `tests/unit/validacion/`,
+así que moverlo rompe una prueba en vez de degradar la señal en silencio.
 
 ### 4. Desmentidos conocidos
 
