@@ -64,7 +64,7 @@ export async function evaluarCorroboracion(
 
   let articulos;
   try {
-    articulos = await buscarCobertura(consulta);
+    articulos = await buscarCobertura({ terminos, titulo: noticia.titulo });
   } catch (error) {
     return {
       ...base,

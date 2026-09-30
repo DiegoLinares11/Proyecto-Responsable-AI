@@ -16,6 +16,7 @@
 import { crearFetchTolerante } from "./http-tolerante.ts";
 import type {
   ArticuloExterno,
+  ConsultaDeCobertura,
   BuscarCobertura,
   BuscarDesmentidos,
   BuscarFuente,
@@ -92,9 +93,9 @@ export function crearBuscadorDeCobertura(opciones: OpcionesGdelt = {}): BuscarCo
     return turno;
   }
 
-  return async function buscarCobertura(consulta: string): Promise<ArticuloExterno[]> {
+  return async function buscarCobertura(consulta: ConsultaDeCobertura): Promise<ArticuloExterno[]> {
     const url = new URL("https://api.gdeltproject.org/api/v2/doc/doc");
-    url.searchParams.set("query", consulta);
+    url.searchParams.set("query", consulta.terminos.join(" "));
     url.searchParams.set("mode", "artlist");
     url.searchParams.set("format", "json");
     url.searchParams.set("maxrecords", String(maximo));
@@ -288,7 +289,7 @@ export function crearBuscadorEnCadena(
     throw new Error("La cadena de corroboración necesita al menos un proveedor");
   }
 
-  return async function buscarCobertura(consulta: string): Promise<ArticuloExterno[]> {
+  return async function buscarCobertura(consulta: ConsultaDeCobertura): Promise<ArticuloExterno[]> {
     const fallos: string[] = [];
 
     for (const proveedor of proveedores) {
