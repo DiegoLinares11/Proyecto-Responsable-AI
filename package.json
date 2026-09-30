@@ -1,0 +1,20 @@
+{
+  "name": "noticias-verificadas",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Plataforma de noticias verificadas con chatbot endurecido — CC3106 Responsible AI",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test \"tests/unit/**/*.test.ts\"",
+    "test:rls": "bash scripts/probar_rls.sh",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}
