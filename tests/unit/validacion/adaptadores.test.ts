@@ -19,6 +19,11 @@ import {
   type ConsultarFuentes,
 } from "../../../src/modules/validacion/index.ts";
 
+/** Una consulta de cobertura armada a partir de un titular. */
+function pedido(titulo: string) {
+  return { terminos: titulo.split(/s+/).filter((t) => t.length >= 3), titulo };
+}
+
 /** Reloj falso: `dormir` adelanta el tiempo en vez de esperarlo. */
 function relojFalso() {
   let t = 0;
@@ -58,9 +63,9 @@ describe("GDELT", () => {
       ahora: reloj.ahora,
     });
 
-    await buscarCobertura("uno");
-    await buscarCobertura("dos");
-    await buscarCobertura("tres");
+    await buscarCobertura(pedido("uno"));
+    await buscarCobertura(pedido("dos"));
+    await buscarCobertura(pedido("tres"));
 
     assert.equal(momentos.length, 3);
     for (let i = 1; i < momentos.length; i++) {
@@ -84,7 +89,7 @@ describe("GDELT", () => {
       ahora: reloj.ahora,
     });
 
-    await Promise.all([buscarCobertura("a"), buscarCobertura("b"), buscarCobertura("c")]);
+    await Promise.all([buscarCobertura(pedido("a")), buscarCobertura(pedido("b")), buscarCobertura(pedido("c"))]);
 
     assert.equal(new Set(momentos).size, 3, "las tres salieron en el mismo instante");
   });
@@ -105,7 +110,7 @@ describe("GDELT", () => {
       ahora: reloj.ahora,
     });
 
-    const articulos = await buscarCobertura("consulta");
+    const articulos = await buscarCobertura(pedido("consulta"));
     assert.equal(llamadas, 2);
     assert.equal(articulos.length, 1);
   });
@@ -125,7 +130,7 @@ describe("GDELT", () => {
       ahora: reloj.ahora,
     });
 
-    await assert.rejects(() => buscarCobertura("consulta"), /direcci[oó]n IP/);
+    await assert.rejects(() => buscarCobertura(pedido("consulta")), /direcci[oó]n IP/);
   });
 
   // GDELT contesta 200 con texto plano cuando la consulta no le gusta.
@@ -136,7 +141,7 @@ describe("GDELT", () => {
       })) as unknown as typeof fetch;
 
     const buscarCobertura = crearBuscadorDeCobertura({ buscar });
-    await assert.rejects(() => buscarCobertura("consulta"), /no es JSON/);
+    await assert.rejects(() => buscarCobertura(pedido("consulta")), /no es JSON/);
   });
 
   test("descarta los articulos sin url o sin dominio", async () => {
@@ -147,7 +152,7 @@ describe("GDELT", () => {
         { domain: "sin-url.com", title: "Falta url" },
       ])) as unknown as typeof fetch;
 
-    const articulos = await crearBuscadorDeCobertura({ buscar })("consulta");
+    const articulos = await crearBuscadorDeCobertura({ buscar })(pedido("consulta de prueba"));
     assert.equal(articulos.length, 1);
     assert.equal(articulos[0]?.dominio, "reuters.com");
   });
@@ -267,7 +272,7 @@ describe("cadena de proveedores de corroboracion", () => {
       proveedor("uno", [{ url: "https://a.com/1", dominio: "a.com", titulo: "A" }]),
       proveedor("dos", [{ url: "https://b.com/1", dominio: "b.com", titulo: "B" }]),
     ]);
-    const r = await cadena("consulta");
+    const r = await cadena(pedido("consulta"));
     assert.equal(r[0]?.dominio, "a.com");
   });
 
@@ -276,7 +281,7 @@ describe("cadena de proveedores de corroboracion", () => {
       proveedor("gdelt", new Error("429 por IP compartida")),
       proveedor("respaldo", [{ url: "https://b.com/1", dominio: "b.com", titulo: "B" }]),
     ]);
-    const r = await cadena("consulta");
+    const r = await cadena(pedido("consulta"));
     assert.equal(r[0]?.dominio, "b.com");
   });
 
@@ -296,7 +301,7 @@ describe("cadena de proveedores de corroboracion", () => {
       },
     ]);
 
-    const r = await cadena("consulta");
+    const r = await cadena(pedido("consulta"));
     assert.equal(r.length, 0);
     assert.equal(consultadoElSegundo, false);
   });
@@ -306,7 +311,7 @@ describe("cadena de proveedores de corroboracion", () => {
       proveedor("gdelt", new Error("429")),
       proveedor("respaldo", new Error("sin red")),
     ]);
-    await assert.rejects(() => cadena("consulta"), (e: Error) => {
+    await assert.rejects(() => cadena(pedido("consulta")), (e: Error) => {
       assert.match(e.message, /gdelt: 429/);
       assert.match(e.message, /respaldo: sin red/);
       return true;
