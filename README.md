@@ -89,9 +89,20 @@ permisos, silencios y las políticas de fila, con 31 pruebas que las verifican.
 Los advisors de seguridad del proyecto salen limpios salvo un hallazgo sobre una
 función propia de Supabase.
 
+**Fase 2** completa: el canal de validación de veracidad, con 52 pruebas. Cinco
+señales deterministas, cero tokens. Todavía sin la ruta que lo conecta a la
+interfaz — eso es Fase 6.
+
 ```bash
-./scripts/probar_rls.sh
+npm test              # las 52 del canal de validación
+npm run test:rls      # las 31 de las políticas de fila
+npm run typecheck
 ```
+
+Sobre las dependencias: **cero en tiempo de ejecución**. Node 24 ejecuta
+TypeScript quitando los tipos, sin compilar, así que las pruebas corren con
+`node --test` sin instalar nada. TypeScript y los tipos de Node son las únicas
+dependencias, y solo para `typecheck`.
 
 Ese comando levanta un clúster PostgreSQL desechable, aplica las cinco
 migraciones y corre la suite de RLS. No necesita Docker, ni proyecto remoto, ni
