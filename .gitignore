@@ -21,3 +21,4 @@ Thumbs.db
 coverage/
 tests/redteam/resultados/
 
+tsconfig.tsbuildinfo
