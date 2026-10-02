@@ -162,7 +162,7 @@ export async function conversar(
   const capa3 = await revisarSalida(
     {
       respuesta: respondido.valor,
-      noticiasOfrecidas: noticias.map((n) => n.id),
+      noticiasOfrecidas: noticias,
       promptDelSistema: PROMPT_DEL_SISTEMA,
     },
     deps.verificarNoticias,

@@ -41,6 +41,8 @@ export {
 
 export {
   delimitarAcervo,
+  marcaDeAcervo,
+  recordatorioDeTurno,
   ESQUEMA_DE_CLASIFICACION,
   ESQUEMA_DE_RESPUESTA,
   PROMPT_DEL_CLASIFICADOR,
