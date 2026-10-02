@@ -31,8 +31,9 @@ import {
   ESQUEMA_DE_RESPUESTA,
   PROMPT_DEL_CLASIFICADOR,
   PROMPT_DEL_SISTEMA,
-  RECORDATORIO_DE_TURNO,
   delimitarAcervo,
+  marcaDeAcervo,
+  recordatorioDeTurno,
 } from "../prompt.ts";
 import type { CostoDelTurno, RespuestaDelModelo, VeredictoCapa1 } from "../tipos.ts";
 import { validarClasificacion, validarRespuesta } from "./validacion.ts";
@@ -148,6 +149,9 @@ export function crearProveedorApi(opciones: OpcionesProveedorApi = {}): Proveedo
 
     async responder(peticion: PeticionDeRespuesta): Promise<Respondido<RespuestaDelModelo>> {
       const inicio = Date.now();
+      // Una marca distinta por consulta: quien escribió el cuerpo de una noticia
+      // no la conoce, así que no puede cerrar el bloque ni abrir uno falso.
+      const marca = marcaDeAcervo();
 
       const negativa =
         peticion.tareaAjenaANegar === null
@@ -179,7 +183,7 @@ export function crearProveedorApi(opciones: OpcionesProveedorApi = {}): Proveedo
             content:
               `${delimitarAcervo(peticion.noticias)}\n\n` +
               `<pregunta>\n${peticion.mensaje}\n</pregunta>${negativa}\n\n` +
-              RECORDATORIO_DE_TURNO,
+              recordatorioDeTurno(marca),
           },
         ],
         // Sin pensamiento extendido: esto es un resumen anclado a los datos que

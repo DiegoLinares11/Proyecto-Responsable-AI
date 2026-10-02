@@ -33,8 +33,9 @@ import {
   ESQUEMA_DE_RESPUESTA,
   PROMPT_DEL_CLASIFICADOR,
   PROMPT_DEL_SISTEMA,
-  RECORDATORIO_DE_TURNO,
   delimitarAcervo,
+  marcaDeAcervo,
+  recordatorioDeTurno,
 } from "../prompt.ts";
 import type { CostoDelTurno, RespuestaDelModelo, VeredictoCapa1 } from "../tipos.ts";
 import {
@@ -178,6 +179,9 @@ export function crearProveedorSuscripcion(
     },
 
     async responder(peticion: PeticionDeRespuesta): Promise<Respondido<RespuestaDelModelo>> {
+      // Una marca distinta por consulta: quien escribió el cuerpo de una noticia
+      // no la conoce, así que no puede cerrar el bloque ni abrir uno falso.
+      const marca = marcaDeAcervo();
       const negativa =
         peticion.tareaAjenaANegar === null
           ? ""
@@ -194,7 +198,7 @@ export function crearProveedorSuscripcion(
         (historial === "" ? "" : `<conversacion_previa>\n${historial}\n</conversacion_previa>\n\n`) +
           `${delimitarAcervo(peticion.noticias)}\n\n` +
           `<pregunta>\n${peticion.mensaje}\n</pregunta>${negativa}\n\n` +
-          RECORDATORIO_DE_TURNO,
+          recordatorioDeTurno(marca),
       );
 
       return { valor: validarRespuesta(parsear(resultado.texto)), costo: medir(resultado) };

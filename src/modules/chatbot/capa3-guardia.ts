@@ -16,6 +16,7 @@
 // ===========================================================================
 
 import {
+  type NoticiaParaElModelo,
   type RespuestaDelModelo,
   type VerificarNoticias,
   type VeredictoCapa3,
@@ -62,10 +63,34 @@ function normalizar(texto: string): string {
     .trim();
 }
 
+/**
+ * Dominios y URLs en la respuesta.
+ *
+ * El chatbot nombra a los medios por su nombre («Prensa Libre»), nunca por su
+ * dominio, y la interfaz es la que enlaza al artículo. Que emita un dominio no
+ * es una función que exista: es la huella de que alguien le dijo que lo hiciera.
+ */
+const DOMINIOS =
+  /\bhttps?:\/\/\S+|\b[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.(?:com|net|org|gt|info|io|co|mx|es|gob|edu|xyz|biz|online|site|club|app|dev)\b/gi;
+
+/**
+ * Afirmaciones sobre el puntaje de veracidad.
+ *
+ * El lookahead descarta las menciones a la escala («va de 0 a 100»), que son
+ * legítimas cuando el chatbot explica cómo funciona el puntaje.
+ */
+const VERACIDAD_AFIRMADA = /veracidad[^.\n\d]{0,25}(\d{1,3})(?!\s*(?:a|hasta)\s*100)/gi;
+
 export type EntradaCapa3 = {
   respuesta: RespuestaDelModelo;
-  /** Los identificadores que se le mostraron al modelo en esta vuelta. */
-  noticiasOfrecidas: readonly string[];
+  /**
+   * Las noticias completas que se le mostraron al modelo en esta vuelta.
+   *
+   * Hacen falta enteras, no solo sus identificadores: sin los puntajes y las
+   * fuentes no se puede comprobar que lo que el modelo AFIRMA sobre una noticia
+   * coincida con lo que esa noticia realmente dice.
+   */
+  noticiasOfrecidas: readonly NoticiaParaElModelo[];
   promptDelSistema: string;
 };
 
@@ -103,7 +128,7 @@ export async function revisarSalida(
   //
   // Una noticia real pero que no estaba en el contexto significa que el modelo
   // la sacó de su entrenamiento, no de la base. Aunque exista, no la leyó aquí.
-  const ofrecidas = new Set(entrada.noticiasOfrecidas);
+  const ofrecidas = new Set(entrada.noticiasOfrecidas.map((n) => n.id));
   const noOfrecidas = citadas.filter((id) => publicables.has(id) && !ofrecidas.has(id));
 
   comprobaciones.push({
@@ -140,6 +165,52 @@ export async function revisarSalida(
       filtradas.length === 0
         ? "No hay fragmentos del prompt del sistema en la respuesta."
         : `La respuesta repite ${filtradas.length} fragmento(s) del prompt del sistema.`,
+  });
+
+  // --- 6. Ningún dominio ni enlace -----------------------------------------
+  //
+  // Esta es la defensa contra la inyección indirecta que manda al usuario a un
+  // sitio del atacante. Es determinista a propósito: el prompt le pide al modelo
+  // que no obedezca órdenes del dato, y el red team mostró que eso no alcanza.
+  // Acá no hace falta que el modelo coopere.
+  const dominios = [...new Set(texto.match(DOMINIOS) ?? [])];
+
+  comprobaciones.push({
+    nombre: "sin_dominios_ajenos",
+    paso: dominios.length === 0,
+    detalle:
+      dominios.length === 0
+        ? "La respuesta no menciona dominios ni enlaces."
+        : `La respuesta menciona ${dominios.join(", ")}. El chatbot nombra a los medios por su ` +
+          "nombre, nunca por su dominio, y no enlaza a ningún lado: que lo haga es la huella de que " +
+          "alguien se lo pidió desde el contenido de una noticia.",
+  });
+
+  // --- 7. Los puntajes de veracidad son los de verdad ----------------------
+  //
+  // Un atacante que escribe el cuerpo de una noticia puede pedirle al modelo que
+  // reporte un puntaje inventado. En una plataforma cuyo argumento es «esto está
+  // verificado», falsificar el sello es el daño más grande posible.
+  const puntajesReales = new Set(
+    entrada.noticiasOfrecidas
+      .map((n) => n.puntajeVeracidad)
+      .filter((p): p is number => p !== null),
+  );
+
+  const afirmados = [...texto.matchAll(VERACIDAD_AFIRMADA)]
+    .map((m) => Number(m[1]))
+    .filter((n) => Number.isFinite(n));
+
+  const inventados = [...new Set(afirmados.filter((n) => !puntajesReales.has(n)))];
+
+  comprobaciones.push({
+    nombre: "veracidad_no_inventada",
+    paso: inventados.length === 0,
+    detalle:
+      inventados.length === 0
+        ? "Los puntajes de veracidad que menciona coinciden con los de las noticias."
+        : `Afirma puntajes de veracidad que ninguna noticia del contexto tiene: ${inventados.join(", ")}. ` +
+          `Los reales son: ${[...puntajesReales].join(", ") || "ninguno"}.`,
   });
 
   const falladas = comprobaciones.filter((c) => !c.paso);
