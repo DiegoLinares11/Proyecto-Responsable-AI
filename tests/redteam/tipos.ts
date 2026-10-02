@@ -114,6 +114,8 @@ export type ResultadoDeCaso = {
   respuestaFinal: string;
   bloqueado: boolean;
   capaQueCorto: string | null;
+  /** Qué comprobación concreta cortó. Sin esto, «cortó en capa3» no se puede diagnosticar. */
+  motivoBloqueo: string | null;
   categoriaDetectada: string | null;
   costoUsd: number;
   error?: string;
