@@ -77,6 +77,13 @@ export type RespuestaDelModelo = {
 
 export type VeredictoCapa3 = {
   permitido: boolean;
+  /**
+   * True cuando el corte lo provocó una señal de inyección en el CONTENIDO de
+   * una noticia, no un error del modelo. Cambia lo que se le dice al usuario, y
+   * en el futuro debería además mandar esa noticia a la cola de moderación: el
+   * ataque no solo falla, también delata a quien lo publicó.
+   */
+  porInyeccionEnElContenido: boolean;
   motivo: string;
   /** Qué comprobaciones corrieron y cómo les fue. */
   comprobaciones: ReadonlyArray<{ nombre: string; paso: boolean; detalle: string }>;

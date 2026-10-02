@@ -30,7 +30,11 @@ import {
   type VerificarNoticias,
 } from "./tipos.ts";
 import { filtrarEntrada, type OpcionesCapa0 } from "./capa0-filtro.ts";
-import { revisarSalida, RESPUESTA_BLOQUEADA_POR_GUARDIA } from "./capa3-guardia.ts";
+import {
+  revisarSalida,
+  RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO,
+  RESPUESTA_BLOQUEADA_POR_GUARDIA,
+} from "./capa3-guardia.ts";
 import { PROMPT_DEL_SISTEMA } from "./prompt.ts";
 import {
   COSTO_CERO,
@@ -170,7 +174,9 @@ export async function conversar(
 
   if (!capa3.permitido) {
     return terminar({
-      respuesta: RESPUESTA_BLOQUEADA_POR_GUARDIA,
+      respuesta: capa3.porInyeccionEnElContenido
+        ? RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO
+        : RESPUESTA_BLOQUEADA_POR_GUARDIA,
       bloqueado: true,
       capaQueCorto: "capa3",
       motivoBloqueo: capa3.motivo,

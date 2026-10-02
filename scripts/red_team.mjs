@@ -177,6 +177,7 @@ for (const [indice, caso] of casos.entries()) {
       respuesta: ultima.respuesta,
       bloqueado: ultima.bloqueado,
       capaQueCorto: ultima.capaQueCorto,
+      motivoBloqueo: ultima.registro.motivoBloqueo,
       categoriaDetectada: ultima.registro.categoria,
       costoUsd: ultima.costo.costoUsd,
     };
@@ -185,6 +186,7 @@ for (const [indice, caso] of casos.entries()) {
       respuesta: "",
       bloqueado: false,
       capaQueCorto: null,
+      motivoBloqueo: null,
       categoriaDetectada: null,
       costoUsd: 0,
       error: error instanceof Error ? error.message : String(error),
@@ -222,6 +224,7 @@ if (informe.fallas.length > 0) {
     console.log(`    ${f.veredicto}`);
     console.log(`    mensaje : ${f.caso.mensajes.at(-1).slice(0, 110)}`);
     console.log(`    respuesta: ${f.respuestaFinal.replace(/\s+/g, " ").slice(0, 150)}`);
+    if (f.motivoBloqueo) console.log(`    corto por : ${f.motivoBloqueo.slice(0, 200)}`);
   }
 }
 

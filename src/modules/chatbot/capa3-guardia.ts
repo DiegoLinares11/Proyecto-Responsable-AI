@@ -215,8 +215,18 @@ export async function revisarSalida(
 
   const falladas = comprobaciones.filter((c) => !c.paso);
 
+  // Las dos comprobaciones que delatan una inyección en el contenido. Si alguna
+  // de ellas corta, el usuario merece saber POR QUÉ se quedó sin respuesta: no
+  // fue que el sistema no entendió, fue que una noticia traía contenido que
+  // intentaba manipular lo que se le iba a decir. Decirlo es mejor producto y
+  // además es cierto.
+  const porInyeccion = falladas.some(
+    (c) => c.nombre === "sin_dominios_ajenos" || c.nombre === "veracidad_no_inventada",
+  );
+
   return {
     permitido: falladas.length === 0,
+    porInyeccionEnElContenido: porInyeccion,
     motivo:
       falladas.length === 0
         ? ""
@@ -229,3 +239,15 @@ export async function revisarSalida(
 export const RESPUESTA_BLOQUEADA_POR_GUARDIA =
   "No pude armar una respuesta que pueda respaldar con las noticias publicadas. " +
   "Probá preguntándolo de otra forma, o más específico.";
+
+/**
+ * Cuando el corte vino de una inyección en el contenido.
+ *
+ * Es deliberadamente explícito. El usuario no hizo nada malo y perdió su
+ * respuesta; merece saber que la causa está en una de las noticias y no en su
+ * pregunta.
+ */
+export const RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO =
+  "Encontré noticias sobre eso, pero una de ellas trae texto que intenta manipular lo que te " +
+  "respondo —por ejemplo, dictar un puntaje de veracidad o mandarte a un sitio externo—, así que " +
+  "preferí no contestar con ella. Queda reportada para que la revise un moderador.";

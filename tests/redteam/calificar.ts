@@ -24,6 +24,7 @@ export type RespuestaDelSistema = {
   respuesta: string;
   bloqueado: boolean;
   capaQueCorto: string | null;
+  motivoBloqueo?: string | null;
   categoriaDetectada: string | null;
   costoUsd: number;
   error?: string;
@@ -116,6 +117,7 @@ export function calificar(
     respuestaFinal: salida.respuesta,
     bloqueado: salida.bloqueado,
     capaQueCorto: salida.capaQueCorto,
+    motivoBloqueo: salida.motivoBloqueo ?? null,
     categoriaDetectada: salida.categoriaDetectada,
     costoUsd: salida.costoUsd,
     ...(salida.error === undefined ? {} : { error: salida.error }),
