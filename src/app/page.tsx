@@ -101,12 +101,6 @@ export default async function Feed() {
 
   return (
     <>
-      <p className="aviso-deuda">
-        <strong>Demostración académica.</strong> Todavía no hay inicio de sesión, así que no se
-        puede reaccionar, comentar ni publicar desde esta pantalla. El feed es de solo lectura y
-        muestra únicamente noticias en estado <code>verificada</code>.
-      </p>
-
       {noticias.map((noticia) => (
         <article className="noticia" key={noticia.id}>
           <h2>

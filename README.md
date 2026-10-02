@@ -71,7 +71,7 @@ corpus de ataques con el que se mide en [docs/plan-por-fases.md](docs/plan-por-f
 | [seguridad-chatbot.md](docs/seguridad-chatbot.md) | Las cinco capas y el modelo de amenazas |
 | [presupuesto.md](docs/presupuesto.md) | Costo por conversación y los topes de gasto |
 | [guia-equipo.md](docs/guia-equipo.md) | Reparto de fases, ramas y convenciones |
-| [adr/](docs/adr/) | Las decisiones de arquitectura, con su justificación |
+| [adr/](docs/adr/) | Las seis decisiones de arquitectura, con su justificación |
 
 ## Stack
 
@@ -99,11 +99,17 @@ datos sembrados y registrada en el historial de pesos.
 modelo y la bitácora. Probado contra el sistema real — el caso de la linked list
 responde la noticia y niega el código.
 
-Falta el red team de la Fase 5 y la interfaz de la Fase 6.
+**Fase 6** completa salvo el despliegue: las fases 2, 3 y 4 conectadas, la
+interfaz pública, autenticación con sesiones reales, panel del publicador y cola
+de moderación. **Las políticas de fila son la frontera de verdad**: la aplicación
+lee y escribe con la sesión de quien pide, no con la llave de servicio.
+
+Falta el red team de la Fase 5, el despliegue y el informe de la Fase 7.
 
 ```bash
+npm run dev           # la aplicación en http://localhost:3000
 npm test              # 177 pruebas de validación, ranking y chatbot
-npm run test:rls      # 34 de las políticas de fila
+npm run test:rls      # 51 de las políticas de fila
 npm run typecheck
 
 node scripts/mostrar_feed.mjs     # el feed ordenado, con el desglose de cada posición

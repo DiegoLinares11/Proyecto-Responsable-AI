@@ -30,12 +30,6 @@ import {
   type TurnoRegistrado,
 } from "../../../modules/chatbot/index.ts";
 
-/**
- * Mientras no haya inicio de sesión, todos los turnos se le atribuyen a este
- * usuario de demostración. Lo crea `scripts/sembrar_demo.sql`.
- */
-export const USUARIO_DE_DEMOSTRACION = "dddddddd-0000-0000-0000-000000000001";
-
 const CAMPOS =
   "id,titulo,resumen,publicada_en,puntaje_veracidad,relevancia,fuentes(nombre)";
 
@@ -76,9 +70,9 @@ function terminos(consulta: string): string {
 export async function crearPuertosDelChatbot(
   cliente: SupabaseClient,
   proveedor: ProveedorLlm,
-  opciones: { topeDiarioPorUsuario: number },
+  opciones: { idUsuario: string; topeDiarioPorUsuario: number },
 ): Promise<{ idConversacion: string; deps: DependenciasDelChatbot }> {
-  const idConversacion = await conversacionDelUsuario(cliente, USUARIO_DE_DEMOSTRACION);
+  const idConversacion = await conversacionDelUsuario(cliente, opciones.idUsuario);
 
   const deps: DependenciasDelChatbot = {
     proveedor,

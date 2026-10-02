@@ -139,3 +139,4 @@ anotadas porque cambian cómo se lee el esquema:
 | [0003](adr/0003-ranking-explicable.md) | El ranking es una fórmula publicada |
 | [0004](adr/0004-defensa-en-profundidad-chatbot.md) | La defensa está en la arquitectura, no en la detección |
 | [0005](adr/0005-proveedor-llm-conmutable.md) | Suscripción para desarrollar, API para desplegar |
+| [0006](adr/0006-lectura-publica-del-feed.md) | El feed se lee sin cuenta, y con eso RLS vuelve a ser la frontera |
