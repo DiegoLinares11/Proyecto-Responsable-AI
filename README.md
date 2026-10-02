@@ -69,6 +69,7 @@ corpus de ataques con el que se mide en [docs/plan-por-fases.md](docs/plan-por-f
 | [validacion-noticias.md](docs/validacion-noticias.md) | Las cinco señales de veracidad y la cola de moderación |
 | [ranking-relevancia.md](docs/ranking-relevancia.md) | La fórmula, los pesos y las defensas contra manipulación |
 | [seguridad-chatbot.md](docs/seguridad-chatbot.md) | Las cinco capas y el modelo de amenazas |
+| [red-team.md](docs/red-team.md) | Cómo se mide la defensa, qué significan los tres números y qué no prueban |
 | [presupuesto.md](docs/presupuesto.md) | Costo por conversación y los topes de gasto |
 | [guia-equipo.md](docs/guia-equipo.md) | Reparto de fases, ramas y convenciones |
 | [adr/](docs/adr/) | Las seis decisiones de arquitectura, con su justificación |
