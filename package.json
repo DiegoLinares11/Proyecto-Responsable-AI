@@ -9,6 +9,9 @@
     "node": ">=24"
   },
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "test": "node --test \"tests/unit/**/*.test.ts\"",
     "test:rls": "bash scripts/probar_rls.sh",
     "typecheck": "tsc --noEmit"

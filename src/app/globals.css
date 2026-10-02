@@ -1,0 +1,130 @@
+/* Noticias Verificadas — hoja de estilos única.
+   Sin framework: son cuatro pantallas y el presupuesto del proyecto no da para
+   discutir sobre bundles. */
+
+:root {
+  --tinta: #16181d;
+  --tinta-suave: #5a6072;
+  --papel: #fbfbfd;
+  --papel-hundido: #f1f2f6;
+  --borde: #e2e4ec;
+  --acento: #1f5fd0;
+  --verificado: #0f7a4f;
+  --alerta: #b4530b;
+  --peligro: #b3261e;
+  --radio: 10px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tinta: #e9eaf0;
+    --tinta-suave: #a0a6b8;
+    --papel: #12141a;
+    --papel-hundido: #1a1d25;
+    --borde: #2a2e3a;
+    --acento: #7aa5f0;
+    --verificado: #4cc38a;
+    --alerta: #e2a03f;
+    --peligro: #f2726a;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+a { color: var(--acento); }
+
+.contenedor { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
+
+header.marca {
+  border-bottom: 1px solid var(--borde);
+  padding: 1.25rem 0;
+  margin-bottom: 1.5rem;
+}
+header.marca h1 { font-size: 1.2rem; margin: 0; letter-spacing: -0.01em; }
+header.marca p { margin: 0.35rem 0 0; color: var(--tinta-suave); font-size: 0.875rem; }
+header.marca nav { margin-top: 0.75rem; display: flex; gap: 1rem; font-size: 0.875rem; }
+
+article.noticia {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+  background: var(--papel);
+}
+article.noticia h2 { font-size: 1.05rem; margin: 0 0 0.5rem; line-height: 1.35; }
+article.noticia h2 a { text-decoration: none; color: inherit; }
+article.noticia h2 a:hover { color: var(--acento); }
+article.noticia p.resumen { margin: 0 0 0.75rem; color: var(--tinta-suave); font-size: 0.925rem; }
+
+.meta {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+  font-size: 0.8125rem; color: var(--tinta-suave);
+  align-items: center;
+}
+
+.sello {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-weight: 600; font-size: 0.75rem;
+  padding: 0.15rem 0.5rem; border-radius: 999px;
+  background: color-mix(in srgb, var(--verificado) 12%, transparent);
+  color: var(--verificado);
+}
+.sello.aviso { background: color-mix(in srgb, var(--alerta) 14%, transparent); color: var(--alerta); }
+.sello.malo  { background: color-mix(in srgb, var(--peligro) 12%, transparent); color: var(--peligro); }
+
+details.porque { margin-top: 0.85rem; font-size: 0.8125rem; }
+details.porque summary { cursor: pointer; color: var(--acento); }
+details.porque table { width: 100%; border-collapse: collapse; margin-top: 0.6rem; }
+details.porque td { padding: 0.3rem 0; border-bottom: 1px solid var(--borde); vertical-align: top; }
+details.porque td.valor { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 1rem; }
+details.porque td.explica { color: var(--tinta-suave); font-size: 0.78rem; padding-top: 0; border-bottom: none; }
+
+.senal { border: 1px solid var(--borde); border-radius: var(--radio); padding: 0.85rem 1rem; margin-bottom: 0.6rem; }
+.senal h3 { margin: 0 0 0.25rem; font-size: 0.875rem; display: flex; justify-content: space-between; gap: 1rem; }
+.senal p { margin: 0; font-size: 0.8125rem; color: var(--tinta-suave); }
+
+.vacio { color: var(--tinta-suave); text-align: center; padding: 3rem 1rem; }
+
+/* --- Chatbot ------------------------------------------------------------- */
+
+.chat { position: fixed; right: 1rem; bottom: 1rem; width: min(26rem, calc(100vw - 2rem)); z-index: 10; }
+.chat button.abrir {
+  float: right; border: 1px solid var(--borde); background: var(--acento); color: white;
+  padding: 0.6rem 1rem; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.875rem;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.18);
+}
+.chat .panel {
+  background: var(--papel); border: 1px solid var(--borde); border-radius: var(--radio);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.18); overflow: hidden; display: flex; flex-direction: column;
+  max-height: min(32rem, 70vh);
+}
+.chat .panel header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--borde); font-size: 0.875rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+.chat .panel header button { background: none; border: none; cursor: pointer; color: var(--tinta-suave); font: inherit; font-size: 1.1rem; line-height: 1; }
+.chat .turnos { overflow-y: auto; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.chat .turno { font-size: 0.875rem; }
+.chat .turno.usuario { align-self: flex-end; max-width: 85%; background: var(--papel-hundido); padding: 0.5rem 0.75rem; border-radius: var(--radio); }
+.chat .turno.asistente { white-space: pre-wrap; }
+.chat .turno .nota { display: block; margin-top: 0.35rem; font-size: 0.72rem; color: var(--tinta-suave); }
+.chat form { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid var(--borde); }
+.chat input {
+  flex: 1; font: inherit; font-size: 0.875rem; padding: 0.5rem 0.65rem;
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  background: var(--papel); color: var(--tinta);
+}
+.chat form button { font: inherit; font-size: 0.875rem; padding: 0.5rem 0.9rem; border: none; border-radius: var(--radio); background: var(--acento); color: white; cursor: pointer; }
+.chat form button:disabled { opacity: 0.5; cursor: default; }
+
+.aviso-deuda {
+  border: 1px dashed var(--alerta); border-radius: var(--radio);
+  padding: 0.75rem 1rem; margin-bottom: 1.5rem;
+  font-size: 0.8125rem; color: var(--tinta-suave);
+}
+.aviso-deuda strong { color: var(--alerta); }
