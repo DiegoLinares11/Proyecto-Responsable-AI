@@ -40,6 +40,12 @@ export {
   type OpcionesDeCalculo,
 } from "./calcular.ts";
 
+export {
+  recalcularRanking,
+  cargadorDePesos,
+  type ResultadoDelRecalculo,
+} from "./recalcular.ts";
+
 export { detectarRafaga, type OpcionesDeRafaga } from "./rafagas.ts";
 
 export {
