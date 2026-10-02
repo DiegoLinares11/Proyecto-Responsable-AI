@@ -105,11 +105,17 @@ interfaz pública, autenticación con sesiones reales, panel del publicador y co
 de moderación. **Las políticas de fila son la frontera de verdad**: la aplicación
 lee y escribe con la sesión de quien pide, no con la llave de servicio.
 
-Falta el red team de la Fase 5, el despliegue y el informe de la Fase 7.
+**Fase 5** completa: corpus adversarial de 92 casos, su calificador y la
+medición antes/después. Encontró tres fallas reales de inyección indirecta; dos
+quedaron cerradas con comprobaciones deterministas y una sigue abierta, dicho
+así en [docs/red-team.md](docs/red-team.md).
+
+Falta el despliegue y el informe de la Fase 7.
 
 ```bash
 npm run dev           # la aplicación en http://localhost:3000
-npm test              # 177 pruebas de validación, ranking y chatbot
+npm test              # 211 pruebas de validación, ranking, chatbot y red team
+node scripts/red_team.mjs       # el corpus adversarial completo
 npm run test:rls      # 51 de las políticas de fila
 npm run typecheck
 
