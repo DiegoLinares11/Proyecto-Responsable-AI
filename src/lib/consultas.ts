@@ -1,30 +1,22 @@
 // ===========================================================================
-// Lecturas del servidor para la interfaz
+// Lecturas de la interfaz
 //
-// ⚠ DEUDA CONOCIDA, Y ES LA PRIMERA DE LA LISTA: estas lecturas van con la
-// llave de servicio, que SE SALTA las políticas de fila de la Fase 1.
+// Van con la sesión del visitante, no con la llave de servicio. Eso significa
+// que **las políticas de fila de la Fase 1 son las que deciden qué devuelve cada
+// consulta**, y no un filtro que el código se acuerde de poner.
 //
-// La razón es que todavía no hay autenticación: sin sesión, el cliente del
-// visitante queda como `anon`, y en esta plataforma `anon` no puede nada a
-// propósito — no hay lectura anónima. Así que mientras no exista el inicio de
-// sesión, la alternativa a esto es una pantalla vacía.
+// La diferencia es la que hay entre un control y una costumbre. Antes estas
+// funciones usaban la llave de servicio —porque sin lectura anónima la
+// alternativa era una pantalla vacía— y el filtro `estado = 'verificada'` lo
+// ponía el código: si alguien lo olvidaba en una consulta nueva, el borrador de
+// otro quedaba expuesto y nada fallaba. Ahora el filtro vive en la política, el
+// código no puede olvidarlo, y una consulta nueva nace segura.
 //
-// Lo que se hace para que la deuda no se vuelva un agujero:
-//
-//   · Cada consulta filtra `estado = 'verificada'` EXPLÍCITAMENTE. No se confía
-//     en que RLS lo haga, porque aquí RLS no está corriendo.
-//   · Se seleccionan columnas por nombre, nunca `*`. Así una columna nueva no
-//     se publica sola.
-//   · No hay ninguna función aquí que lea borradores, noticias en moderación,
-//     la bitácora ni datos de usuarios.
-//
-// Cuando entre la autenticación, esto se reescribe para recibir el token del
-// visitante y las políticas vuelven a ser la frontera. Hasta entonces, el filtro
-// explícito es lo único que separa el feed público de la base completa, y eso
-// hay que decirlo en voz alta en vez de que se olvide.
+// Los filtros por estado que quedan abajo son por CLARIDAD y para no traer
+// filas que después se descartan. Ya no son la frontera.
 // ===========================================================================
 
-import { clienteDeServicio } from "./supabase.ts";
+import { clienteDelServidor } from "./supabase-servidor.ts";
 
 export type NoticiaDelFeed = {
   id: string;
@@ -84,9 +76,11 @@ function aNoticia(fila: FilaDelFeed): NoticiaDelFeed {
   };
 }
 
-/** El feed: solo verificadas, de mayor a menor relevancia. */
+/** El feed: de mayor a menor relevancia. La política decide qué filas llegan. */
 export async function leerFeed(limite = 20): Promise<NoticiaDelFeed[]> {
-  const { data, error } = await clienteDeServicio()
+  const cliente = await clienteDelServidor();
+
+  const { data, error } = await cliente
     .from("noticias")
     .select(CAMPOS_DEL_FEED)
     .eq("estado", "verificada")
@@ -107,38 +101,137 @@ export type SenalDeValidacion = {
 export type NoticiaConDesglose = NoticiaDelFeed & {
   cuerpo: string;
   urlOriginal: string | null;
+  estado: string;
   senales: SenalDeValidacion[];
 };
 
-/** Una noticia verificada con su desglose de validación. */
+const ORDEN_DE_SENALES = [
+  "credibilidad_fuente",
+  "url_verificable",
+  "corroboracion",
+  "desmentido",
+  "coherencia",
+];
+
+/**
+ * Una noticia con su desglose.
+ *
+ * No filtra por estado: si quien mira es el autor o un moderador, la política le
+ * deja ver su borrador, y esta pantalla es justamente donde tiene que poder ver
+ * por qué el canal lo dejó donde lo dejó. Para cualquier otro, la política
+ * devuelve vacío y la página responde 404.
+ */
 export async function leerNoticia(id: string): Promise<NoticiaConDesglose | null> {
-  const cliente = clienteDeServicio();
+  const cliente = await clienteDelServidor();
 
   const { data, error } = await cliente
     .from("noticias")
-    .select(`${CAMPOS_DEL_FEED},cuerpo,url_original`)
-    .eq("estado", "verificada")
+    .select(`${CAMPOS_DEL_FEED},cuerpo,url_original,estado`)
     .eq("id", id)
     .maybeSingle();
 
   if (error !== null) throw new Error(`No se pudo leer la noticia: ${error.message}`);
   if (data === null) return null;
 
-  const fila = data as unknown as FilaDelFeed & { cuerpo: string; url_original: string | null };
+  const fila = data as unknown as FilaDelFeed & {
+    cuerpo: string;
+    url_original: string | null;
+    estado: string;
+  };
 
   const { data: senales } = await cliente
     .from("validaciones")
     .select("senal,aporte,disponible,detalle")
     .eq("id_noticia", id);
 
-  const ORDEN = ["credibilidad_fuente", "url_verificable", "corroboracion", "desmentido", "coherencia"];
-
   return {
     ...aNoticia(fila),
     cuerpo: fila.cuerpo,
     urlOriginal: fila.url_original,
+    estado: fila.estado,
     senales: ((senales ?? []) as SenalDeValidacion[])
       .map((s) => ({ ...s, aporte: Number(s.aporte) }))
-      .sort((a, b) => ORDEN.indexOf(a.senal) - ORDEN.indexOf(b.senal)),
+      .sort((a, b) => ORDEN_DE_SENALES.indexOf(a.senal) - ORDEN_DE_SENALES.indexOf(b.senal)),
   };
+}
+
+export type NoticiaEnRevision = {
+  id: string;
+  titulo: string;
+  resumen: string;
+  urlOriginal: string | null;
+  estado: string;
+  puntajeVeracidad: number | null;
+  creadoEn: string;
+  rafagaSospechosa: boolean;
+  rafagaMotivo: string | null;
+};
+
+/**
+ * La cola de moderación.
+ *
+ * Devuelve filas solo si quien pregunta tiene `noticias_moderar`: eso lo decide
+ * la política `noticias_lectura`, no un `if` de este lado. Para cualquier otro
+ * la lista sale vacía, que es el comportamiento correcto — no hay una ruta por
+ * la que un error de este código exponga la cola.
+ */
+export async function leerColaDeModeracion(): Promise<NoticiaEnRevision[]> {
+  const cliente = await clienteDelServidor();
+
+  const { data, error } = await cliente
+    .from("noticias")
+    .select("id,titulo,resumen,url_original,estado,puntaje_veracidad,creado_en,rafaga_sospechosa,rafaga_motivo")
+    .in("estado", ["en_revision", "no_verificable"])
+    .order("creado_en", { ascending: true })
+    .limit(50);
+
+  if (error !== null) throw new Error(`No se pudo leer la cola: ${error.message}`);
+
+  return ((data ?? []) as Array<{
+    id: string;
+    titulo: string;
+    resumen: string;
+    url_original: string | null;
+    estado: string;
+    puntaje_veracidad: number | null;
+    creado_en: string;
+    rafaga_sospechosa: boolean;
+    rafaga_motivo: string | null;
+  }>).map((f) => ({
+    id: f.id,
+    titulo: f.titulo,
+    resumen: f.resumen,
+    urlOriginal: f.url_original,
+    estado: f.estado,
+    puntajeVeracidad: f.puntaje_veracidad,
+    creadoEn: f.creado_en,
+    rafagaSospechosa: f.rafaga_sospechosa,
+    rafagaMotivo: f.rafaga_motivo,
+  }));
+}
+
+/** Los borradores de quien pregunta. La política ya limita a los propios. */
+export async function leerMisBorradores(): Promise<NoticiaEnRevision[]> {
+  const cliente = await clienteDelServidor();
+
+  const { data, error } = await cliente
+    .from("noticias")
+    .select("id,titulo,resumen,url_original,estado,puntaje_veracidad,creado_en,rafaga_sospechosa,rafaga_motivo")
+    .in("estado", ["borrador", "en_revision", "no_verificable"])
+    .order("creado_en", { ascending: false })
+    .limit(30);
+
+  if (error !== null) throw new Error(`No se pudieron leer los borradores: ${error.message}`);
+
+  return ((data ?? []) as Array<Record<string, unknown>>).map((f) => ({
+    id: f["id"] as string,
+    titulo: f["titulo"] as string,
+    resumen: f["resumen"] as string,
+    urlOriginal: f["url_original"] as string | null,
+    estado: f["estado"] as string,
+    puntajeVeracidad: f["puntaje_veracidad"] as number | null,
+    creadoEn: f["creado_en"] as string,
+    rafagaSospechosa: f["rafaga_sospechosa"] as boolean,
+    rafagaMotivo: f["rafaga_motivo"] as string | null,
+  }));
 }

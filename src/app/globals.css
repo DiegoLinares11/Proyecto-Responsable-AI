@@ -128,3 +128,30 @@ details.porque td.explica { color: var(--tinta-suave); font-size: 0.78rem; paddi
   font-size: 0.8125rem; color: var(--tinta-suave);
 }
 .aviso-deuda strong { color: var(--alerta); }
+
+/* --- Formularios ---------------------------------------------------------- */
+
+.formulario { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1rem; }
+.formulario label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8125rem; color: var(--tinta-suave); }
+.formulario input, .formulario textarea {
+  font: inherit; font-size: 0.925rem; padding: 0.55rem 0.7rem; color: var(--tinta);
+  border: 1px solid var(--borde); border-radius: var(--radio); background: var(--papel);
+}
+.formulario textarea { resize: vertical; min-height: 5rem; line-height: 1.5; }
+.formulario button {
+  font: inherit; font-size: 0.925rem; padding: 0.6rem 1rem; align-self: flex-start;
+  border: none; border-radius: var(--radio); background: var(--acento); color: white; cursor: pointer;
+}
+.formulario button:disabled { opacity: 0.5; cursor: default; }
+.formulario .error { color: var(--peligro); font-size: 0.8125rem; margin: 0; }
+.formulario .exito { color: var(--verificado); font-size: 0.8125rem; margin: 0; }
+
+.sesion { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; font-size: 0.8125rem; color: var(--tinta-suave); }
+.sesion form { display: inline; }
+.sesion button { background: none; border: none; color: var(--acento); cursor: pointer; font: inherit; font-size: 0.8125rem; padding: 0; }
+
+.fila-cola { border: 1px solid var(--borde); border-radius: var(--radio); padding: 0.9rem 1.05rem; margin-bottom: 0.75rem; }
+.fila-cola h3 { margin: 0 0 0.3rem; font-size: 0.95rem; }
+.fila-cola .acciones { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+.fila-cola .acciones button { font: inherit; font-size: 0.8125rem; padding: 0.35rem 0.75rem; border-radius: var(--radio); border: 1px solid var(--borde); background: var(--papel-hundido); color: var(--tinta); cursor: pointer; }
+.fila-cola .acciones button.principal { background: var(--verificado); border-color: var(--verificado); color: white; }

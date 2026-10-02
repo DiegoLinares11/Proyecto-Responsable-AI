@@ -464,5 +464,82 @@ select pg_temp.debe_contar($q$
     )
 $q$, 2, 'las 2 vistas tienen security_invoker activo');
 
+-- ===========================================================================
+-- 11. Lectura pública: qué ve un visitante SIN cuenta
+--
+-- La superficie de `anon` es la más expuesta que tiene el proyecto: cualquiera
+-- en internet con la llave publicable —que por diseño va en el navegador— puede
+-- consultar exactamente esto. Cada fila de aquí abajo es una afirmación sobre
+-- lo que el mundo puede leer.
+-- ===========================================================================
+
+\echo ''
+\echo '# 11. lo que ve un visitante sin cuenta'
+
+reset role;
+
+-- Una noticia de cada estado, para poder comprobar qué atraviesa la política.
+update public.noticias set estado = 'verificada', publicada_en = now()
+  where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+
+insert into public.noticias (id, titulo, resumen, cuerpo, id_autor, estado)
+values ('aaaaaaaa-0000-0000-0000-000000000009',
+        'Borrador que nadie de afuera deberia ver',
+        'Resumen de un borrador que sirve para comprobar la politica de lectura publica.',
+        repeat('Cuerpo del borrador de prueba. ', 5),
+        '22222222-2222-2222-2222-222222222222', 'borrador')
+on conflict (id) do nothing;
+
+set role anon;
+
+select pg_temp.debe_contar(
+  $q$select count(*) from public.noticias$q$,
+  1, 'un visitante sin cuenta ve SOLO la noticia verificada');
+
+select pg_temp.debe_contar(
+  $q$select count(*) from public.noticias where estado <> 'verificada'$q$,
+  0, 'no ve borradores ni nada en moderacion');
+
+select pg_temp.debe_contar(
+  'select count(*) from public.fuentes',
+  9, 'si ve el registro de fuentes: la transparencia es parte del producto');
+
+select pg_temp.debe_contar(
+  'select count(*) from public.pesos_ranking where vigente_hasta is null',
+  5, 'si ve los pesos del ranking, por la misma razon');
+
+-- Lo que NO puede ver. Sin privilegio otorgado, la consulta ni siquiera corre.
+select pg_temp.debe_fallar('select count(*) from public.usuarios',
+  'no ve la tabla de usuarios');
+select pg_temp.debe_fallar('select count(*) from public.mensajes',
+  'no ve las conversaciones del chatbot');
+select pg_temp.debe_fallar('select count(*) from public.auditoria',
+  'no ve la bitacora de auditoria');
+select pg_temp.debe_fallar('select count(*) from public.interacciones',
+  'no ve quien reacciono a que');
+select pg_temp.debe_fallar('select count(*) from public.comentarios',
+  'no ve los comentarios');
+select pg_temp.debe_fallar('select count(*) from public.silencios',
+  'no ve a quien se le quito una accion');
+
+-- Y lo que no puede hacer.
+select pg_temp.debe_fallar($q$
+  insert into public.noticias (titulo, resumen, cuerpo, id_autor)
+  values ('Titular inyectado por un visitante',
+          'Un resumen suficientemente largo para pasar la restriccion de longitud.',
+          repeat('Cuerpo de prueba. ', 10),
+          '22222222-2222-2222-2222-222222222222')
+$q$, 'un visitante sin cuenta NO puede publicar');
+
+select pg_temp.debe_no_afectar_filas(
+  $q$update public.noticias set titulo = 'Titular cambiado desde afuera'$q$,
+  'un visitante sin cuenta NO puede editar noticias');
+
+select pg_temp.debe_fallar(
+  $q$select count(*) from public.vista_noticias_ranking$q$,
+  'tampoco llega a las vistas internas del ranking');
+
+reset role;
+
 \echo ''
 \echo '=== todas las pruebas pasaron ==='

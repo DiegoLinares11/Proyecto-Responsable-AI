@@ -56,7 +56,13 @@ export function VentanaDelChatbot() {
       if (!respuesta.ok) {
         setTurnos((previos) => [
           ...previos,
-          { rol: "asistente", texto: cuerpo.error ?? `Error ${respuesta.status}.` },
+          {
+            rol: "asistente",
+            texto: cuerpo.error ?? `Error ${respuesta.status}.`,
+            ...(respuesta.status === 401
+              ? { nota: "El feed se lee sin cuenta; el asistente necesita una." }
+              : {}),
+          },
         ]);
         return;
       }

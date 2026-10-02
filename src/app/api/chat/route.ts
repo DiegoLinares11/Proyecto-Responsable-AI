@@ -4,12 +4,11 @@
 // Es el único lugar de la aplicación que llama a un modelo de lenguaje
 // (docs/arquitectura.md).
 //
-// ⚠ DEUDA CONOCIDA, la misma que en src/lib/consultas.ts: sin autenticación no
-// hay a quién atribuirle los turnos ni sobre quién aplicar el cupo diario, así
-// que se usa un identificador de demostración. El tope por usuario de la capa 0
-// —que es lo que protege el presupuesto— **no está haciendo nada real mientras
-// no haya sesiones**, porque todos los visitantes comparten el mismo contador.
-// Decirlo acá y no en el informe es lo que evita que se olvide.
+// Exige sesión. No por el contenido —el feed es público— sino por el
+// PRESUPUESTO: el tope diario de la capa 0 solo significa algo si hay a quién
+// contárselo. Mientras no había sesiones, todos los visitantes compartían un
+// mismo contador y el tope no protegía nada; con 20 dólares de presupuesto eso
+// era un agujero por donde se iba el proyecto, no un detalle.
 // ===========================================================================
 
 import { NextResponse } from "next/server";
@@ -18,12 +17,21 @@ import { conversar } from "../../../modules/chatbot/index.ts";
 import { crearProveedor } from "../../../modules/chatbot/proveedor/index.ts";
 import { clienteDeServicio } from "../../../lib/supabase.ts";
 import { entornoDelModelo } from "../../../lib/entorno.ts";
-import { crearPuertosDelChatbot, USUARIO_DE_DEMOSTRACION } from "./puertos.ts";
+import { perfilDelVisitante } from "../../../lib/supabase-servidor.ts";
+import { crearPuertosDelChatbot } from "./puertos.ts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(peticion: Request) {
+  const perfil = await perfilDelVisitante();
+  if (perfil === null) {
+    return NextResponse.json(
+      { error: "Hay que entrar para usar el asistente. El feed sí se puede leer sin cuenta." },
+      { status: 401 },
+    );
+  }
+
   let mensaje: string;
 
   try {
@@ -62,11 +70,12 @@ export async function POST(peticion: Request) {
 
   try {
     const { idConversacion, deps } = await crearPuertosDelChatbot(cliente, proveedor, {
+      idUsuario: perfil.usuario.id,
       topeDiarioPorUsuario: configuracion.topeMensajesPorUsuarioDia,
     });
 
     const resultado = await conversar(
-      { idUsuario: USUARIO_DE_DEMOSTRACION, idConversacion, mensaje },
+      { idUsuario: perfil.usuario.id, idConversacion, mensaje },
       deps,
     );
 
