@@ -208,6 +208,18 @@ const deps = {
   guardarTurno,
   contarMensajesDeHoy,
   gastoAcumuladoUsd,
+  reportarContenidoSospechoso: async (senalamientos) => {
+    await rest("alertas_de_contenido", {
+      method: "POST",
+      body: JSON.stringify(
+        senalamientos.map((s) => ({
+          id_noticia: s.idNoticia,
+          comprobacion: s.comprobacion,
+          evidencia: s.evidencia.slice(0, 300),
+        })),
+      ),
+    });
+  },
   capa0: { topeGastoUsd: TOPE_GASTO_USD },
 };
 

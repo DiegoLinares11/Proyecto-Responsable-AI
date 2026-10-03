@@ -377,3 +377,11 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 .fila-cola .acciones { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 .fila-cola .acciones button { font: inherit; font-size: 0.8125rem; padding: 0.35rem 0.75rem; border-radius: var(--radio); border: 1px solid var(--borde); background: var(--papel-hundido); color: var(--tinta); cursor: pointer; }
 .fila-cola .acciones button.principal { background: var(--verificado); border-color: var(--verificado); color: white; }
+.fila-cola .acciones button.peligro { background: var(--peligro); border-color: var(--peligro); color: white; }
+
+/* Una alerta no es una noticia en revisión: ya está publicada, y eso se tiene
+   que ver antes de leer nada. */
+.fila-cola.alerta { border-left: 3px solid var(--peligro); }
+.fila-cola .evidencias { margin: 0.6rem 0 0; padding-left: 1.1rem; font-size: 0.8125rem; color: var(--tinta-suave); }
+.fila-cola .evidencias li { margin-bottom: 0.2rem; }
+.fila-cola .evidencias code { color: var(--peligro); font-size: 0.78rem; }

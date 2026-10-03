@@ -10,8 +10,9 @@
 // ===========================================================================
 
 import { perfilDelVisitante } from "../../lib/supabase-servidor.ts";
-import { leerColaDeModeracion } from "../../lib/consultas.ts";
+import { leerAlertasDeContenido, leerColaDeModeracion } from "../../lib/consultas.ts";
 import { FilaDeModeracion } from "./fila.tsx";
+import { FilaDeAlerta } from "./alerta.tsx";
 
 export const dynamic = "force-dynamic";
 
@@ -41,11 +42,26 @@ export default async function Moderacion() {
     );
   }
 
-  const cola = await leerColaDeModeracion();
+  const [cola, alertas] = await Promise.all([leerColaDeModeracion(), leerAlertasDeContenido()]);
 
   return (
     <article>
-      <h2 style={{ fontSize: "1.2rem" }}>Cola de moderación</h2>
+      <h2 style={{ fontSize: "1.2rem" }}>Alertas de contenido</h2>
+      <p style={{ color: "var(--tinta-suave)", fontSize: "0.875rem" }}>
+        Noticias <strong>ya publicadas</strong> cuyo texto intentó manipular al chatbot: el chatbot
+        bloqueó la respuesta y encontró la orden en el texto de la noticia. Siguen publicadas
+        porque una alerta no despublica nada sola —si lo hiciera, cualquiera podría bajar una
+        noticia legítima con solo preguntar por el sitio que menciona—. El sistema delata; la
+        decisión es tuya.
+      </p>
+
+      {alertas.length === 0 ? (
+        <p className="vacio">Ninguna noticia publicada intentó manipular al chatbot.</p>
+      ) : (
+        alertas.map((alerta) => <FilaDeAlerta alerta={alerta} key={alerta.idNoticia} />)
+      )}
+
+      <h2 style={{ fontSize: "1.2rem", marginTop: "2.5rem" }}>Cola de moderación</h2>
       <p style={{ color: "var(--tinta-suave)", fontSize: "0.875rem" }}>
         Lo que el canal de validación no se animó a decidir solo. Cada decisión necesita un motivo
         escrito: una decisión editorial sin explicación no se puede auditar después, y la

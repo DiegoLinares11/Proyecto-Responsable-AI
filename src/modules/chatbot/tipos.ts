@@ -88,15 +88,29 @@ export type RespuestaDelModelo = {
   confianza: NivelDeConfianza;
 };
 
+/**
+ * Una noticia del contexto que traía en su propio texto lo que la capa 3
+ * encontró en la respuesta. Es lo que permite decir «fue esta» en vez de
+ * «alguna de las ocho».
+ */
+export type SenalamientoDeContenido = {
+  idNoticia: string;
+  comprobacion: "sin_dominios_ajenos" | "veracidad_no_inventada";
+  /** Lo que se encontró, tal cual: el dominio, o el puntaje que se intentó dictar. */
+  evidencia: string;
+};
+
 export type VeredictoCapa3 = {
   permitido: boolean;
   /**
-   * True cuando el corte lo provocó una señal de inyección en el CONTENIDO de
-   * una noticia, no un error del modelo. Cambia lo que se le dice al usuario, y
-   * en el futuro debería además mandar esa noticia a la cola de moderación: el
-   * ataque no solo falla, también delata a quien lo publicó.
+   * True cuando el corte lo provocó una inyección que SE ENCONTRÓ en el texto
+   * de alguna noticia ofrecida. Si el modelo emitió un dominio que ninguna
+   * noticia trae, no fue el contenido —fue el modelo, o el usuario— y el
+   * mensaje no puede culpar a una noticia.
    */
   porInyeccionEnElContenido: boolean;
+  /** Qué noticias trajeron la evidencia. Vacío si no se pudo atribuir. */
+  sospechosas: readonly SenalamientoDeContenido[];
   motivo: string;
   /** Qué comprobaciones corrieron y cómo les fue. */
   comprobaciones: ReadonlyArray<{ nombre: string; paso: boolean; detalle: string }>;
@@ -165,6 +179,15 @@ export type ContarMensajesDeHoy = (idUsuario: string) => Promise<number>;
  * pasar cuando no sabe cuánto se gastó es el mismo agujero que viene a cerrar.
  */
 export type ConsultarGastoAcumulado = () => Promise<number>;
+
+/**
+ * Deja la alerta para un moderador. Si no lo logra, LANZA: el orquestador
+ * necesita saberlo para no decirle al usuario que la noticia quedó reportada
+ * cuando no quedó.
+ */
+export type ReportarContenidoSospechoso = (
+  senalamientos: readonly SenalamientoDeContenido[],
+) => Promise<void>;
 
 // ---------------------------------------------------------------------------
 // Límites

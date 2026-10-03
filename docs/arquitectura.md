@@ -112,6 +112,16 @@ anotadas porque cambian cómo se lee el esquema:
 - **La bitácora del chatbot no se escribe desde el cliente.** `mensajes` y
   `conversaciones` solo tienen política de lectura. Si el cliente pudiera
   insertar, el auditado escribiría su propia auditoría.
+- **La auditoría la escribe el sistema, también cuando decide una persona.** La
+  sesión del moderador hace el cambio de estado —que es lo que hay que
+  autorizar— y, si la política lo deja pasar, el registro lo escribe la llave de
+  servicio. Hasta el 3 de octubre lo intentaba la sesión del moderador, que no
+  tiene permiso de escritura en la auditoría, y `registrar` no lanza: ninguna
+  decisión de moderación quedó registrada nunca.
+- **Las alertas de contenido las escribe el sistema y las cierra una persona.**
+  Ningún cliente inserta en `alertas_de_contenido`; descartar una es un UPDATE
+  por columna que la política solo le permite a un moderador, a su nombre, una
+  vez y con motivo. La fecha la pone el motor.
 
 
 | Tabla | Qué guarda | Notas |
@@ -127,7 +137,8 @@ anotadas porque cambian cómo se lee el esquema:
 | `interacciones` | Lecturas y reacciones: quién, qué noticia, cuándo | Único por usuario/noticia/tipo — ese índice **es** el tope anti-manipulación |
 | `comentarios` | Texto, autor, si está oculto | Separada de `interacciones`: lleva texto y se modera |
 | `pesos_ranking` | Configuración de la fórmula, con historial | Cambiar un peso deja rastro |
-| `conversaciones` y `mensajes` | Historial del chatbot | Con política de retención |
+| `conversaciones` y `mensajes` | Historial del chatbot | **Sin política de retención todavía**: es una decisión pendiente (informe, §8) |
+| `alertas_de_contenido` | Noticias publicadas cuyo texto intentó manipular al chatbot | Las escribe el sistema; no despublican nada solas |
 | `auditoria` | Append-only: qué decidió el sistema y por qué | Sin `update` ni `delete` |
 
 ## Decisiones registradas

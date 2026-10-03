@@ -14,6 +14,61 @@ export type Database = {
   }
   public: {
     Tables: {
+      alertas_de_contenido: {
+        Row: {
+          comprobacion: string
+          descartada_en: string | null
+          descartada_por: string | null
+          detectada_en: string
+          evidencia: string
+          id: number
+          id_noticia: string
+          motivo_descarte: string | null
+        }
+        Insert: {
+          comprobacion: string
+          descartada_en?: string | null
+          descartada_por?: string | null
+          detectada_en?: string
+          evidencia: string
+          id?: never
+          id_noticia: string
+          motivo_descarte?: string | null
+        }
+        Update: {
+          comprobacion?: string
+          descartada_en?: string | null
+          descartada_por?: string | null
+          detectada_en?: string
+          evidencia?: string
+          id?: never
+          id_noticia?: string
+          motivo_descarte?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alertas_de_contenido_descartada_por_fkey"
+            columns: ["descartada_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alertas_de_contenido_id_noticia_fkey"
+            columns: ["id_noticia"]
+            isOneToOne: false
+            referencedRelation: "noticias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alertas_de_contenido_id_noticia_fkey"
+            columns: ["id_noticia"]
+            isOneToOne: false
+            referencedRelation: "vista_noticias_ranking"
+            referencedColumns: ["id_noticia"]
+          },
+        ]
+      }
       auditoria: {
         Row: {
           accion: string
@@ -654,6 +709,13 @@ export type Database = {
       }
     }
     Views: {
+      vista_gasto_api: {
+        Row: {
+          gasto_usd: number | null
+          turnos: number | null
+        }
+        Relationships: []
+      }
       vista_interacciones_ranking: {
         Row: {
           autoridad: number | null
