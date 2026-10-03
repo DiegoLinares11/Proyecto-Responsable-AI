@@ -18,11 +18,28 @@
 
 import { clienteDelServidor } from "./supabase-servidor.ts";
 
+export type SeccionDeNoticia =
+  | "general" | "guatemala" | "mundo" | "politica"
+  | "economia" | "deportes" | "cultura" | "tecnologia";
+
+/**
+ * La imagen viaja como un objeto o como null, nunca como tres campos sueltos.
+ * La base ya garantiza que si hay url hay crédito y texto alterno; armarlo así
+ * hace que la interfaz no pueda pintar una foto sin ellos aunque se descuide.
+ */
+export type ImagenDeNoticia = {
+  url: string;
+  credito: string;
+  alterno: string;
+};
+
 export type NoticiaDelFeed = {
   id: string;
   titulo: string;
   resumen: string;
   publicadaEn: string;
+  seccion: SeccionDeNoticia;
+  imagen: ImagenDeNoticia | null;
   fuente: string | null;
   credibilidadFuente: number | null;
   puntajeVeracidad: number | null;
@@ -38,6 +55,7 @@ export type NoticiaDelFeed = {
 
 const CAMPOS_DEL_FEED =
   "id,titulo,resumen,publicada_en,puntaje_veracidad,relevancia," +
+  "seccion,url_imagen,credito_imagen,texto_alterno_imagen," +
   "componente_interacciones,componente_verificadas,componente_fuente,componente_veracidad," +
   "rafaga_sospechosa,fuentes(nombre,puntaje_credibilidad)";
 
@@ -46,6 +64,10 @@ type FilaDelFeed = {
   titulo: string;
   resumen: string;
   publicada_en: string;
+  seccion: SeccionDeNoticia;
+  url_imagen: string | null;
+  credito_imagen: string | null;
+  texto_alterno_imagen: string | null;
   puntaje_veracidad: number | null;
   relevancia: number | string;
   componente_interacciones: number | string;
@@ -62,6 +84,17 @@ function aNoticia(fila: FilaDelFeed): NoticiaDelFeed {
     titulo: fila.titulo,
     resumen: fila.resumen,
     publicadaEn: fila.publicada_en,
+    seccion: fila.seccion,
+    imagen:
+      fila.url_imagen !== null &&
+      fila.credito_imagen !== null &&
+      fila.texto_alterno_imagen !== null
+        ? {
+            url: fila.url_imagen,
+            credito: fila.credito_imagen,
+            alterno: fila.texto_alterno_imagen,
+          }
+        : null,
     fuente: fila.fuentes?.nombre ?? null,
     credibilidadFuente: fila.fuentes?.puntaje_credibilidad ?? null,
     puntajeVeracidad: fila.puntaje_veracidad,
@@ -76,14 +109,39 @@ function aNoticia(fila: FilaDelFeed): NoticiaDelFeed {
   };
 }
 
+const SECCIONES: readonly SeccionDeNoticia[] = [
+  "general", "guatemala", "mundo", "politica",
+  "economia", "deportes", "cultura", "tecnologia",
+];
+
+/**
+ * Interpreta la sección que viene en la URL.
+ *
+ * Es entrada de quien sea, así que lo desconocido devuelve null —portada
+ * completa— en vez de llegar como texto a una consulta. PostgREST la escaparía
+ * igual, pero una lista blanca no depende de que eso siga siendo cierto.
+ */
+export function interpretarSeccion(valor: unknown): SeccionDeNoticia | null {
+  return typeof valor === "string" && SECCIONES.includes(valor as SeccionDeNoticia)
+    ? (valor as SeccionDeNoticia)
+    : null;
+}
+
 /** El feed: de mayor a menor relevancia. La política decide qué filas llegan. */
-export async function leerFeed(limite = 20): Promise<NoticiaDelFeed[]> {
+export async function leerFeed(
+  opciones: { limite?: number; seccion?: SeccionDeNoticia | null } = {},
+): Promise<NoticiaDelFeed[]> {
+  const { limite = 20, seccion = null } = opciones;
   const cliente = await clienteDelServidor();
 
-  const { data, error } = await cliente
+  let consulta = cliente
     .from("noticias")
     .select(CAMPOS_DEL_FEED)
-    .eq("estado", "verificada")
+    .eq("estado", "verificada");
+
+  if (seccion !== null) consulta = consulta.eq("seccion", seccion);
+
+  const { data, error } = await consulta
     .order("relevancia", { ascending: false })
     .limit(limite);
 

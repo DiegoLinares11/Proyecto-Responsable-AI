@@ -24,6 +24,7 @@ import { revalidatePath } from "next/cache";
 import { clienteDelServidor, perfilDelVisitante } from "../../lib/supabase-servidor.ts";
 import { clienteDeServicio } from "../../lib/supabase.ts";
 import { crearBorrador, validarYResolver, ErrorDeNoticia } from "../../modules/noticias/index.ts";
+import { interpretarSeccion } from "../../lib/consultas.ts";
 import { entornoDelModelo } from "../../lib/entorno.ts";
 
 export type ResultadoDePublicacion =
@@ -42,6 +43,9 @@ export async function enviarNoticia(
   const resumen = String(datos.get("resumen") ?? "").trim();
   const cuerpo = String(datos.get("cuerpo") ?? "").trim();
   const urlCruda = String(datos.get("url") ?? "").trim();
+  const urlImagen = String(datos.get("url_imagen") ?? "").trim();
+  const creditoImagen = String(datos.get("credito_imagen") ?? "").trim();
+  const alternoImagen = String(datos.get("texto_alterno_imagen") ?? "").trim();
 
   if (titulo.length < 10) return { error: "El titular necesita al menos 10 caracteres." };
   if (resumen.length < 20) return { error: "El resumen necesita al menos 20 caracteres." };
@@ -49,6 +53,32 @@ export async function enviarNoticia(
 
   if (urlCruda !== "" && !/^https?:\/\//.test(urlCruda)) {
     return { error: "El enlace tiene que empezar con http:// o https://" };
+  }
+
+  // La sección llega de un <select>, pero un formulario se puede mandar a mano.
+  // Lo desconocido cae en 'general' en vez de viajar como texto hasta la base.
+  const seccion = interpretarSeccion(datos.get("seccion")) ?? "general";
+
+  // Las tres condiciones de la foto son las mismas que puso la migración. Acá se
+  // repiten para poder decir cuál falta; la que manda sigue siendo la de la base.
+  if (urlImagen !== "" && !urlImagen.startsWith("https://")) {
+    return {
+      error: "La imagen tiene que ser https. Una imagen por http la bloquea el navegador.",
+    };
+  }
+  if (urlImagen !== "" && creditoImagen.length < 2) {
+    return {
+      error:
+        "Si ponés imagen, decí de quién es. Publicar la foto de alguien sin atribuirla no va " +
+        "en una plataforma que argumenta sobre la procedencia.",
+    };
+  }
+  if (urlImagen !== "" && alternoImagen.length < 5) {
+    return {
+      error:
+        "Si ponés imagen, escribí el texto alternativo. Sin él, quien usa lector de pantalla " +
+        "no se entera de que la foto existe.",
+    };
   }
 
   const cliente = await clienteDelServidor();
@@ -60,6 +90,11 @@ export async function enviarNoticia(
       resumen,
       cuerpo,
       urlOriginal: urlCruda === "" ? null : urlCruda,
+      seccion,
+      imagen:
+        urlImagen === ""
+          ? null
+          : { url: urlImagen, credito: creditoImagen, alterno: alternoImagen },
     });
     idNoticia = creada.id;
   } catch (error) {

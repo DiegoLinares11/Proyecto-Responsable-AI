@@ -1,18 +1,38 @@
 // ===========================================================================
-// El feed
+// La portada
 //
-// Lo que distingue a esta pantalla de cualquier otro feed de noticias es el
+// Lo que distingue a esta pantalla de cualquier otra portada de noticias es el
 // «¿por qué está aquí?»: cada posición trae el desglose de su relevancia con los
 // números que la sustentan. Un ordenamiento que no se puede explicar es lo que
 // este curso enseña a no construir (ADR 0003), y la forma de no construirlo es
 // mostrarlo.
+//
+// La jerarquía —una nota principal grande, una rejilla de destacadas, un riel de
+// titulares— no es decoración: es la lectura en diagonal que hace cualquier
+// lector de diario, y el orden lo sigue poniendo la fórmula, no un editor.
 // ===========================================================================
 
 import { Fragment } from "react";
 
-import { leerFeed, type NoticiaDelFeed } from "../lib/consultas.ts";
+import {
+  interpretarSeccion,
+  leerFeed,
+  type NoticiaDelFeed,
+  type SeccionDeNoticia,
+} from "../lib/consultas.ts";
 
 export const dynamic = "force-dynamic";
+
+const NOMBRE_DE_SECCION: Record<SeccionDeNoticia, string> = {
+  general: "Última hora",
+  guatemala: "Guatemala",
+  mundo: "Mundo",
+  politica: "Política",
+  economia: "Economía",
+  deportes: "Deportes",
+  cultura: "Cultura",
+  tecnologia: "Tecnología",
+};
 
 function fecha(iso: string): string {
   return new Date(iso).toLocaleString("es-GT", {
@@ -31,6 +51,29 @@ function SelloDeVeracidad({ puntaje }: { puntaje: number | null }) {
     return <span className="sello">verificada · {puntaje}/100</span>;
   }
   return <span className="sello aviso">veracidad {puntaje}/100</span>;
+}
+
+/**
+ * La foto.
+ *
+ * `referrerPolicy="no-referrer"` no es un detalle: una imagen remota la pide el
+ * navegador del lector, así que el servidor del medio ve su IP y, si no se lo
+ * impide, también QUÉ nota está leyendo. Lo primero no se puede evitar sin un
+ * proxy propio; lo segundo sí, y cuesta un atributo.
+ */
+function Foto({ imagen }: { imagen: NonNullable<NoticiaDelFeed["imagen"]> }) {
+  return (
+    <figure className="foto">
+      <img
+        src={imagen.url}
+        alt={imagen.alterno}
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+      />
+      <figcaption>{imagen.credito}</figcaption>
+    </figure>
+  );
 }
 
 function PorQueEstaAqui({ noticia }: { noticia: NoticiaDelFeed }) {
@@ -79,7 +122,7 @@ function PorQueEstaAqui({ noticia }: { noticia: NoticiaDelFeed }) {
           ))}
         </tbody>
       </table>
-      <p style={{ marginTop: "0.6rem", color: "var(--tinta-suave)" }}>
+      <p className="cierre">
         El total se divide por la antigüedad, para que lo viejo con mucho acumulado no se quede
         arriba para siempre. <a href="/como-funciona">La fórmula completa está acá.</a>
       </p>
@@ -87,37 +130,116 @@ function PorQueEstaAqui({ noticia }: { noticia: NoticiaDelFeed }) {
   );
 }
 
-export default async function Feed() {
-  const noticias = await leerFeed();
+function Nota({ noticia, principal = false }: { noticia: NoticiaDelFeed; principal?: boolean }) {
+  return (
+    <article className={principal ? "nota principal" : "nota"}>
+      {noticia.imagen !== null ? <Foto imagen={noticia.imagen} /> : null}
+      <div className="texto">
+        <span className="antetitulo">{NOMBRE_DE_SECCION[noticia.seccion]}</span>
+        <h2>
+          <a href={`/noticia/${noticia.id}`}>{noticia.titulo}</a>
+        </h2>
+        <p className="resumen">{noticia.resumen}</p>
+        <div className="meta">
+          <SelloDeVeracidad puntaje={noticia.puntajeVeracidad} />
+          <span className="fuente">{noticia.fuente ?? "fuente no registrada"}</span>
+          <span>{fecha(noticia.publicadaEn)}</span>
+          {noticia.rafagaSospechosa ? (
+            <span className="sello malo">tracción en revisión</span>
+          ) : null}
+        </div>
+        <PorQueEstaAqui noticia={noticia} />
+      </div>
+    </article>
+  );
+}
 
-  if (noticias.length === 0) {
+export default async function Portada({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const seccion = interpretarSeccion((await searchParams)["seccion"]);
+  const noticias = await leerFeed({ seccion });
+
+  // El corte es por posición en el ranking, no por criterio editorial. Quien
+  // decide qué va arriba sigue siendo la fórmula.
+  const [principal, ...resto] = noticias;
+
+  if (principal === undefined) {
     return (
       <p className="vacio">
-        Todavía no hay noticias verificadas. Una noticia solo aparece acá cuando el canal de
-        validación la dio por buena o cuando un moderador la aprobó.
+        {seccion === null ? (
+          <>
+            Todavía no hay noticias verificadas. Una noticia solo aparece acá cuando el canal de
+            validación la dio por buena o cuando un moderador la aprobó.
+          </>
+        ) : (
+          <>
+            No hay noticias verificadas en {NOMBRE_DE_SECCION[seccion]}.{" "}
+            <a href="/">Ver la portada completa.</a>
+          </>
+        )}
       </p>
     );
   }
 
+  const destacadas = resto.slice(0, 4);
+  const titulares = resto.slice(4);
+
   return (
-    <>
-      {noticias.map((noticia) => (
-        <article className="noticia" key={noticia.id}>
-          <h2>
-            <a href={`/noticia/${noticia.id}`}>{noticia.titulo}</a>
-          </h2>
-          <p className="resumen">{noticia.resumen}</p>
-          <div className="meta">
-            <SelloDeVeracidad puntaje={noticia.puntajeVeracidad} />
-            <span>{noticia.fuente ?? "fuente no registrada"}</span>
-            <span>{fecha(noticia.publicadaEn)}</span>
-            {noticia.rafagaSospechosa ? (
-              <span className="sello malo">tracción en revisión</span>
-            ) : null}
+    <div className="portada">
+      <div>
+        {seccion !== null ? (
+          <p className="meta" style={{ marginBottom: "1rem" }}>
+            <span className="antetitulo" style={{ marginBottom: 0 }}>
+              {NOMBRE_DE_SECCION[seccion]}
+            </span>
+            <a href="/">Ver la portada completa</a>
+          </p>
+        ) : null}
+        <Nota noticia={principal} principal />
+        {destacadas.length > 0 ? (
+          <div className="rejilla">
+            {destacadas.map((noticia) => (
+              <Nota key={noticia.id} noticia={noticia} />
+            ))}
           </div>
-          <PorQueEstaAqui noticia={noticia} />
-        </article>
-      ))}
-    </>
+        ) : null}
+      </div>
+
+      <aside className="riel">
+        {titulares.length > 0 ? (
+          <section>
+            <h2>Más titulares</h2>
+            <ol className="titulares">
+              {titulares.map((noticia) => (
+                <li key={noticia.id}>
+                  <a href={`/noticia/${noticia.id}`}>{noticia.titulo}</a>
+                  <span className="pie">
+                    {NOMBRE_DE_SECCION[noticia.seccion]} · {noticia.fuente ?? "sin registrar"}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
+        <section className="metodo">
+          <h2>Cómo se ordena</h2>
+          <p>
+            El orden no lo decide un editor ni un modelo. Sale de una fórmula con cuatro
+            componentes, dividida por la antigüedad de la nota.
+          </p>
+          <p>
+            Cada titular trae su desglose: abrí <strong>¿Por qué está aquí?</strong> y vas a ver
+            los números exactos que lo pusieron en esa posición.
+          </p>
+          <p>
+            <a href="/como-funciona">La fórmula completa, con sus pesos y sus sesgos conocidos.</a>
+          </p>
+        </section>
+      </aside>
+    </div>
   );
 }

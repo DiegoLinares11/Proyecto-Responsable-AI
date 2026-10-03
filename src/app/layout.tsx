@@ -11,6 +11,19 @@ export const metadata: Metadata = {
     "Plataforma de noticias con validación de fuentes y ranking auditable. Proyecto de CC3106 Responsible AI.",
 };
 
+// Las secciones de la cabecera. Cada una filtra la portada de verdad; una barra
+// de navegación decorativa es precisamente el adorno que este proyecto no
+// quiere, porque promete una organización que no existe.
+const SECCIONES: ReadonlyArray<readonly [string, string]> = [
+  ["guatemala", "Guatemala"],
+  ["mundo", "Mundo"],
+  ["politica", "Política"],
+  ["economia", "Economía"],
+  ["deportes", "Deportes"],
+  ["cultura", "Cultura"],
+  ["tecnologia", "Tecnología"],
+];
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Esto decide QUÉ MOSTRAR, no qué se puede hacer. La autorización vive en las
   // políticas de fila: un enlace escondido no protege nada, un `insert` que
@@ -22,20 +35,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <div className="contenedor">
           <header className="marca">
-            <h1>Noticias Verificadas</h1>
-            <p>
-              Cada noticia pasa por cinco señales antes de publicarse, y el orden del feed se
-              calcula con una fórmula que podés revisar.
-            </p>
-            <nav>
-              <a href="/">Feed</a>
-              <a href="/como-funciona">¿Cómo funciona?</a>
-              {perfil?.permisos.has("noticias_publicar") === true ? (
-                <a href="/publicar">Publicar</a>
-              ) : null}
-              {perfil?.permisos.has("noticias_moderar") === true ? (
-                <a href="/moderacion">Moderación</a>
-              ) : null}
+            <div className="fila">
+              <h1>
+                <a href="/">Noticias Verificadas</a>
+              </h1>
+              <p className="lema">
+                Cada noticia pasa por cinco señales antes de publicarse, y el orden lo calcula una
+                fórmula que podés revisar.
+              </p>
 
               <span className="sesion">
                 {perfil === null ? (
@@ -51,6 +58,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   </>
                 )}
               </span>
+            </div>
+
+            <nav>
+              <a href="/">Portada</a>
+              {SECCIONES.map(([clave, nombre]) => (
+                <a key={clave} href={`/?seccion=${clave}`}>
+                  {nombre}
+                </a>
+              ))}
+
+              <a className="interno" href="/como-funciona">
+                ¿Cómo funciona?
+              </a>
+              {perfil?.permisos.has("noticias_publicar") === true ? (
+                <a className="interno" href="/publicar">
+                  Publicar
+                </a>
+              ) : null}
+              {perfil?.permisos.has("noticias_moderar") === true ? (
+                <a className="interno" href="/moderacion">
+                  Moderación
+                </a>
+              ) : null}
             </nav>
           </header>
           {children}
