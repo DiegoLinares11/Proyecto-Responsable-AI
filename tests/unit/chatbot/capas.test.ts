@@ -181,7 +181,7 @@ describe("delimitacion del acervo", () => {
   });
 
   test("un acervo vacio lo dice, no se omite", () => {
-    assert.match(delimitarAcervo([]), /No se encontraron noticias/);
+    assert.match(delimitarAcervo([], "marca123"), /No se encontraron noticias/);
   });
 
   // La inyeccion indirecta: el contenido lo suben publicadores, asi que basta

@@ -36,7 +36,11 @@ export function urlDelServidor(): string {
   return `http://${host ?? 'localhost'}:3000`;
 }
 
-export async function preguntar(mensaje: string): Promise<RespuestaDelChat> {
+/**
+ * La ubicación viaja con cada pregunta: es la que el usuario ve en pantalla, y
+ * el servidor la valida contra la lista cerrada antes de usarla.
+ */
+export async function preguntar(mensaje: string, idUbicacion: string): Promise<RespuestaDelChat> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   if (!token) throw new Error('Hay que entrar para usar el asistente.');
@@ -46,7 +50,7 @@ export async function preguntar(mensaje: string): Promise<RespuestaDelChat> {
     respuesta = await fetch(`${urlDelServidor()}/api/chat`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-      body: JSON.stringify({ mensaje }),
+      body: JSON.stringify({ mensaje, ubicacion: idUbicacion }),
     });
   } catch {
     throw new Error(

@@ -79,7 +79,14 @@ export type NoticiaParaElModelo = {
   fuente: string;
   puntajeVeracidad: number | null;
   relevancia: number;
+  /** A quién le importa: lo declaró quien publicó. */
+  alcance?: "local" | "nacional" | "internacional";
+  /** El nombre de la zona, si es local: «Quetzaltenango». */
+  zona?: string | null;
 };
+
+/** La ubicación simulada que eligió el usuario. Viene de la lista cerrada. */
+export type UbicacionDelUsuario = { id: string; nombre: string; pais: string };
 
 /** Lo que el modelo devuelve, con esquema cerrado. */
 export type RespuestaDelModelo = {
@@ -161,7 +168,11 @@ export type ResultadoDeConversacion = {
  * moderación: esa restricción vive en la consulta y se vuelve a comprobar en la
  * capa 3, porque en control de accesos una sola capa es ninguna.
  */
-export type RecuperarNoticias = (consulta: string, limite: number) => Promise<NoticiaParaElModelo[]>;
+export type RecuperarNoticias = (
+  consulta: string,
+  limite: number,
+  ubicacion?: UbicacionDelUsuario | null,
+) => Promise<NoticiaParaElModelo[]>;
 
 /** Comprueba qué identificadores existen de verdad y son publicables. */
 export type VerificarNoticias = (ids: readonly string[]) => Promise<Set<string>>;

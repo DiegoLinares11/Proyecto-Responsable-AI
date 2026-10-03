@@ -31,9 +31,7 @@ import {
   ESQUEMA_DE_RESPUESTA,
   PROMPT_DEL_CLASIFICADOR,
   PROMPT_DEL_SISTEMA,
-  delimitarAcervo,
-  marcaDeAcervo,
-  recordatorioDeTurno,
+  armarTurnoDeRespuesta,
 } from "../prompt.ts";
 import type { CostoDelTurno, RespuestaDelModelo, VeredictoCapa1 } from "../tipos.ts";
 import { validarClasificacion, validarRespuesta } from "./validacion.ts";
@@ -149,16 +147,6 @@ export function crearProveedorApi(opciones: OpcionesProveedorApi = {}): Proveedo
 
     async responder(peticion: PeticionDeRespuesta): Promise<Respondido<RespuestaDelModelo>> {
       const inicio = Date.now();
-      // Una marca distinta por consulta: quien escribió el cuerpo de una noticia
-      // no la conoce, así que no puede cerrar el bloque ni abrir uno falso.
-      const marca = marcaDeAcervo();
-
-      const negativa =
-        peticion.tareaAjenaANegar === null
-          ? ""
-          : `\n\n<nota_para_el_asistente>El mensaje original también pedía: ` +
-            `"${peticion.tareaAjenaANegar}". Eso está fuera de lo que hacés. Respondé la ` +
-            `consulta de noticias y decí en una frase que lo otro no lo hacés.</nota_para_el_asistente>`;
 
       const mensaje = await cliente.messages.create({
         model: modeloRespuesta,
@@ -177,13 +165,9 @@ export function crearProveedorApi(opciones: OpcionesProveedorApi = {}): Proveedo
           })),
           {
             role: "user",
-            // Orden deliberado: primero los datos, luego la pregunta, y el
-            // recordatorio de que los datos son datos al final — lo último que
-            // el modelo lee antes de contestar.
-            content:
-              `${delimitarAcervo(peticion.noticias)}\n\n` +
-              `<pregunta>\n${peticion.mensaje}\n</pregunta>${negativa}\n\n` +
-              recordatorioDeTurno(marca),
+            // El turno lo arma un solo lugar, que genera la marca aleatoria y
+            // la usa en el bloque y en el recordatorio (prompt.ts).
+            content: armarTurnoDeRespuesta(peticion),
           },
         ],
         // Sin pensamiento extendido: esto es un resumen anclado a los datos que

@@ -27,6 +27,7 @@ import { BotonGoogle } from '@/componentes/boton-google';
 import { Espacio, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { preguntar } from '@/lib/chat';
 import { titulosDe } from '@/lib/noticias';
+import { usePreferencias } from '@/lib/preferencias';
 import { useSesion } from '@/lib/sesion';
 
 type Turno =
@@ -41,13 +42,16 @@ type Turno =
     }
   | { id: string; rol: 'error'; texto: string };
 
-// Las cuatro consultas que el enunciado pide que el chat resuelva.
-const SUGERENCIAS = [
-  'Resumime lo más reciente',
-  '¿Qué está pasando en Guatemala?',
-  'Explicame lo más importante del mundo hoy',
-  '¿Qué se sabe de la tasa de interés?',
-];
+// Las cuatro consultas que el enunciado pide que el chat resuelva: lo reciente,
+// lo de la región simulada, lo de otro país y un tema de las noticias.
+function sugerencias(zona: string): string[] {
+  return [
+    'Resumime lo más reciente',
+    `¿Qué está pasando en ${zona}?`,
+    'Explicame lo más importante del mundo hoy',
+    '¿Qué se sabe de la tasa de interés?',
+  ];
+}
 
 const NOMBRE_DE_CONFIANZA = { alta: 'confianza alta', media: 'confianza media', baja: 'confianza baja' };
 
@@ -55,6 +59,7 @@ export default function Chat() {
   const c = useColores();
   const e = crearEstilos(c);
   const { sesion, cargando } = useSesion();
+  const { ubicacion } = usePreferencias();
   const [turnos, setTurnos] = useState<Turno[]>([]);
   const [borrador, setBorrador] = useState('');
   const [pensando, setPensando] = useState(false);
@@ -69,7 +74,7 @@ export default function Chat() {
     setPensando(true);
 
     try {
-      const r = await preguntar(mensaje);
+      const r = await preguntar(mensaje, ubicacion.id);
       const titulos = await titulosDe(r.noticiasCitadas ?? []);
       setTurnos((t) => [
         ...t,
@@ -136,7 +141,7 @@ export default function Chat() {
               <View style={e.vacio}>
                 <Text style={e.vacioTitulo}>¿Qué querés saber?</Text>
                 <View style={e.sugerencias}>
-                  {SUGERENCIAS.map((s) => (
+                  {sugerencias(ubicacion.nombre).map((s) => (
                     <Pressable key={s} onPress={() => enviar(s)} style={e.sugerencia}>
                       <Text style={e.sugerenciaTexto}>{s}</Text>
                     </Pressable>

@@ -18,7 +18,7 @@
 //      dato.
 // ===========================================================================
 
-import { type NoticiaParaElModelo } from "./tipos.ts";
+import { type NoticiaParaElModelo, type UbicacionDelUsuario } from "./tipos.ts";
 
 /**
  * El prompt del sistema. ESTABLE: cualquier cambio invalida la caché y encarece
@@ -82,9 +82,6 @@ export function recordatorioDeTurno(marca: string): string {
   );
 }
 
-/** Se mantiene por compatibilidad con pruebas que no usan marca. */
-export const RECORDATORIO_DE_TURNO = recordatorioDeTurno("sin-marca");
-
 function escapar(texto: string): string {
   // Se neutralizan las etiquetas para que el contenido de una noticia no pueda
   // cerrar el bloque <acervo> antes de tiempo y hacerse pasar por instrucción.
@@ -108,9 +105,19 @@ export function marcaDeAcervo(): string {
   );
 }
 
+/**
+ * Arma el bloque de datos.
+ *
+ * La marca es OBLIGATORIA. Durante las Fases 4 a 7 tenía un valor por omisión,
+ * «sin-marca», y los dos proveedores llamaban a esta función sin pasársela:
+ * cada bloque salía con la misma etiqueta fija y predecible, mientras el
+ * recordatorio le decía al modelo que el dato era lo que estaba entre una
+ * etiqueta aleatoria que no existía en el mensaje. Sin valor por omisión, ese
+ * error no compila.
+ */
 export function delimitarAcervo(
   noticias: readonly NoticiaParaElModelo[],
-  marca = "sin-marca",
+  marca: string,
 ): string {
   if (noticias.length === 0) {
     return (
@@ -127,12 +134,65 @@ export function delimitarAcervo(
       `medio: ${escapar(n.fuente)}`,
       `publicada: ${escapar(n.publicadaEn)}`,
       `puntaje_veracidad: ${n.puntajeVeracidad ?? "sin evaluar"}`,
+      ...(n.alcance === undefined
+        ? []
+        : [`alcance: ${n.alcance}${n.alcance === "local" && n.zona ? ` (${escapar(n.zona)})` : ""}`]),
       `resumen: ${escapar(n.resumen)}`,
       "</noticia>",
     ].join("\n"),
   );
 
   return `<acervo id="${marca}">\n${entradas.join("\n\n")}\n</acervo id="${marca}">`;
+}
+
+export type TurnoDeRespuesta = {
+  noticias: readonly NoticiaParaElModelo[];
+  mensaje: string;
+  tareaAjenaANegar: string | null;
+  ubicacion?: UbicacionDelUsuario | null;
+  /** Solo para pruebas. En producción se genera una por turno. */
+  marca?: string;
+};
+
+/**
+ * El turno del usuario, completo: datos, contexto, pregunta y recordatorio.
+ *
+ * Existe para que la marca aleatoria la genere y la use UN SOLO lugar. Cuando
+ * cada proveedor armaba su turno, la marca del bloque y la del recordatorio
+ * eran dos argumentos que había que acordarse de pasar igual, en dos archivos,
+ * y ninguno de los dos se acordó. Ninguna prueba lo vio, porque cada pieza se
+ * probaba por separado.
+ *
+ * Orden deliberado: primero los datos, luego la pregunta, y el recordatorio de
+ * que los datos son datos al final — lo último que el modelo lee.
+ */
+export function armarTurnoDeRespuesta(turno: TurnoDeRespuesta): string {
+  const marca = turno.marca ?? marcaDeAcervo();
+
+  // La ubicación viene de la lista cerrada de la base, pero se escapa igual:
+  // nada que llegue de afuera entra sin escapar en un turno.
+  const contexto =
+    turno.ubicacion == null
+      ? ""
+      : `\n\n<contexto_del_usuario>Ubicación simulada que eligió el usuario: ` +
+        `${escapar(turno.ubicacion.nombre)}. Si pregunta por «mi zona», «mi región» o «acá», se ` +
+        `refiere a eso: usá las noticias locales de esa zona, y si no hay ninguna, decilo.` +
+        `</contexto_del_usuario>`;
+
+  // La tarea ajena la redacta el clasificador a partir del mensaje del usuario:
+  // también se escapa, para que no pueda cerrar la nota.
+  const negativa =
+    turno.tareaAjenaANegar === null
+      ? ""
+      : `\n\n<nota_para_el_asistente>El mensaje original también pedía: ` +
+        `"${escapar(turno.tareaAjenaANegar)}". Eso está fuera de lo que hacés. Respondé la ` +
+        `consulta de noticias y decí en una frase que lo otro no lo hacés.</nota_para_el_asistente>`;
+
+  return (
+    `${delimitarAcervo(turno.noticias, marca)}${contexto}\n\n` +
+    `<pregunta>\n${turno.mensaje}\n</pregunta>${negativa}\n\n` +
+    recordatorioDeTurno(marca)
+  );
 }
 
 /**

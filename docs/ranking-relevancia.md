@@ -120,6 +120,37 @@ se marca y lo ve una persona.
 historial de cambios. Cuando se ajusta un peso queda registro de quién y por
 qué — es una decisión editorial y se trata como tal.
 
+## Personalización
+
+La relevancia de arriba es **global**: la misma para todos. En la app, cada
+usuario la ve multiplicada por dos factores suyos, y después reacomodada por
+los cupos de cobertura (`app-movil/src/lib/personalizacion.ts`):
+
+```
+relevancia_personal = relevancia_global × geográfico × interés
+```
+
+| Factor | Valores | Por qué |
+|---|---|---|
+| Geográfico | de tu zona ×1.6 · nacional de tu país ×1.2 · internacional ×1.0 · local de otra zona ×0.2 | Lo declara quien publica (`noticias.alcance`); la ubicación la elige el usuario |
+| Interés | entre ×0.8 y ×1.4 | Las noticias que el usuario abrió en 30 días, por sección. El chat no cuenta |
+
+Los **cupos de cobertura** reacomodan sin filtrar: lo nacional o internacional
+más importante del día entre las tres primeras para todos, y algo local, algo
+nacional y algo internacional entre las seis primeras, si existen. Ninguna
+preferencia saca una noticia del feed.
+
+Sin tokens: es aritmética sobre unas decenas de noticias, en el teléfono.
+
+### La calibración de la personalización
+
+El factor de lo local de otra zona empezó en 0.6 y los datos reales lo bajaron
+a 0.2. Es el mismo problema que la calibración de la gravedad de más abajo,
+visto desde otro lado: la frescura domina. Las noticias de 3 a 6 horas tenían
+casi cuatro veces la relevancia global de las de un día, y un ×0.6 no alcanzaba
+para que una nota de Petén no tapara lo nacional e internacional a alguien en
+la capital. Detalle y números en `docs/requisitos.md` §3.
+
 ## Calibración
 
 | Peso | Inicial | Vigente | Por qué cambió |
