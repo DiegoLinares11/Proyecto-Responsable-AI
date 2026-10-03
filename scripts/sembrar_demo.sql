@@ -207,3 +207,36 @@ select 'dddddddd-aaaa-0000-0000-000000000004',
        'reaccion', now() - ((n % 30) || ' minutes')::interval
 from generate_series(1, 50) as n
 on conflict do nothing;
+-- Secciones e imagenes para los datos de demostracion.
+--
+-- El credito dice que son imagenes de demostracion porque lo son. Poner una foto
+-- de archivo sin decirlo, en una plataforma cuyo argumento entero es la
+-- procedencia, seria contradecirse en la portada.
+
+update public.noticias set
+  seccion = 'politica',
+  url_imagen = 'https://picsum.photos/seed/congreso/1200/675',
+  credito_imagen = 'Imagen de demostracion - Lorem Picsum',
+  texto_alterno_imagen = 'Fotografia generica de archivo usada como marcador en los datos de prueba'
+where id = 'dddddddd-aaaa-0000-0000-000000000001';
+
+update public.noticias set
+  seccion = 'economia',
+  url_imagen = 'https://picsum.photos/seed/bono/1200/675',
+  credito_imagen = 'Imagen de demostracion - Lorem Picsum',
+  texto_alterno_imagen = 'Fotografia generica de archivo usada como marcador en los datos de prueba'
+where id = 'dddddddd-aaaa-0000-0000-000000000002';
+
+update public.noticias set
+  seccion = 'politica',
+  url_imagen = 'https://picsum.photos/seed/corte/1200/675',
+  credito_imagen = 'Imagen de demostracion - Lorem Picsum',
+  texto_alterno_imagen = 'Fotografia generica de archivo usada como marcador en los datos de prueba'
+where id = 'dddddddd-aaaa-0000-0000-000000000003';
+
+update public.noticias set seccion = 'politica'
+where id in ('dddddddd-aaaa-0000-0000-000000000004', 'dddddddd-aaaa-0000-0000-000000000005');
+
+update public.noticias set seccion = 'guatemala'
+where id = '6090d9df-f831-492f-9cb0-c5a7c6964b15';
+

@@ -36,11 +36,26 @@ import {
 import { registrar } from "../auditoria/index.ts";
 import { crearDependenciasDeValidacion, type OpcionesDeValidacion } from "./puertos.ts";
 
+/**
+ * La imagen viaja entera o no viaja.
+ *
+ * La base ya lo exige con un CHECK; repetirlo en el tipo hace que no se pueda
+ * ni construir la llamada incompleta, en vez de descubrirlo con un error de
+ * Postgres después de haberle pedido todo el texto a quien publica.
+ */
+export type ImagenDeBorrador = {
+  url: string;
+  credito: string;
+  alterno: string;
+};
+
 export type DatosDeBorrador = {
   titulo: string;
   resumen: string;
   cuerpo: string;
   urlOriginal: string | null;
+  seccion: string;
+  imagen: ImagenDeBorrador | null;
 };
 
 export class ErrorDeNoticia extends Error {
@@ -73,6 +88,10 @@ export async function crearBorrador(
       resumen: datos.resumen,
       cuerpo: datos.cuerpo,
       url_original: datos.urlOriginal,
+      seccion: datos.seccion,
+      url_imagen: datos.imagen?.url ?? null,
+      credito_imagen: datos.imagen?.credito ?? null,
+      texto_alterno_imagen: datos.imagen?.alterno ?? null,
       id_autor: idAutor,
       estado: "borrador",
     })

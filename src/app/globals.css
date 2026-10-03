@@ -1,18 +1,28 @@
 /* Noticias Verificadas — hoja de estilos única.
-   Sin framework: son cuatro pantallas y el presupuesto del proyecto no da para
-   discutir sobre bundles. */
+   Sin framework y sin fuentes remotas: son cinco pantallas, el presupuesto no da
+   para discutir sobre bundles, y una fuente de Google la pide el navegador del
+   lector, que es exactamente la fuga que la portada declara no querer. */
 
 :root {
   --tinta: #16181d;
   --tinta-suave: #5a6072;
-  --papel: #fbfbfd;
-  --papel-hundido: #f1f2f6;
+  --tinta-tenue: #878da0;
+  --papel: #ffffff;
+  --papel-hundido: #f4f5f8;
   --borde: #e2e4ec;
+  --borde-fuerte: #c9ccd8;
   --acento: #1f5fd0;
   --verificado: #0f7a4f;
   --alerta: #b4530b;
   --peligro: #b3261e;
-  --radio: 10px;
+  --radio: 8px;
+
+  /* Los titulares van en serif. No es nostalgia: separa visualmente lo que el
+     medio afirma de lo que la plataforma calcula, que acá va todo en sans. */
+  --titulares: Georgia, "Times New Roman", "Liberation Serif", serif;
+  --texto: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ancho: 74rem;
+
   color-scheme: light dark;
 }
 
@@ -20,9 +30,11 @@
   :root {
     --tinta: #e9eaf0;
     --tinta-suave: #a0a6b8;
-    --papel: #12141a;
-    --papel-hundido: #1a1d25;
-    --borde: #2a2e3a;
+    --tinta-tenue: #777e92;
+    --papel: #101218;
+    --papel-hundido: #181b23;
+    --borde: #272b36;
+    --borde-fuerte: #3a3f4e;
     --acento: #7aa5f0;
     --verificado: #4cc38a;
     --alerta: #e2a03f;
@@ -36,56 +48,213 @@ body {
   margin: 0;
   background: var(--papel);
   color: var(--tinta);
-  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 16px/1.6 var(--texto);
+  -webkit-font-smoothing: antialiased;
 }
 
 a { color: var(--acento); }
 
-.contenedor { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
+.contenedor { max-width: var(--ancho); margin: 0 auto; padding: 0 1.25rem 5rem; }
+
+/* Las pantallas de lectura y los formularios no quieren 74rem de ancho: a 44rem
+   el ojo encuentra el renglón siguiente sin perderse. */
+.lectura { max-width: 44rem; margin: 0 auto; }
+
+/* --- Masthead ------------------------------------------------------------- */
 
 header.marca {
-  border-bottom: 1px solid var(--borde);
-  padding: 1.25rem 0;
+  border-bottom: 2px solid var(--tinta);
   margin-bottom: 1.5rem;
 }
-header.marca h1 { font-size: 1.2rem; margin: 0; letter-spacing: -0.01em; }
-header.marca p { margin: 0.35rem 0 0; color: var(--tinta-suave); font-size: 0.875rem; }
-header.marca nav { margin-top: 0.75rem; display: flex; gap: 1rem; font-size: 0.875rem; }
+.marca .fila {
+  display: flex; align-items: baseline; gap: 1.25rem;
+  padding: 1.15rem 0 0.9rem;
+}
+.marca h1 {
+  font: 700 1.6rem/1 var(--titulares);
+  margin: 0; letter-spacing: -0.02em; white-space: nowrap;
+}
+.marca h1 a { color: inherit; text-decoration: none; }
+.marca .lema {
+  margin: 0; color: var(--tinta-suave); font-size: 0.8125rem; line-height: 1.4;
+  border-left: 1px solid var(--borde); padding-left: 1.25rem;
+  max-width: 24rem;
+}
+.marca .sesion {
+  margin-left: auto; display: flex; align-items: center; gap: 0.75rem;
+  font-size: 0.8125rem; color: var(--tinta-suave); white-space: nowrap;
+}
+.marca .sesion form { display: inline; }
+.marca .sesion button,
+.marca .sesion a {
+  background: none; border: none; color: var(--acento);
+  cursor: pointer; font: inherit; padding: 0;
+}
 
-article.noticia {
+/* La tira de secciones, como la de cualquier diario. */
+.marca nav {
+  display: flex; gap: 1.4rem; flex-wrap: wrap;
+  border-top: 1px solid var(--borde);
+  padding: 0.6rem 0;
+  font-size: 0.8125rem; font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.marca nav a { color: var(--tinta); text-decoration: none; }
+.marca nav a:hover { color: var(--acento); }
+.marca nav a.interno { color: var(--tinta-suave); font-weight: 500; }
+
+/* En pantalla angosta el lema no cabe al lado del nombre: puesto en fila se
+   parte en una columna de una palabra por renglón. Va debajo, a todo el ancho.
+   Y las secciones se deslizan en una sola tira, que es lo que hace cualquier
+   diario en el teléfono antes que gastar tres renglones en la navegación. */
+@media (max-width: 48rem) {
+  .marca .fila { flex-wrap: wrap; row-gap: 0.4rem; align-items: center; padding-bottom: 0.7rem; }
+  .marca h1 { font-size: 1.3rem; }
+  .marca .lema { order: 3; flex-basis: 100%; border-left: none; padding-left: 0; max-width: none; }
+
+  .marca nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 1.15rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .marca nav::-webkit-scrollbar { display: none; }
+  .marca nav a { white-space: nowrap; }
+}
+
+/* --- Portada -------------------------------------------------------------- */
+
+.portada {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 19rem;
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 62rem) {
+  .portada { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* El antetítulo: la sección, arriba del titular, en versalitas. Es lo que deja
+   leer una portada en diagonal. */
+.antetitulo {
+  display: inline-block;
+  font: 700 0.6875rem/1 var(--texto);
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--acento);
+  margin-bottom: 0.5rem;
+}
+
+.nota h2 { font-family: var(--titulares); font-weight: 700; letter-spacing: -0.015em; }
+.nota h2 a { color: inherit; text-decoration: none; }
+.nota h2 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.nota p.resumen { color: var(--tinta-suave); margin: 0.5rem 0 0.7rem; }
+
+figure.foto { margin: 0 0 0.85rem; }
+figure.foto img {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 16 / 9; object-fit: cover;
+  background: var(--papel-hundido);
+  border-radius: var(--radio);
+}
+figure.foto figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.6875rem; color: var(--tinta-tenue);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* La nota principal. Una portada sin jerarquía es una lista. */
+.nota.principal { padding-bottom: 1.5rem; border-bottom: 1px solid var(--borde); }
+.nota.principal h2 { font-size: clamp(1.5rem, 1rem + 1.5vw, 2.15rem); line-height: 1.14; margin: 0; }
+.nota.principal p.resumen { font-size: 1rem; }
+
+/* Foto a un lado, titular al otro. Apiladas, la foto se come el pliegue y el
+   titular —que es lo que la persona vino a leer— queda fuera de la pantalla. */
+@media (min-width: 48rem) {
+  .nota.principal {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 1.6rem;
+    align-items: start;
+  }
+  .nota.principal figure.foto { margin-bottom: 0; }
+  .nota.principal figure.foto img { aspect-ratio: 3 / 2; }
+}
+
+/* Las destacadas, en rejilla, como las tarjetas de cualquier portada. */
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.75rem 1.5rem;
+  margin-top: 1.5rem;
+}
+.rejilla .nota h2 { font-size: 1.0625rem; line-height: 1.25; margin: 0; }
+.rejilla .nota p.resumen { font-size: 0.875rem; margin: 0.4rem 0 0.6rem; }
+
+/* --- Riel de titulares ---------------------------------------------------- */
+
+.riel { display: flex; flex-direction: column; gap: 1.5rem; }
+.riel section {
   border: 1px solid var(--borde);
   border-radius: var(--radio);
-  padding: 1.1rem 1.25rem;
-  margin-bottom: 1rem;
-  background: var(--papel);
+  background: var(--papel-hundido);
+  padding: 1rem 1.1rem;
 }
-article.noticia h2 { font-size: 1.05rem; margin: 0 0 0.5rem; line-height: 1.35; }
-article.noticia h2 a { text-decoration: none; color: inherit; }
-article.noticia h2 a:hover { color: var(--acento); }
-article.noticia p.resumen { margin: 0 0 0.75rem; color: var(--tinta-suave); font-size: 0.925rem; }
+.riel h2 {
+  font: 700 0.75rem/1 var(--texto);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin: 0 0 0.85rem; padding-bottom: 0.6rem;
+  border-bottom: 2px solid var(--tinta);
+}
+.titulares { list-style: none; margin: 0; padding: 0; }
+.titulares li { padding: 0.7rem 0; border-top: 1px solid var(--borde); }
+.titulares li:first-child { border-top: none; padding-top: 0; }
+.titulares a {
+  font: 600 0.9rem/1.3 var(--titulares);
+  color: var(--tinta); text-decoration: none; display: block;
+}
+.titulares a:hover { color: var(--acento); }
+.titulares .pie { display: block; margin-top: 0.3rem; font-size: 0.6875rem; color: var(--tinta-tenue); }
+
+.riel .metodo p { margin: 0 0 0.6rem; font-size: 0.8125rem; color: var(--tinta-suave); }
+.riel .metodo p:last-child { margin-bottom: 0; }
+
+/* --- Metadatos y sellos --------------------------------------------------- */
 
 .meta {
-  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
-  font-size: 0.8125rem; color: var(--tinta-suave);
+  display: flex; flex-wrap: wrap; gap: 0.4rem 0.85rem;
+  font-size: 0.75rem; color: var(--tinta-suave);
   align-items: center;
 }
+.meta .fuente { font-weight: 600; color: var(--tinta); }
 
 .sello {
   display: inline-flex; align-items: center; gap: 0.3rem;
-  font-weight: 600; font-size: 0.75rem;
-  padding: 0.15rem 0.5rem; border-radius: 999px;
-  background: color-mix(in srgb, var(--verificado) 12%, transparent);
+  font-weight: 700; font-size: 0.6875rem;
+  letter-spacing: 0.03em; text-transform: uppercase;
+  padding: 0.18rem 0.45rem; border-radius: 3px;
+  background: color-mix(in srgb, var(--verificado) 13%, transparent);
   color: var(--verificado);
 }
-.sello.aviso { background: color-mix(in srgb, var(--alerta) 14%, transparent); color: var(--alerta); }
-.sello.malo  { background: color-mix(in srgb, var(--peligro) 12%, transparent); color: var(--peligro); }
+.sello.aviso { background: color-mix(in srgb, var(--alerta) 15%, transparent); color: var(--alerta); }
+.sello.malo  { background: color-mix(in srgb, var(--peligro) 13%, transparent); color: var(--peligro); }
 
-details.porque { margin-top: 0.85rem; font-size: 0.8125rem; }
-details.porque summary { cursor: pointer; color: var(--acento); }
-details.porque table { width: 100%; border-collapse: collapse; margin-top: 0.6rem; }
+/* --- «¿Por qué está aquí?» ------------------------------------------------ */
+
+details.porque { margin-top: 0.7rem; font-size: 0.78rem; }
+details.porque summary {
+  cursor: pointer; color: var(--tinta-suave);
+  font-size: 0.72rem; letter-spacing: 0.02em;
+}
+details.porque summary:hover { color: var(--acento); }
+details.porque[open] summary { color: var(--acento); margin-bottom: 0.5rem; }
+details.porque table { width: 100%; border-collapse: collapse; }
 details.porque td { padding: 0.3rem 0; border-bottom: 1px solid var(--borde); vertical-align: top; }
 details.porque td.valor { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 1rem; }
-details.porque td.explica { color: var(--tinta-suave); font-size: 0.78rem; padding-top: 0; border-bottom: none; }
+details.porque td.explica { color: var(--tinta-suave); font-size: 0.72rem; padding-top: 0; border-bottom: none; }
+details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
+
+/* --- Nota completa -------------------------------------------------------- */
 
 .senal { border: 1px solid var(--borde); border-radius: var(--radio); padding: 0.85rem 1rem; margin-bottom: 0.6rem; }
 .senal h3 { margin: 0 0 0.25rem; font-size: 0.875rem; display: flex; justify-content: space-between; gap: 1rem; }
@@ -93,7 +262,7 @@ details.porque td.explica { color: var(--tinta-suave); font-size: 0.78rem; paddi
 
 .vacio { color: var(--tinta-suave); text-align: center; padding: 3rem 1rem; }
 
-/* --- Chatbot ------------------------------------------------------------- */
+/* --- Chatbot -------------------------------------------------------------- */
 
 .chat { position: fixed; right: 1rem; bottom: 1rem; width: min(26rem, calc(100vw - 2rem)); z-index: 10; }
 .chat button.abrir {
@@ -133,7 +302,7 @@ details.porque td.explica { color: var(--tinta-suave); font-size: 0.78rem; paddi
 
 .formulario { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1rem; }
 .formulario label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8125rem; color: var(--tinta-suave); }
-.formulario input, .formulario textarea {
+.formulario input, .formulario textarea, .formulario select {
   font: inherit; font-size: 0.925rem; padding: 0.55rem 0.7rem; color: var(--tinta);
   border: 1px solid var(--borde); border-radius: var(--radio); background: var(--papel);
 }
@@ -145,10 +314,7 @@ details.porque td.explica { color: var(--tinta-suave); font-size: 0.78rem; paddi
 .formulario button:disabled { opacity: 0.5; cursor: default; }
 .formulario .error { color: var(--peligro); font-size: 0.8125rem; margin: 0; }
 .formulario .exito { color: var(--verificado); font-size: 0.8125rem; margin: 0; }
-
-.sesion { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; font-size: 0.8125rem; color: var(--tinta-suave); }
-.sesion form { display: inline; }
-.sesion button { background: none; border: none; color: var(--acento); cursor: pointer; font: inherit; font-size: 0.8125rem; padding: 0; }
+.formulario .pista { font-size: 0.75rem; color: var(--tinta-tenue); font-weight: 400; }
 
 .fila-cola { border: 1px solid var(--borde); border-radius: var(--radio); padding: 0.9rem 1.05rem; margin-bottom: 0.75rem; }
 .fila-cola h3 { margin: 0 0 0.3rem; font-size: 0.95rem; }

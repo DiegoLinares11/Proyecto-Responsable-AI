@@ -89,6 +89,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "comentarios_id_noticia_fkey"
+            columns: ["id_noticia"]
+            isOneToOne: false
+            referencedRelation: "vista_noticias_ranking"
+            referencedColumns: ["id_noticia"]
+          },
+          {
             foreignKeyName: "comentarios_id_usuario_fkey"
             columns: ["id_usuario"]
             isOneToOne: false
@@ -176,6 +183,7 @@ export type Database = {
           nivel: Database["public"]["Enums"]["nivel_fuente"]
           nombre: string
           puntaje_credibilidad: number
+          url_rss: string | null
         }
         Insert: {
           actualizado_en?: string
@@ -187,6 +195,7 @@ export type Database = {
           nivel?: Database["public"]["Enums"]["nivel_fuente"]
           nombre: string
           puntaje_credibilidad?: number
+          url_rss?: string | null
         }
         Update: {
           actualizado_en?: string
@@ -198,6 +207,7 @@ export type Database = {
           nivel?: Database["public"]["Enums"]["nivel_fuente"]
           nombre?: string
           puntaje_credibilidad?: number
+          url_rss?: string | null
         }
         Relationships: [
           {
@@ -238,6 +248,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "noticias"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interacciones_id_noticia_fkey"
+            columns: ["id_noticia"]
+            isOneToOne: false
+            referencedRelation: "vista_noticias_ranking"
+            referencedColumns: ["id_noticia"]
           },
           {
             foreignKeyName: "interacciones_id_usuario_fkey"
@@ -325,6 +342,7 @@ export type Database = {
           componente_veracidad: number
           componente_verificadas: number
           creado_en: string
+          credito_imagen: string | null
           cuerpo: string
           estado: Database["public"]["Enums"]["estado_noticia"]
           id: string
@@ -333,10 +351,16 @@ export type Database = {
           penalizacion_estado: number
           publicada_en: string | null
           puntaje_veracidad: number | null
+          rafaga_motivo: string | null
+          rafaga_revisada_por: string | null
+          rafaga_sospechosa: boolean
           relevancia: number
           relevancia_calculada_en: string | null
           resumen: string
+          seccion: Database["public"]["Enums"]["seccion_noticia"]
+          texto_alterno_imagen: string | null
           titulo: string
+          url_imagen: string | null
           url_original: string | null
         }
         Insert: {
@@ -347,6 +371,7 @@ export type Database = {
           componente_veracidad?: number
           componente_verificadas?: number
           creado_en?: string
+          credito_imagen?: string | null
           cuerpo: string
           estado?: Database["public"]["Enums"]["estado_noticia"]
           id?: string
@@ -355,10 +380,16 @@ export type Database = {
           penalizacion_estado?: number
           publicada_en?: string | null
           puntaje_veracidad?: number | null
+          rafaga_motivo?: string | null
+          rafaga_revisada_por?: string | null
+          rafaga_sospechosa?: boolean
           relevancia?: number
           relevancia_calculada_en?: string | null
           resumen: string
+          seccion?: Database["public"]["Enums"]["seccion_noticia"]
+          texto_alterno_imagen?: string | null
           titulo: string
+          url_imagen?: string | null
           url_original?: string | null
         }
         Update: {
@@ -369,6 +400,7 @@ export type Database = {
           componente_veracidad?: number
           componente_verificadas?: number
           creado_en?: string
+          credito_imagen?: string | null
           cuerpo?: string
           estado?: Database["public"]["Enums"]["estado_noticia"]
           id?: string
@@ -377,10 +409,16 @@ export type Database = {
           penalizacion_estado?: number
           publicada_en?: string | null
           puntaje_veracidad?: number | null
+          rafaga_motivo?: string | null
+          rafaga_revisada_por?: string | null
+          rafaga_sospechosa?: boolean
           relevancia?: number
           relevancia_calculada_en?: string | null
           resumen?: string
+          seccion?: Database["public"]["Enums"]["seccion_noticia"]
+          texto_alterno_imagen?: string | null
           titulo?: string
+          url_imagen?: string | null
           url_original?: string | null
         }
         Relationships: [
@@ -396,6 +434,13 @@ export type Database = {
             columns: ["id_fuente"]
             isOneToOne: false
             referencedRelation: "fuentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "noticias_rafaga_revisada_por_fkey"
+            columns: ["rafaga_revisada_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -598,11 +643,37 @@ export type Database = {
             referencedRelation: "noticias"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "validaciones_id_noticia_fkey"
+            columns: ["id_noticia"]
+            isOneToOne: false
+            referencedRelation: "vista_noticias_ranking"
+            referencedColumns: ["id_noticia"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      vista_interacciones_ranking: {
+        Row: {
+          autoridad: number | null
+          creada_en: string | null
+          cuenta_creada_en: string | null
+          id_noticia: string | null
+          tipo: string | null
+        }
+        Relationships: []
+      }
+      vista_noticias_ranking: {
+        Row: {
+          credibilidad_fuente: number | null
+          estado: Database["public"]["Enums"]["estado_noticia"] | null
+          id_noticia: string | null
+          publicada_en: string | null
+          puntaje_veracidad: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
@@ -622,6 +693,15 @@ export type Database = {
         | "medio_digital"
         | "blog"
         | "desconocido"
+      seccion_noticia:
+        | "general"
+        | "guatemala"
+        | "mundo"
+        | "politica"
+        | "economia"
+        | "deportes"
+        | "cultura"
+        | "tecnologia"
       senal_validacion:
         | "credibilidad_fuente"
         | "url_verificable"
@@ -771,6 +851,16 @@ export const Constants = {
         "medio_digital",
         "blog",
         "desconocido",
+      ],
+      seccion_noticia: [
+        "general",
+        "guatemala",
+        "mundo",
+        "politica",
+        "economia",
+        "deportes",
+        "cultura",
+        "tecnologia",
       ],
       senal_validacion: [
         "credibilidad_fuente",
