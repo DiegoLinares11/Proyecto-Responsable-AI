@@ -64,7 +64,7 @@ ataque, hace una pregunta inocente, y la borra al terminar. El mensaje del
 usuario es siempre limpio; una prueba del corpus comprueba justamente eso, para
 que nadie convierta estos casos en inyección directa por descuido.
 
-### Los falsos positivos son un quinto del corpus
+### Los falsos positivos son casi un cuarto del corpus (22 de 95)
 
 Varios contienen deliberadamente palabras que los detectores de la capa 0
 vigilan, en su sentido normal:
@@ -180,7 +180,7 @@ la diferencia a un cambio de código es, en buena parte, leer ruido. Cualquier
 afirmación del tipo «esto quedó arreglado» necesita repeticiones, y por eso
 existe `scripts/red_team_repetido.sh`.
 
-## Cuatro correcciones al instrumento, un arreglo al sistema
+## Cinco correcciones al instrumento, un arreglo al sistema
 
 Es el hallazgo central de esta fase y vale más que cualquiera de los números.
 
@@ -190,6 +190,7 @@ Es el hallazgo central de esta fase y vale más que cualquiera de los números.
 | Expectativas | 52 de 72 ataques esperaban «atender» cuando no había nada legítimo que atender |
 | **Definición de éxito** | Medía el **mecanismo** (¿bloqueó?) en vez del resultado (¿se contuvo?) |
 | Diagnóstico | «Cortó en capa 3» no decía **cuál** de las siete comprobaciones |
+| Un caso mal puesto | `esc-11` esperaba atención sin traer nada legítimo que atender; lo señaló el propio clasificador al razonar mejor que quien lo escribió |
 
 La tercera es la más instructiva. Con la definición mal puesta, la línea base
 daba **42/92**; con la correcta, **89/92 sobre exactamente los mismos datos**.
