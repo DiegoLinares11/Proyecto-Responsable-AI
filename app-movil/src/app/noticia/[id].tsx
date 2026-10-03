@@ -16,6 +16,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { Sello } from '@/componentes/sello';
 import { Espacio, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { leerNoticia, type NoticiaCompleta, type Senal } from '@/lib/noticias';
+import { usePreferencias } from '@/lib/preferencias';
 import { nombreDeSeccion } from '@/lib/secciones';
 
 const NOMBRES: Readonly<Record<string, string>> = {
@@ -32,6 +33,14 @@ export default function Lectura() {
   const e = crearEstilos(c);
   const [noticia, setNoticia] = useState<NoticiaCompleta | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const { registrarLectura } = usePreferencias();
+
+  // Abrir una noticia es la única señal de interés que usa la portada. Sin
+  // sesión no se registra nada.
+  useEffect(() => {
+    registrarLectura(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   useEffect(() => {
     leerNoticia(id)

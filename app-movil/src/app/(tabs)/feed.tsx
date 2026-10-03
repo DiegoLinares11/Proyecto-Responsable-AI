@@ -6,14 +6,16 @@
 // indiferenciada y da a Marca como referencia: la jerarquía es lo que deja
 // leer una portada en diagonal.
 //
-// Por ahora el orden es el mismo para todos: la fórmula de la Fase 3. La
-// personalización por ubicación e intereses es el siguiente paso, y el
-// subtítulo lo dice en vez de prometer algo que todavía no hace.
+// El orden es PERSONAL: la relevancia global de la Fase 3 multiplicada por la
+// ubicación simulada y por lo que el usuario lee, con cupos que garantizan lo
+// local, lo nacional y lo internacional arriba (lib/personalizacion.ts). Y cada
+// tarjeta dice por qué está donde está: un orden que no se puede explicar es
+// lo que este curso enseña a no construir.
 // ===========================================================================
 
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -26,9 +28,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Sello } from '@/componentes/sello';
+import { SelectorDeUbicacion } from '@/componentes/selector-de-ubicacion';
 import { Espacio, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { haceCuanto, leerFeed, type NoticiaDelFeed } from '@/lib/noticias';
+import { personalizar } from '@/lib/personalizacion';
+import { porQue, type Razon } from '@/lib/porque';
+import { usePreferencias } from '@/lib/preferencias';
 import { nombreDeSeccion } from '@/lib/secciones';
+
 
 const DESTACADAS = 4;
 
@@ -38,6 +45,15 @@ export default function Portada() {
   const [noticias, setNoticias] = useState<NoticiaDelFeed[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refrescando, setRefrescando] = useState(false);
+  const [eligiendo, setEligiendo] = useState(false);
+  const { ubicacion, lecturas } = usePreferencias();
+
+  // Se recalcula en el teléfono cada vez que cambia la ubicación o una lectura:
+  // es aritmética sobre unas decenas de noticias, no una llamada.
+  const lista = useMemo(
+    () => (noticias === null ? null : personalizar(noticias, ubicacion, lecturas)),
+    [noticias, ubicacion, lecturas],
+  );
 
   const cargar = useCallback(async () => {
     try {
@@ -80,37 +96,48 @@ export default function Portada() {
   return (
     <SafeAreaView style={e.pantalla} edges={['top']}>
       <FlatList
-        data={noticias ?? []}
-        keyExtractor={(n) => n.id}
+        data={lista ?? []}
+        keyExtractor={(n) => n.noticia.id}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={refrescar} tintColor={c.acento} />}
         ListHeaderComponent={
           <View style={e.cabecera}>
             <Text style={e.fecha}>{hoy}</Text>
             <Text style={e.marca}>Portada</Text>
+            <Pressable
+              onPress={() => setEligiendo(true)}
+              style={e.ubicacion}
+              accessibilityRole="button"
+              accessibilityLabel={`Ubicación simulada: ${ubicacion.nombre}. Tocá para cambiarla.`}>
+              <Text style={e.ubicacionTexto}>📍 {ubicacion.nombre}</Text>
+              <Text style={e.ubicacionCambiar}>cambiar</Text>
+            </Pressable>
             <Text style={e.subtitulo}>
-              Ordenada por la fórmula de relevancia, igual para todos por ahora. Cada noticia explica
-              su lugar.
+              Ordenada para {ubicacion.nombre}
+              {lecturas.length > 0 ? ' y lo que leés' : ''}, sin esconder lo local, lo nacional ni lo
+              internacional. Cada noticia dice por qué está donde está.
             </Text>
+            <SelectorDeUbicacion visible={eligiendo} cerrar={() => setEligiendo(false)} />
           </View>
         }
         ListEmptyComponent={
           error ? (
             <Text style={e.error}>{error}</Text>
-          ) : noticias === null ? (
+          ) : lista === null ? (
             <ActivityIndicator style={{ marginTop: 48 }} color={c.acento} />
           ) : (
             <Text style={e.vacio}>Todavía no hay noticias verificadas.</Text>
           )
         }
-        renderItem={({ item, index }) =>
-          index === 0 ? (
-            <Principal noticia={item} e={e} onPress={() => abrir(item.id)} />
+        renderItem={({ item, index }) => {
+          const props = { noticia: item.noticia, razon: porQue(item), e, onPress: () => abrir(item.noticia.id) };
+          return index === 0 ? (
+            <Principal {...props} />
           ) : index <= DESTACADAS ? (
-            <Destacada noticia={item} e={e} onPress={() => abrir(item.id)} />
+            <Destacada {...props} />
           ) : (
-            <Titular noticia={item} e={e} onPress={() => abrir(item.id)} primero={index === DESTACADAS + 1} />
-          )
-        }
+            <Titular {...props} primero={index === DESTACADAS + 1} />
+          );
+        }}
       />
     </SafeAreaView>
   );
@@ -118,11 +145,22 @@ export default function Portada() {
 
 type PropsDeTarjeta = {
   noticia: NoticiaDelFeed;
+  razon: Razon;
   e: ReturnType<typeof crearEstilos>;
   onPress: () => void;
 };
 
-function Meta({ noticia, e }: Omit<PropsDeTarjeta, 'onPress'>) {
+/** La línea de «por qué está aquí». */
+function PorQue({ razon, e }: { razon: Razon; e: ReturnType<typeof crearEstilos> }) {
+  return (
+    <Text
+      style={[e.razon, razon.tono === 'zona' ? e.razonZona : razon.tono === 'cobertura' ? e.razonCobertura : null]}>
+      {razon.texto}
+    </Text>
+  );
+}
+
+function Meta({ noticia, e }: Pick<PropsDeTarjeta, 'noticia' | 'e'>) {
   return (
     <View style={e.meta}>
       <Sello puntaje={noticia.puntajeVeracidad} />
@@ -134,7 +172,7 @@ function Meta({ noticia, e }: Omit<PropsDeTarjeta, 'onPress'>) {
   );
 }
 
-function Principal({ noticia, e, onPress }: PropsDeTarjeta) {
+function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
     <Pressable onPress={onPress} style={e.principal}>
       {noticia.imagen ? (
@@ -153,12 +191,13 @@ function Principal({ noticia, e, onPress }: PropsDeTarjeta) {
           {noticia.resumen}
         </Text>
         <Meta noticia={noticia} e={e} />
+        <PorQue razon={razon} e={e} />
       </View>
     </Pressable>
   );
 }
 
-function Destacada({ noticia, e, onPress }: PropsDeTarjeta) {
+function Destacada({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
     <Pressable onPress={onPress} style={e.destacada}>
       <View style={{ flex: 1, gap: 6 }}>
@@ -167,6 +206,7 @@ function Destacada({ noticia, e, onPress }: PropsDeTarjeta) {
           {noticia.titulo}
         </Text>
         <Meta noticia={noticia} e={e} />
+        <PorQue razon={razon} e={e} />
       </View>
       {noticia.imagen ? (
         <Image
@@ -180,7 +220,7 @@ function Destacada({ noticia, e, onPress }: PropsDeTarjeta) {
   );
 }
 
-function Titular({ noticia, e, onPress, primero }: PropsDeTarjeta & { primero: boolean }) {
+function Titular({ noticia, razon, e, onPress, primero }: PropsDeTarjeta & { primero: boolean }) {
   return (
     <>
       {primero ? <Text style={e.encabezadoTitulares}>MÁS TITULARES</Text> : null}
@@ -192,6 +232,7 @@ function Titular({ noticia, e, onPress, primero }: PropsDeTarjeta & { primero: b
           {nombreDeSeccion(noticia.seccion)} · {noticia.fuente ?? 'sin registrar'} ·{' '}
           {haceCuanto(noticia.publicadaEn)}
         </Text>
+        <PorQue razon={razon} e={e} />
       </Pressable>
     </>
   );
@@ -215,6 +256,24 @@ function crearEstilos(c: Paleta) {
     },
     marca: { fontFamily: Tipos.titulares, fontSize: 34, fontWeight: '700', color: c.tinta },
     subtitulo: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 18, color: c.tintaSuave, marginTop: 4 },
+    ubicacion: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      alignSelf: 'flex-start',
+      marginTop: Espacio.s,
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 999,
+      backgroundColor: c.papelHundido,
+      borderWidth: 1,
+      borderColor: c.borde,
+    },
+    ubicacionTexto: { fontFamily: Tipos.texto, fontSize: 14, fontWeight: '700', color: c.tinta },
+    ubicacionCambiar: { fontFamily: Tipos.texto, fontSize: 13, color: c.acento },
+    razon: { fontFamily: Tipos.texto, fontSize: 12, color: c.tintaTenue, marginTop: 2 },
+    razonZona: { color: c.verificado, fontWeight: '700' },
+    razonCobertura: { color: c.acento, fontWeight: '600' },
 
     antetitulo: {
       fontFamily: Tipos.texto,
