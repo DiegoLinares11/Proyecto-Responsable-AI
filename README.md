@@ -64,6 +64,8 @@ corpus de ataques con el que se mide en [docs/plan-por-fases.md](docs/plan-por-f
 
 | Documento | Qué contiene |
 |---|---|
+| [requisitos.md](docs/requisitos.md) | **El enunciado del curso traducido a requerimientos**, criterios de aceptación, estado y Definition of Done |
+| [informe-ia-responsable.md](docs/informe-ia-responsable.md) | El informe del curso: amenazas, decisiones, red team, sesgos y límites |
 | [plan-por-fases.md](docs/plan-por-fases.md) | Las 7 fases, con entregable y criterio de aceptación cada una |
 | [arquitectura.md](docs/arquitectura.md) | Módulos, flujo de datos y esquema de base |
 | [validacion-noticias.md](docs/validacion-noticias.md) | Las cinco señales de veracidad y la cola de moderación |

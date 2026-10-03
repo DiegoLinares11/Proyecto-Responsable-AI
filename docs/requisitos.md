@@ -1,0 +1,236 @@
+# Requerimientos, criterios de aceptación y Definition of Done
+
+Fuente: *Proyecto 2: AI Assisted News App* (enunciado del curso, PDF). Este
+documento traduce ese enunciado a requerimientos propios y verificables, que es
+lo que el punto 8 de la presentación pide mostrar.
+
+**Por qué existe ahora y no al principio.** Las Fases 0 a 7 se planificaron
+sobre una descripción verbal del proyecto, sin el PDF. Al leerlo el 3 de octubre
+aparecieron requisitos que el sistema no tenía —app móvil, Firebase Auth,
+ubicación simulada, personalización por usuario, imagen para noticias sin
+imagen—. Es el ejemplo más grande del proyecto de una evidencia cambiando el
+plan, y se cuenta así en la presentación.
+
+Estados: ✅ cumple · 🟡 parcial · ❌ falta.
+
+---
+
+## 1. Decisiones que fija el enunciado
+
+| Decisión | Elegida | Por qué |
+|---|---|---|
+| App móvil en iPhone y Android, sin tiendas | **PWA instalable**, servida por la misma aplicación Next.js que el portal | Sin cuenta de Apple ($99) ni de Google Play ($25), sin Mac. El login de Google por Firebase funciona en el navegador; en la ruta nativa sin cuenta pagada (Expo Go) no. Se comparte con un QR y se instala con «Agregar a inicio». **Pendiente de confirmar con el profesor** que cuenta como app móvil |
+| Autenticación | **Firebase Authentication con Google**, en la app y en el portal | Lo exige el enunciado. Supabase sigue siendo la base de datos y la frontera de RLS, aceptando los tokens de Firebase como proveedor de terceros |
+| Chat | **Temporal**: el texto de las conversaciones no se guarda | El enunciado no exige historial. Guardarlo era una decisión de retención pendiente (informe, §8); no guardarlo la resuelve. Se conservan solo los metadatos de costo, que el tope de gasto necesita |
+| Presupuesto | USD 20 en créditos de API, incluidos desarrollo y pruebas | **Pendiente de confirmar con el profesor**: las pruebas del chatbot y el red team corrieron con una suscripción personal (ADR 0005), no con créditos de API |
+
+---
+
+## 2. Requerimientos
+
+### R-01 · App móvil instalable en iPhone y Android — ❌
+
+**Criterios de aceptación**
+- Se instala desde Safari (iPhone) y Chrome (Android) con su propio ícono y abre
+  a pantalla completa, sin barra del navegador.
+- Se comparte en clase con un QR; nadie necesita una tienda ni una cuenta de
+  desarrollador.
+- Tres vistas: **chat** (inicial), **feed** y **lectura de noticia**, más el
+  selector de ubicación.
+- Usable con una mano a 375 px de ancho: navegación inferior, objetivos táctiles
+  de 44 px como mínimo.
+
+### R-02 · Login con Google mediante Firebase Authentication — ❌
+
+**Criterios de aceptación**
+- La app y el portal inician sesión con Google por Firebase. No queda ningún
+  otro camino de entrada.
+- Las políticas de fila de Supabase siguen siendo la frontera: un usuario sin
+  `noticias_publicar` no puede publicar aunque llame a la API a mano. La suite
+  de RLS lo comprueba con identidades de Firebase.
+- El primer inicio de sesión crea el perfil como **lector**; nadie nace con
+  privilegios (se conserva la regla de la Fase 1).
+
+### R-03 · Ubicación simulada — ❌
+
+**Criterios de aceptación**
+- El usuario elige una ubicación de una lista (departamentos de Guatemala y
+  algunos países). No se usa el GPS ni se pide permiso de ubicación.
+- La elección queda en su perfil y se puede cambiar en cualquier momento; el
+  feed y el chat responden al cambio sin reiniciar la app.
+- Dos teléfonos con ubicaciones distintas muestran feeds distintos para las
+  mismas noticias publicadas (es la demostración del punto 4 de la presentación).
+
+### R-04 · Chat como pantalla inicial, temporal — 🟡
+
+Existe con defensa en profundidad (Fases 4 y 5), pero es una ventana flotante y
+guarda el texto.
+
+**Criterios de aceptación**
+- Es lo primero que se ve al abrir la app.
+- Responde, con las noticias publicadas: un resumen de lo reciente; lo relevante
+  para la **región simulada** del usuario; noticias de otro país o región; temas
+  presentes en las noticias.
+- Cada respuesta deja reconocer sus fuentes —el medio y la noticia— y distingue
+  lo **confirmado** de lo **no confirmado o en desarrollo** (R-13).
+- Al cerrar la sesión, la conversación desaparece; en la base no queda el texto.
+- Las 8 comprobaciones de la capa 3 y el red team siguen pasando.
+
+### R-05 · Feed personalizado con jerarquía visual — 🟡
+
+La jerarquía tipo diario existe (nota principal, rejilla, riel). El orden es el
+mismo para todos.
+
+**Criterios de aceptación**
+- El orden, el tamaño y la posición dependen del usuario: su ubicación y sus
+  intereses (R-06), además de la relevancia global de la Fase 3.
+- No es una lista indiferenciada: al menos tres tamaños de tarjeta según la
+  relevancia estimada.
+- Cada noticia sigue explicando «¿por qué está aquí?», ahora con los factores
+  personales (por ejemplo, «tu ubicación ×1.6»).
+
+### R-06 · Intereses inferidos del comportamiento — ❌
+
+**Criterios de aceptación**
+- Las señales son las lecturas y reacciones del propio usuario por sección. **No
+  se usan las conversaciones del chat** (son temporales y privadas).
+- El efecto está acotado: un interés puede subir o bajar una noticia, nunca
+  hacerla desaparecer.
+- El usuario ve qué intereses le infirió el sistema y los puede reiniciar.
+
+### R-07 · La personalización no oculta lo que hay que saber — ❌
+
+**Criterios de aceptación**
+- Entre las primeras posiciones del feed hay siempre al menos una noticia
+  **local** (de su región), una **nacional** y una **internacional**, si existen,
+  sin importar sus intereses.
+- La noticia de mayor relevancia global aparece entre las tres primeras para
+  todos los usuarios.
+- Una prueba unitaria lo comprueba con un usuario de intereses extremos: solo
+  lee deportes y su ubicación es de otro país.
+
+### R-08 · Vista de lectura con procedencia — ✅
+
+Existe: medio, fecha, enlace al original, crédito de la imagen y el desglose de
+las cinco señales de validación.
+
+**Criterio pendiente**: que se vea bien dentro de la PWA (R-01).
+
+### R-09 · Portal administrativo autenticado — 🟡
+
+Existen `/publicar` y `/moderacion`, con Supabase Auth.
+
+**Criterios de aceptación**
+- Entrada con Firebase (R-02).
+- Al crear una noticia se registra su **alcance geográfico** (local, nacional o
+  internacional) y su **región**, además de la sección, la procedencia y la
+  imagen.
+- **Publica una persona.** El canal de validación recomienda y explica; el botón
+  de publicar lo aprieta alguien con permiso. Hoy el canal publica solo lo que
+  pasa de 75, y el enunciado pide que lo haga una persona.
+
+### R-10 · Imagen para una noticia sin imagen — ❌
+
+**Criterios de aceptación**
+- Si la noticia no trae imagen, el portal ofrece, dentro del mismo flujo:
+  1. **Buscar una imagen con licencia libre** (Wikimedia Commons), con su autor y
+     su licencia guardados en el crédito.
+  2. **Generar una ilustración** que no pueda confundirse con una fotografía: una
+     composición tipográfica con la sección y el titular, sin IA y sin costo.
+- Si en algún momento se usa IA para generar una imagen, se marca en la base y
+  se muestra sobre la imagen: «Ilustración generada por IA — no es una fotografía
+  del hecho».
+- La base distingue el **origen** de cada imagen: fotografía del medio, licencia
+  libre, ilustración o generada por IA. La interfaz lo muestra siempre.
+
+### R-11 · Costos visibles — 🟡
+
+El tope de gasto se cumple en la capa 0 (`vista_gasto_api`).
+
+**Criterios de aceptación**
+- El portal muestra el gasto acumulado, el saldo (USD 20 menos el gasto), el
+  costo promedio por función —clasificador y respuesta— y el crédito reservado
+  para la demostración.
+- Lo que se muestra sale de la misma vista que usa el tope: un solo número de
+  verdad.
+
+### R-12 · Validación contra la desinformación — ✅
+
+Cinco señales deterministas, umbrales, cola de moderación, red team, alertas de
+contenido envenenado (Fases 2, 5 y posteriores).
+
+### R-13 · Lo no confirmado se comunica como tal — 🟡
+
+**Criterios de aceptación**
+- Una noticia puede publicarse como **en desarrollo**, con una etiqueta visible
+  en el feed, en la lectura y en el chat. Solo la publica así una persona, con
+  motivo escrito.
+- El chat no presenta como confirmado nada que esté en desarrollo, y lo dice.
+- Cuando el sistema no puede confirmar algo, lo dice con esas palabras, no con un
+  puntaje que haya que interpretar.
+
+### R-14 · Transparencia en la interfaz — 🟡
+
+**Criterios de aceptación**
+- Lo que escribió el medio, lo que resumió el sistema y lo que generó la IA se
+  distinguen a la vista. Las respuestas del chat llevan una marca de «respuesta
+  generada por IA».
+- Cada pregunta de transparencia del enunciado (importancia, fuentes, validación,
+  límites de la IA, imágenes) tiene una respuesta en la app o en el portal, no
+  solo en este documento.
+
+---
+
+## 3. Diseño propuesto de la personalización (R-03, R-05, R-06, R-07)
+
+Sin tokens, como el resto del ranking: ordenar y presentar se resuelve sin IA,
+que es lo que pide el enunciado sobre llamadas costosas.
+
+```
+relevancia_personal = relevancia_global (Fase 3)
+                    × factor_geografico(alcance, región de la noticia, ubicación del usuario)
+                    × factor_de_interes(sección, historial del usuario)
+```
+
+| Factor | Valores propuestos | Límite |
+|---|---|---|
+| Geográfico | local de su región ×1.6 · nacional de su país ×1.2 · internacional ×1.0 · local de otra región ×0.6 | Fijo y publicado |
+| Interés | entre ×0.8 y ×1.4, según la proporción de lecturas por sección en los últimos 30 días, suavizada | No puede bajar de ×0.8: el interés reordena, no esconde |
+
+Después del orden, los **cupos de cobertura** (R-07) se garantizan
+reacomodando, no filtrando.
+
+Los factores son una propuesta para discutir en equipo: el enunciado pide que
+cada equipo decida y defienda sus señales.
+
+---
+
+## 4. Definition of Done
+
+Una tarea está terminada cuando se cumplen todas estas condiciones:
+
+1. Cumple sus criterios de aceptación, y cada uno se puede **mostrar**, no solo
+   afirmar.
+2. Tiene pruebas: unitarias para la lógica, y aserciones en la suite de RLS si
+   toca permisos. Las pruebas existentes siguen pasando (`npm test`,
+   `npm run test:rls`, `npm run typecheck`, `next build`).
+3. Si toca el chatbot, el red team de la categoría afectada se corrió con
+   repeticiones y el resultado quedó en `docs/red-team.md`, incluido lo que salió
+   mal.
+4. Se vio funcionando en la app real: escritorio y 375 px.
+5. Si cambia una decisión, quedó escrita (ADR, o la sección del documento que
+   corresponde). **Ninguna afirmación sobre un control puede quedar en un
+   documento, una pantalla o una respuesta del chatbot sin una prueba que la
+   compruebe**: es la lección de las cuatro veces que el sistema afirmó controles
+   que no tenía (informe, §9).
+6. El commit explica el porqué, en Conventional Commits.
+
+---
+
+## 5. Preguntas para el profesor
+
+1. ¿Una **PWA instalable** cuenta como «aplicación móvil en iPhone y Android»? Si
+   no, el respaldo es Expo Go, y el backend se reutiliza completo.
+2. El presupuesto de USD 20 «incluye desarrollo y pruebas». Las pruebas del
+   chatbot corrieron con una suscripción personal de Claude, no con créditos de
+   API. ¿Es aceptable si se declara, o hay que repetirlas con créditos?
