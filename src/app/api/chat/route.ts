@@ -17,14 +17,39 @@ import { conversar } from "../../../modules/chatbot/index.ts";
 import { crearProveedor } from "../../../modules/chatbot/proveedor/index.ts";
 import { clienteDeServicio } from "../../../lib/supabase.ts";
 import { entornoDelModelo } from "../../../lib/entorno.ts";
-import { perfilDelVisitante } from "../../../lib/supabase-servidor.ts";
+import { perfilDelVisitante, tokenDePortador } from "../../../lib/supabase-servidor.ts";
 import { crearPuertosDelChatbot } from "./puertos.ts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// La app móvil llama desde otro origen. Se permite cualquiera porque la
+// identidad de esa vía viaja en la cabecera `Authorization`, que un sitio
+// ajeno no tiene; las cookies no se aceptan de otro origen (no hay
+// `Allow-Credentials`), así que la sesión del navegador sigue protegida por
+// SameSite como antes.
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+};
+
+export function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
 export async function POST(peticion: Request) {
-  const perfil = await perfilDelVisitante();
+  const respuesta = await atender(peticion);
+  for (const [clave, valor] of Object.entries(CORS)) respuesta.headers.set(clave, valor);
+  return respuesta;
+}
+
+async function atender(peticion: Request): Promise<NextResponse> {
+  // Dos caminos a la misma identidad: la cookie del navegador, o el token que
+  // manda la app móvil. En los dos, `getUser` valida contra Supabase.
+  const perfil = await perfilDelVisitante({
+    token: tokenDePortador(peticion.headers.get("authorization")),
+  });
   if (perfil === null) {
     return NextResponse.json(
       { error: "Hay que entrar para usar el asistente. El feed sí se puede leer sin cuenta." },
