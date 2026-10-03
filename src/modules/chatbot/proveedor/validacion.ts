@@ -21,6 +21,7 @@ import type {
 
 const CATEGORIAS: readonly CategoriaDeIntencion[] = [
   "consulta_noticias",
+  "cortesia",
   "fuera_de_dominio",
   "intento_desvio",
   "contenido_dañino",
