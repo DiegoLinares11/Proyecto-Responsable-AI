@@ -176,3 +176,21 @@ from (values
 ) as t(noticia, cuantos), generate_series(1, 20) as n
 where n <= t.cuantos
 on conflict do nothing;
+-- ---------------------------------------------------------------------------
+-- Cuerpos en parrafos
+--
+-- `repeat(...)` daba una sola frase repetida sin saltos, y la pantalla de nota
+-- completa parte el cuerpo en parrafos: con ese dato el tratamiento tipografico
+-- era invisible. Tres parrafos, y el ultimo dice que es texto de demostracion
+-- porque lo es.
+-- ---------------------------------------------------------------------------
+
+update public.noticias set cuerpo =
+  resumen || chr(10) || chr(10) ||
+  'Lo publicado por la fuente original coincide con lo que reportan otros medios sobre el mismo hecho. ' ||
+  'Esa coincidencia es la que midio la senal de corroboracion independiente, y es la que explica buena ' ||
+  'parte del puntaje de veracidad que aparece arriba.' || chr(10) || chr(10) ||
+  'Este es texto de demostracion para la portada del proyecto. El contenido real de la nota vive en el ' ||
+  'enlace al articulo original; la plataforma guarda el titular, el resumen y el cuerpo que escribio ' ||
+  'quien publico, y el desglose de las cinco senales que decidieron si se publicaba.'
+where id::text like 'dddddddd-aaaa-0000-0000-00000000001%';
