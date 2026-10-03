@@ -8,11 +8,15 @@
 // acción usara la llave de servicio, cualquier fallo de autorización de este
 // lado —un `if` mal escrito, una comprobación olvidada— se convertiría en que
 // cualquiera puede aprobar noticias.
+//
+// La llave de servicio entra solo para escribir la auditoría, y solo después
+// de que la sesión del moderador pasó la política (ver `decidirComoModerador`).
 // ===========================================================================
 
 import { revalidatePath } from "next/cache";
 
 import { perfilDelVisitante, clienteDelServidor } from "../../lib/supabase-servidor.ts";
+import { clienteDeServicio } from "../../lib/supabase.ts";
 import { decidirComoModerador, ErrorDeNoticia } from "../../modules/noticias/index.ts";
 
 export type ResultadoDeModeracion = { error: string } | { ok: string } | undefined;
@@ -42,6 +46,7 @@ export async function moderar(
   try {
     await decidirComoModerador(
       await clienteDelServidor(),
+      clienteDeServicio(),
       idNoticia,
       decision as "aprobar" | "rechazar" | "archivar",
       perfil.usuario.id,
