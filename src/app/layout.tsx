@@ -4,6 +4,7 @@ import "./globals.css";
 import { VentanaDelChatbot } from "./ventana-chatbot.tsx";
 import { perfilDelVisitante } from "../lib/supabase-servidor.ts";
 import { salir } from "./entrar/acciones.ts";
+import { SECCIONES } from "../lib/secciones.ts";
 
 export const metadata: Metadata = {
   title: "Noticias Verificadas",
@@ -13,16 +14,9 @@ export const metadata: Metadata = {
 
 // Las secciones de la cabecera. Cada una filtra la portada de verdad; una barra
 // de navegación decorativa es precisamente el adorno que este proyecto no
-// quiere, porque promete una organización que no existe.
-const SECCIONES: ReadonlyArray<readonly [string, string]> = [
-  ["guatemala", "Guatemala"],
-  ["mundo", "Mundo"],
-  ["politica", "Política"],
-  ["economia", "Economía"],
-  ["deportes", "Deportes"],
-  ["cultura", "Cultura"],
-  ["tecnologia", "Tecnología"],
-];
+// quiere, porque promete una organización que no existe. «Última hora» no va:
+// es lo que ya muestra la portada.
+const SECCIONES_DE_LA_CABECERA = SECCIONES.filter((s) => s.clave !== "general");
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Esto decide QUÉ MOSTRAR, no qué se puede hacer. La autorización vive en las
@@ -62,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
             <nav>
               <a href="/">Portada</a>
-              {SECCIONES.map(([clave, nombre]) => (
+              {SECCIONES_DE_LA_CABECERA.map(({ clave, nombre }) => (
                 <a key={clave} href={`/?seccion=${clave}`}>
                   {nombre}
                 </a>

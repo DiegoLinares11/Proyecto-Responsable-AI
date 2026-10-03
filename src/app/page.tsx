@@ -14,25 +14,10 @@
 
 import { Fragment } from "react";
 
-import {
-  interpretarSeccion,
-  leerFeed,
-  type NoticiaDelFeed,
-  type SeccionDeNoticia,
-} from "../lib/consultas.ts";
+import { leerFeed, type NoticiaDelFeed } from "../lib/consultas.ts";
+import { interpretarSeccion, NOMBRE_DE_SECCION } from "../lib/secciones.ts";
 
 export const dynamic = "force-dynamic";
-
-const NOMBRE_DE_SECCION: Record<SeccionDeNoticia, string> = {
-  general: "Última hora",
-  guatemala: "Guatemala",
-  mundo: "Mundo",
-  politica: "Política",
-  economia: "Economía",
-  deportes: "Deportes",
-  cultura: "Cultura",
-  tecnologia: "Tecnología",
-};
 
 function fecha(iso: string): string {
   return new Date(iso).toLocaleString("es-GT", {

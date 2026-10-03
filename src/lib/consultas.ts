@@ -21,9 +21,7 @@ import { agruparAlertas, type AlertaDeContenido, type FilaDeAlerta } from "./ale
 
 export type { AlertaDeContenido };
 
-export type SeccionDeNoticia =
-  | "general" | "guatemala" | "mundo" | "politica"
-  | "economia" | "deportes" | "cultura" | "tecnologia";
+import type { SeccionDeNoticia } from "./secciones.ts";
 
 /**
  * La imagen viaja como un objeto o como null, nunca como tres campos sueltos.
@@ -110,24 +108,6 @@ function aNoticia(fila: FilaDelFeed): NoticiaDelFeed {
     },
     rafagaSospechosa: fila.rafaga_sospechosa,
   };
-}
-
-const SECCIONES: readonly SeccionDeNoticia[] = [
-  "general", "guatemala", "mundo", "politica",
-  "economia", "deportes", "cultura", "tecnologia",
-];
-
-/**
- * Interpreta la sección que viene en la URL.
- *
- * Es entrada de quien sea, así que lo desconocido devuelve null —portada
- * completa— en vez de llegar como texto a una consulta. PostgREST la escaparía
- * igual, pero una lista blanca no depende de que eso siga siendo cierto.
- */
-export function interpretarSeccion(valor: unknown): SeccionDeNoticia | null {
-  return typeof valor === "string" && SECCIONES.includes(valor as SeccionDeNoticia)
-    ? (valor as SeccionDeNoticia)
-    : null;
 }
 
 /** El feed: de mayor a menor relevancia. La política decide qué filas llegan. */

@@ -14,7 +14,8 @@
 
 import { notFound } from "next/navigation";
 
-import { leerNoticia, type SenalDeValidacion, type SeccionDeNoticia } from "../../../lib/consultas.ts";
+import { leerNoticia, type SenalDeValidacion } from "../../../lib/consultas.ts";
+import { NOMBRE_DE_SECCION } from "../../../lib/secciones.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -24,17 +25,6 @@ const NOMBRES: Readonly<Record<string, string>> = {
   corroboracion: "Corroboración independiente",
   desmentido: "Desmentidos conocidos",
   coherencia: "Coherencia interna",
-};
-
-const NOMBRE_DE_SECCION: Record<SeccionDeNoticia, string> = {
-  general: "Última hora",
-  guatemala: "Guatemala",
-  mundo: "Mundo",
-  politica: "Política",
-  economia: "Economía",
-  deportes: "Deportes",
-  cultura: "Cultura",
-  tecnologia: "Tecnología",
 };
 
 function Senal({ senal }: { senal: SenalDeValidacion }) {

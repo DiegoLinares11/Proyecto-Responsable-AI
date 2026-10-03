@@ -24,7 +24,7 @@ import { revalidatePath } from "next/cache";
 import { clienteDelServidor, perfilDelVisitante } from "../../lib/supabase-servidor.ts";
 import { clienteDeServicio } from "../../lib/supabase.ts";
 import { crearBorrador, validarYResolver, ErrorDeNoticia } from "../../modules/noticias/index.ts";
-import { interpretarSeccion } from "../../lib/consultas.ts";
+import { interpretarSeccion } from "../../lib/secciones.ts";
 import { entornoDelModelo } from "../../lib/entorno.ts";
 
 export type ResultadoDePublicacion =
