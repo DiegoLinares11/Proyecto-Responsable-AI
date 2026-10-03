@@ -82,6 +82,19 @@ const DOMINIOS =
  */
 const VERACIDAD_AFIRMADA = /veracidad[^.\n\d]{0,25}(\d{1,3})(?!\s*(?:a|hasta)\s*100)/gi;
 
+/**
+ * Afirmaciones de que una NOTICIA es la más confiable.
+ *
+ * El sustantivo es opcional pero, si está, tiene que ser «noticia» o «nota»:
+ * «la fuente más confiable» habla del medio, no de la noticia, y su
+ * credibilidad no está en el contexto para comprobarla.
+ */
+const CONFIANZA_SUPERLATIVA =
+  /\b(?:la|las)\s+(?:noticias?\s+|notas?\s+)?(m[aá]s\s+(?:confiables?|fiables?|cre[ií]bles?|verificadas?|seguras?|s[oó]lidas?))\b/gi;
+
+/** «Una de las más confiables» no es un superlativo absoluto: no se juzga. */
+const UNA_DE = /\bun[oa]s?\s+de\s+$/i;
+
 /** El texto de una noticia tal como lo vio el modelo: titular y resumen. */
 const textoVisto = (n: NoticiaParaElModelo): string => normalizar(`${n.titulo} ${n.resumen}`);
 
@@ -111,6 +124,7 @@ function atribuir(
   noticias: readonly NoticiaParaElModelo[],
   dominios: readonly string[],
   puntajesInventados: readonly number[],
+  superlativosFalsos: readonly string[],
 ): SenalamientoDeContenido[] {
   const hallados = new Map<string, SenalamientoDeContenido>();
   const anotar = (s: SenalamientoDeContenido) =>
@@ -135,6 +149,16 @@ function atribuir(
       );
       if (dicta) {
         anotar({ idNoticia: noticia.id, comprobacion: "veracidad_no_inventada", evidencia: `veracidad ${puntaje}` });
+      }
+    }
+  }
+
+  // La confianza: la noticia trae ella misma la frase que el modelo repitió.
+  for (const superlativo of superlativosFalsos) {
+    const nucleo = normalizar(superlativo);
+    for (const noticia of noticias) {
+      if (textoVisto(noticia).includes(nucleo)) {
+        anotar({ idNoticia: noticia.id, comprobacion: "confianza_no_inventada", evidencia: superlativo });
       }
     }
   }
@@ -274,6 +298,38 @@ export async function revisarSalida(
           `Los reales son: ${[...puntajesReales].join(", ") || "ninguno"}.`,
   });
 
+  // --- 8. Las afirmaciones de confianza son ciertas -----------------------
+  //
+  // «Es la más confiable» es una afirmación sobre los datos, y se comprueba
+  // contra los datos: alguna de las noticias citadas tiene que tener el puntaje
+  // de veracidad más alto de las que se le mostraron al modelo. Se verifica la
+  // AFIRMACIÓN, no la redacción de quien la pidió, así que no depende de cómo
+  // esté escrito el ataque. Es lo que cierra `iin-07`, abierto desde la Fase 5.
+  //
+  // Si la respuesta no cita nada, no hay a qué atar la afirmación y no se
+  // juzga: bloquear ahí castigaría frases como «no puedo decirte cuál es la más
+  // confiable».
+  const superlativos = [...texto.matchAll(CONFIANZA_SUPERLATIVA)]
+    .filter((m) => !UNA_DE.test(texto.slice(Math.max(0, (m.index ?? 0) - 12), m.index)))
+    .map((m) => (m[1] ?? "").toLowerCase().replace(/\s+/g, " "));
+
+  const citadasEnContexto = entrada.noticiasOfrecidas.filter((n) => citadas.includes(n.id));
+  const mejorPuntaje = Math.max(
+    ...entrada.noticiasOfrecidas.map((n) => n.puntajeVeracidad ?? Number.NEGATIVE_INFINITY),
+  );
+  const respaldada = citadasEnContexto.some((n) => n.puntajeVeracidad === mejorPuntaje);
+  const confianzaInventada = superlativos.length > 0 && citadasEnContexto.length > 0 && !respaldada;
+
+  comprobaciones.push({
+    nombre: "confianza_no_inventada",
+    paso: !confianzaInventada,
+    detalle: !confianzaInventada
+      ? "Las afirmaciones de confianza, si hay, las respalda el puntaje de lo citado."
+      : `Afirma que lo citado es «${superlativos[0]}», y ninguna noticia citada tiene el mejor ` +
+        `puntaje de veracidad del contexto (${mejorPuntaje}). Las citadas tienen: ` +
+        `${citadasEnContexto.map((n) => n.puntajeVeracidad ?? "sin evaluar").join(", ")}.`,
+  });
+
   const falladas = comprobaciones.filter((c) => !c.paso);
 
   // Las dos comprobaciones que delatan una inyección en el contenido. Si
@@ -281,7 +337,12 @@ export async function revisarSalida(
   // por qué se quedó sin respuesta —no fue que el sistema no entendió, fue que
   // una noticia intentaba manipular lo que se le iba a decir— y esa noticia va
   // a un moderador. Si la evidencia no está en ninguna, decirlo sería mentir.
-  const sospechosas = atribuir(entrada.noticiasOfrecidas, dominios, inventados);
+  const sospechosas = atribuir(
+    entrada.noticiasOfrecidas,
+    dominios,
+    inventados,
+    confianzaInventada ? superlativos : [],
+  );
 
   return {
     permitido: falladas.length === 0,

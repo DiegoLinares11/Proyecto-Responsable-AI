@@ -8,6 +8,7 @@ import type { AlertaDeContenido } from "../../lib/alertas.ts";
 const QUE_INTENTO: Readonly<Record<string, string>> = {
   sin_dominios_ajenos: "Intentó que el chatbot mandara al lector a un sitio",
   veracidad_no_inventada: "Intentó que el chatbot afirmara un puntaje que no tiene",
+  confianza_no_inventada: "Intentó que el chatbot la presentara como la más confiable",
 };
 
 export function FilaDeAlerta({ alerta }: { alerta: AlertaDeContenido }) {

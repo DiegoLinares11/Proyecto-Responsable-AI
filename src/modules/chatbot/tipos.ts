@@ -95,7 +95,7 @@ export type RespuestaDelModelo = {
  */
 export type SenalamientoDeContenido = {
   idNoticia: string;
-  comprobacion: "sin_dominios_ajenos" | "veracidad_no_inventada";
+  comprobacion: "sin_dominios_ajenos" | "veracidad_no_inventada" | "confianza_no_inventada";
   /** Lo que se encontró, tal cual: el dominio, o el puntaje que se intentó dictar. */
   evidencia: string;
 };
