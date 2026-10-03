@@ -108,16 +108,30 @@ function normalizar(texto: string): string {
     .toLowerCase();
 }
 
+/**
+ * Lo que se deja de margen sobre los $20: con $18 de tope quedan dos dólares
+ * para medir en modo api —una corrida de red team cuesta alrededor de uno— y
+ * para los turnos que estén en vuelo cuando se cruza la línea.
+ */
+export const TOPE_GASTO_USD_POR_OMISION = 18;
+
 export type OpcionesCapa0 = {
   maximoDeCaracteres?: number;
   /** Cupo diario por usuario. Protege el presupuesto, no la seguridad. */
   topeDiarioPorUsuario?: number;
+  /**
+   * Tope de gasto real de API del proyecto entero, en dólares. Al llegar, el
+   * chatbot se apaga para todos. Protege el presupuesto, no la seguridad.
+   */
+  topeGastoUsd?: number;
 };
 
 export type EntradaCapa0 = {
   mensaje: string;
   /** Cuántos mensajes lleva hoy este usuario. */
   mensajesDeHoy: number;
+  /** Cuánto lleva gastado el proyecto en la API, en dólares. */
+  gastoAcumuladoUsd: number;
 };
 
 export function filtrarEntrada(
@@ -126,6 +140,7 @@ export function filtrarEntrada(
 ): VeredictoCapa0 {
   const maximo = opciones.maximoDeCaracteres ?? MAXIMO_DE_CARACTERES;
   const tope = opciones.topeDiarioPorUsuario ?? 40;
+  const topeGasto = opciones.topeGastoUsd ?? TOPE_GASTO_USD_POR_OMISION;
 
   const mensaje = entrada.mensaje.trim();
 
@@ -139,6 +154,25 @@ export function filtrarEntrada(
       motivo:
         `El mensaje tiene ${mensaje.length} caracteres y el tope son ${maximo}. ` +
         "Un mensaje enorme cuesta dinero aunque se rechace después.",
+      sospechas: [],
+    };
+  }
+
+  // Antes que el cupo por usuario porque es más general: si el proyecto ya no
+  // tiene presupuesto, a nadie le sirve saber cuántos mensajes le quedaban.
+  //
+  // Un gasto que no es un número —una lectura rota— cuenta como agotado. Falla
+  // cerrado: lo contrario es un tope que se abre justo cuando no sabe nada.
+  //
+  // El mensaje no dice cuánto se gastó. Ese número no lo puede leer ningún
+  // usuario en la base (sección 12 de la suite de RLS), y repetirlo acá sería
+  // filtrarlo por la puerta de al lado.
+  if (!Number.isFinite(entrada.gastoAcumuladoUsd) || entrada.gastoAcumuladoUsd >= topeGasto) {
+    return {
+      permitido: false,
+      motivo:
+        "El asistente alcanzó el tope de gasto del proyecto y se apagó solo, antes de " +
+        "agotar el crédito. Las noticias y su desglose siguen disponibles en el feed.",
       sospechas: [],
     };
   }

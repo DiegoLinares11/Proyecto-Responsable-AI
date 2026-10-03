@@ -541,5 +541,105 @@ select pg_temp.debe_fallar(
 
 reset role;
 
+-- ===========================================================================
+-- 12. El tope de gasto
+--
+-- La vista que el chatbot consulta antes de cada turno. Dos cosas que importan:
+-- que sume solo el gasto real de API —los costos del modo suscripción son
+-- estimados del SDK, no dinero pagado— y que nadie fuera del servidor pueda
+-- leer cuánto lleva gastado el proyecto.
+-- ===========================================================================
+
+\echo ''
+\echo '# 12. el tope de gasto'
+
+reset role;
+
+insert into public.conversaciones (id, id_usuario)
+values ('cccccccc-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111');
+
+insert into public.mensajes (id_conversacion, rol, contenido, modelo, costo_usd) values
+  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'turno por API',             'claude-sonnet-5',  0.011),
+  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'clasificado y negado',      'claude-haiku-4-5', 0.0004),
+  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'turno en modo suscripcion', 'suscripcion',      0.15),
+  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'cortado en capa 0',         null,               0),
+  ('cccccccc-0000-0000-0000-000000000001', 'usuario',   'mensaje del usuario',       null,               null);
+
+select pg_temp.debe_contar(
+  $q$select (gasto_usd * 10000)::bigint from public.vista_gasto_api$q$,
+  114, 'suma solo el gasto real de API: 0.011 + 0.0004, sin los 0.15 estimados de suscripcion');
+
+select pg_temp.debe_contar(
+  $q$select turnos from public.vista_gasto_api$q$,
+  2, 'cuenta solo los turnos que pasaron por la API');
+
+select pg_temp.debe_contar($q$
+  select count(*) from pg_class c
+  where c.relname = 'vista_gasto_api' and c.relkind = 'v'
+    and exists (
+      select 1 from pg_options_to_table(c.reloptions)
+      where option_name = 'security_invoker' and option_value = 'true'
+    )
+$q$, 1, 'la vista del gasto tiene security_invoker activo');
+
+select pg_temp.entrar_como('11111111-1111-1111-1111-111111111111');
+set role authenticated;
+
+select pg_temp.debe_fallar('select gasto_usd from public.vista_gasto_api',
+  'un usuario con sesion NO ve cuanto lleva gastado el proyecto');
+
+reset role;
+set role anon;
+
+select pg_temp.debe_fallar('select gasto_usd from public.vista_gasto_api',
+  'un visitante sin cuenta tampoco');
+
+reset role;
+
+-- ===========================================================================
+-- 13. La portada: la imagen viaja entera o no viaja
+--
+-- Las tres condiciones de la foto viven en la base y no en el formulario,
+-- porque el formulario no es el único camino hasta la tabla: este script de
+-- pruebas es otro, y el script de validación es un tercero.
+-- ===========================================================================
+
+\echo ''
+\echo '# 13. la portada'
+
+reset role;
+
+select pg_temp.debe_fallar($q$
+  update public.noticias set url_imagen = 'https://ejemplo.org/foto.jpg'
+  where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una imagen sin credito ni texto alterno NO entra');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias
+     set url_imagen = 'https://ejemplo.org/foto.jpg',
+         credito_imagen = 'Fotografia: alguien'
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'con credito pero sin texto alterno tampoco: quien usa lector de pantalla se queda afuera');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias
+     set url_imagen = 'http://ejemplo.org/foto.jpg',
+         credito_imagen = 'Fotografia: alguien',
+         texto_alterno_imagen = 'Lo que se ve en la foto'
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una imagen por http NO entra, aunque traiga todo lo demas');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias
+     set url_imagen = 'https://ejemplo.org/foto.jpg',
+         credito_imagen = 'Fotografia: alguien',
+         texto_alterno_imagen = 'Lo que se ve en la foto'
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'con https, credito y texto alterno SI entra');
+
+select pg_temp.debe_contar(
+  $q$select count(*) from public.noticias where seccion = 'general' and id = 'aaaaaaaa-0000-0000-0000-000000000009'$q$,
+  1, 'una noticia sin seccion queda en general: no se le inventa una');
+
 \echo ''
 \echo '=== todas las pruebas pasaron ==='

@@ -316,10 +316,23 @@ por otra persona sin leer ni el corpus ni el módulo del chatbot.
 ### Deuda técnica conocida
 
 - La protección contra contraseñas filtradas de Supabase está apagada.
-- El tope de gasto acumulado es una variable de entorno que nadie comprueba
-  todavía: el sistema no se apaga solo al llegar al límite.
 - La noticia que dispara los guardas de inyección **no se manda a la cola de
   moderación**, así que el ataque falla pero no delata a quien lo publicó.
+
+### Cerrado después de la primera versión de este informe
+
+**El tope de gasto.** La primera versión de este informe lo listaba como deuda:
+una variable de entorno que nadie comprobaba. Al cablearlo apareció algo peor —
+`docs/presupuesto.md` lo describía como existente desde el 10 de septiembre. Tres
+semanas de un control documentado y ausente. Ahora se compara en la capa 0 antes
+de cada turno, cuenta solo gasto real de API, falla cerrado y tiene once pruebas
+unitarias y cinco aserciones en la suite de RLS.
+
+El detalle que más importa no es el tope sino lo que protege de rebote: si una
+corrida del red team cruzaba el tope a mitad de camino, los ataques restantes
+habrían muerto en capa 0 y **contado como contenidos sin haber llegado al
+modelo**. Una falla de presupuesto se habría leído como un éxito de seguridad. El
+corredor ahora corta y declara la corrida incompleta.
 
 ---
 

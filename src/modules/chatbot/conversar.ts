@@ -4,7 +4,7 @@
 // Todo el control de flujo de la defensa está aquí y en ningún otro lugar, para
 // que se pueda leer completo de un tirón. Cada capa asume que la anterior falló.
 //
-//   Capa 0  filtro determinista + cupo            0 tokens
+//   Capa 0  filtro, cupo y tope de gasto          0 tokens
 //   Capa 1  clasificador de intención             ~$0.0004
 //   Capa 2  respuesta acotada                     ~$0.011
 //   Capa 3  guardia de salida                     0 tokens
@@ -23,6 +23,7 @@ import {
   NOTICIAS_EN_CONTEXTO,
   type CategoriaDeIntencion,
   type ContarMensajesDeHoy,
+  type ConsultarGastoAcumulado,
   type GuardarTurno,
   type NivelDeConfianza,
   type RecuperarNoticias,
@@ -50,6 +51,12 @@ export type DependenciasDelChatbot = {
   verificarNoticias: VerificarNoticias;
   guardarTurno: GuardarTurno;
   contarMensajesDeHoy: ContarMensajesDeHoy;
+  /**
+   * Obligatorio a propósito. Opcional, con cero por omisión, cualquier forma
+   * nueva de armar las dependencias saldría sin tope y nadie lo notaría — que
+   * es exactamente como estuvo el tope desde la Fase 4 hasta que se cableó.
+   */
+  gastoAcumuladoUsd: ConsultarGastoAcumulado;
   capa0?: OpcionesCapa0;
   noticiasEnContexto?: number;
 };
@@ -104,8 +111,14 @@ export async function conversar(
   };
 
   // --- Capa 0 --------------------------------------------------------------
-  const mensajesDeHoy = await deps.contarMensajesDeHoy(peticion.idUsuario);
-  const capa0 = filtrarEntrada({ mensaje: peticion.mensaje, mensajesDeHoy }, deps.capa0);
+  const [mensajesDeHoy, gastoAcumuladoUsd] = await Promise.all([
+    deps.contarMensajesDeHoy(peticion.idUsuario),
+    deps.gastoAcumuladoUsd(),
+  ]);
+  const capa0 = filtrarEntrada(
+    { mensaje: peticion.mensaje, mensajesDeHoy, gastoAcumuladoUsd },
+    deps.capa0,
+  );
 
   if (!capa0.permitido) {
     return terminar({

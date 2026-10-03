@@ -14,6 +14,7 @@ import {
   filtrarEntrada,
   huellasDelSistema,
   MAXIMO_DE_CARACTERES,
+  TOPE_GASTO_USD_POR_OMISION,
   PROMPT_DEL_SISTEMA,
   revisarSalida,
   type NoticiaParaElModelo,
@@ -29,7 +30,7 @@ const LINKED_LIST =
 
 describe("capa 0 — lo que bloquea", () => {
   const entrada = (mensaje: string, mensajesDeHoy = 0) =>
-    filtrarEntrada({ mensaje, mensajesDeHoy });
+    filtrarEntrada({ mensaje, mensajesDeHoy, gastoAcumuladoUsd: 0 });
 
   test("un mensaje vacio", () => {
     assert.equal(entrada("").permitido, false);
@@ -50,12 +51,54 @@ describe("capa 0 — lo que bloquea", () => {
   });
 });
 
+// El tope existió como variable de entorno desde la Fase 4 sin que ningún código
+// lo leyera. Estas pruebas son las que habrían fallado todo ese tiempo.
+describe("capa 0 — el tope de gasto del proyecto", () => {
+  const conGasto = (gastoAcumuladoUsd: number, opciones = {}) =>
+    filtrarEntrada({ mensaje: "¿Qué hay de nuevo?", mensajesDeHoy: 0, gastoAcumuladoUsd }, opciones);
+
+  test("por debajo del tope pasa; al llegar, se apaga", () => {
+    assert.equal(conGasto(17.99).permitido, true);
+    assert.equal(conGasto(18).permitido, false);
+    assert.equal(conGasto(19.5).permitido, false);
+  });
+
+  test("el tope por omisión deja dos dólares de margen sobre los veinte", () => {
+    assert.equal(TOPE_GASTO_USD_POR_OMISION, 18);
+  });
+
+  test("el tope configurado manda sobre el de omisión", () => {
+    assert.equal(conGasto(5, { topeGastoUsd: 5 }).permitido, false);
+    assert.equal(conGasto(4.99, { topeGastoUsd: 5 }).permitido, true);
+  });
+
+  // Una lectura rota no puede abrir la puerta. Es el único sentido de tener tope.
+  test("un gasto que no es un número cuenta como agotado", () => {
+    for (const roto of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+      assert.equal(conGasto(roto).permitido, false, String(roto));
+    }
+  });
+
+  // La base no deja que ningún usuario lea el gasto (sección 12 de la suite de
+  // RLS). El mensaje de capa 0 no puede ser la puerta de al lado.
+  test("el mensaje dice que se apagó, no cuánto se gastó", () => {
+    const v = conGasto(18.4271);
+    assert.match(v.motivo, /tope de gasto/);
+    assert.doesNotMatch(v.motivo, /\d/);
+  });
+
+  test("manda sobre el cupo por usuario: si no hay presupuesto, el cupo da igual", () => {
+    const v = filtrarEntrada({ mensaje: "Hola", mensajesDeHoy: 999, gastoAcumuladoUsd: 18 });
+    assert.match(v.motivo, /tope de gasto/);
+  });
+});
+
 describe("capa 0 — lo que registra sin bloquear", () => {
   const claves = (mensaje: string) =>
-    filtrarEntrada({ mensaje, mensajesDeHoy: 0 }).sospechas.map((s) => s.clave);
+    filtrarEntrada({ mensaje, mensajesDeHoy: 0, gastoAcumuladoUsd: 0 }).sospechas.map((s) => s.clave);
 
   test("el caso de la linked list deja dos senales y NO se bloquea", () => {
-    const veredicto = filtrarEntrada({ mensaje: LINKED_LIST, mensajesDeHoy: 0 });
+    const veredicto = filtrarEntrada({ mensaje: LINKED_LIST, mensajesDeHoy: 0, gastoAcumuladoUsd: 0 });
 
     // Sigue adelante: la parte de la noticia es legitima y hay que responderla.
     assert.equal(veredicto.permitido, true);

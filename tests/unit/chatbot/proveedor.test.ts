@@ -15,6 +15,7 @@ import {
   crearProveedor,
   crearProveedorSuscripcion,
   interpretarModo,
+  MODELO_DE_SUSCRIPCION,
   sumarCostos,
   validarClasificacion,
   validarRespuesta,
@@ -218,5 +219,17 @@ describe("el modo suscripcion sin salida estructurada", () => {
 
   test("se declara no apto para despliegue", () => {
     assert.equal(conTexto("{}").aptoParaDespliegue, false);
+  });
+
+  // La vista `vista_gasto_api` excluye LITERALMENTE la cadena 'suscripcion'
+  // (migración 20261003120000). Si alguien renombra la marca en el código y no
+  // en la base, el desarrollo local empieza a gastar el presupuesto del
+  // despliegue con costos que son solo estimados. Esta prueba lo impide.
+  test("marca sus turnos con la cadena exacta que la vista del gasto excluye", async () => {
+    assert.equal(MODELO_DE_SUSCRIPCION, "suscripcion");
+
+    const p = conTexto('{"respuesta":"Hola","noticias_citadas":[],"confianza":"alta"}');
+    const r = await p.responder({ mensaje: "hola", noticias: [], historial: [], tareaAjenaANegar: null });
+    assert.equal(r.costo.modelo, MODELO_DE_SUSCRIPCION);
   });
 });
