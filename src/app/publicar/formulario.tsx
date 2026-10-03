@@ -3,19 +3,7 @@
 import { useActionState } from "react";
 
 import { enviarNoticia, type ResultadoDePublicacion } from "./acciones.ts";
-
-// La sección la elige quien publica. No la infiere ningún modelo: clasificar una
-// nota es una decisión editorial, y el ADR 0002 dice dónde van esas (ADR 0002).
-const SECCIONES: ReadonlyArray<readonly [string, string]> = [
-  ["general", "Última hora"],
-  ["guatemala", "Guatemala"],
-  ["mundo", "Mundo"],
-  ["politica", "Política"],
-  ["economia", "Economía"],
-  ["deportes", "Deportes"],
-  ["cultura", "Cultura"],
-  ["tecnologia", "Tecnología"],
-];
+import { SECCIONES } from "../../lib/secciones.ts";
 
 export function FormularioDePublicacion() {
   const [estado, accion, enviando] = useActionState<ResultadoDePublicacion, FormData>(
@@ -33,7 +21,7 @@ export function FormularioDePublicacion() {
         <label>
           Sección
           <select name="seccion" defaultValue="general">
-            {SECCIONES.map(([clave, nombre]) => (
+            {SECCIONES.map(({ clave, nombre }) => (
               <option key={clave} value={clave}>
                 {nombre}
               </option>
