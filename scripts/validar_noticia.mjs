@@ -2,7 +2,7 @@
 // Corre el canal de validación sobre una noticia y resuelve su estado.
 //
 //   node scripts/validar_noticia.mjs <id-de-noticia>
-//   node scripts/validar_noticia.mjs <url-de-un-articulo>
+//   node scripts/validar_noticia.mjs <url-de-un-articulo> [--seccion=guatemala]
 //
 // Con una URL, crea el borrador leyendo los metadatos del artículo y después lo
 // valida — que es el camino completo de punta a punta.
@@ -35,7 +35,10 @@ const cliente = createClient(
   { auth: { persistSession: false } },
 );
 
-const argumento = process.argv[2];
+const banderaSeccion = process.argv.find((a) => a.startsWith("--seccion="));
+const seccion = banderaSeccion === undefined ? "general" : banderaSeccion.slice("--seccion=".length);
+
+const argumento = process.argv.slice(2).find((a) => !a.startsWith("--"));
 if (argumento === undefined) {
   console.error("Uso: node scripts/validar_noticia.mjs <id-de-noticia | url>");
   process.exit(2);
@@ -70,8 +73,28 @@ if (ES_UUID.test(argumento)) {
     .insert({
       titulo: metadatos.titulo.slice(0, 300),
       resumen: resumen.slice(0, 1000),
-      cuerpo: `${metadatos.titulo}. ${resumen} `.repeat(3),
+      // No se copia el articulo: eso es de quien lo escribio. Se guarda la
+      // entradilla que el propio medio publica para ser citado, y una nota que
+      // dice de donde salio. Repetir el titular tres veces, que es lo que hacia
+      // antes, daba un bloque ilegible y ademas fingia un cuerpo que no hay.
+      cuerpo:
+        `${resumen}
+
+` +
+        `Esta nota se cargo a la plataforma desde su enlace original para ejercitar el canal ` +
+        `de validacion. El texto completo es de ${new URL(argumento).hostname} y esta en el enlace ` +
+        `al articulo original; aca se guardan el titular y la entradilla que el propio medio ` +
+        `publica para ser citado, mas el desglose de las cinco senales que decidieron su estado.`,
       url_original: argumento,
+      seccion,
+      // La imagen que el propio medio publica para que la muestren al enlazarlo,
+      // acreditada a su dominio. El texto alterno sale del titular: no es ideal
+      // —describe la nota, no la foto— pero es cierto y es mejor que nada para
+      // quien usa lector de pantalla.
+      url_imagen: metadatos.imagen,
+      credito_imagen: metadatos.imagen === null ? null : `Imagen publicada por ${new URL(argumento).hostname}`,
+      texto_alterno_imagen:
+        metadatos.imagen === null ? null : `Imagen que acompana la nota: ${metadatos.titulo}`.slice(0, 300),
       id_autor: "dddddddd-0000-0000-0000-000000000001",
       estado: "borrador",
     })

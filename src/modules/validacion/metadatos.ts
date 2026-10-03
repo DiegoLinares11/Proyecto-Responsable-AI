@@ -1,7 +1,7 @@
 // ===========================================================================
 // Lectura de metadatos de una página
 //
-// Se leen las etiquetas Open Graph (`og:title`, `og:description`,
+// Se leen las etiquetas Open Graph (`og:title`, `og:description`, `og:image`,
 // `article:published_time`) y, si no están, el `<title>`.
 //
 // A propósito sin librería de parseo: hacen falta cuatro campos de la cabecera,
@@ -15,6 +15,12 @@ export type MetadatosDePagina = {
   titulo: string | null;
   descripcion: string | null;
   publicadoEn: Date | null;
+  /**
+   * La imagen que el propio medio declara para que otros la muestren al
+   * enlazarlo. Solo se devuelve si es https: una imagen por http en una página
+   * https la bloquea el navegador, y la columna de la base la rechaza igual.
+   */
+  imagen: string | null;
 };
 
 const ENTIDADES: Readonly<Record<string, string>> = {
@@ -91,6 +97,9 @@ export function leerMetadatos(html: string): MetadatosDePagina {
   const descripcion =
     metas.get("og:description") ?? metas.get("description") ?? null;
 
+  const imagenCruda = metas.get("og:image") ?? metas.get("twitter:image") ?? null;
+  const imagen = imagenCruda !== null && imagenCruda.startsWith("https://") ? imagenCruda : null;
+
   const publicadoEn =
     leerFecha(metas.get("article:published_time")) ??
     leerFecha(metas.get("article:modified_time")) ??
@@ -101,5 +110,6 @@ export function leerMetadatos(html: string): MetadatosDePagina {
     titulo: titulo === null || titulo === "" ? null : titulo,
     descripcion,
     publicadoEn,
+    imagen,
   };
 }
