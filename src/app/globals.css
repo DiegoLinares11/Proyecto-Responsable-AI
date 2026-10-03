@@ -371,6 +371,13 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 .formulario .error { color: var(--peligro); font-size: 0.8125rem; margin: 0; }
 .formulario .exito { color: var(--verificado); font-size: 0.8125rem; margin: 0; }
 .formulario .pista { font-size: 0.75rem; color: var(--tinta-tenue); font-weight: 400; }
+.formulario fieldset.alcance {
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  padding: 0.8rem 1rem; margin: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.75rem;
+}
+.formulario fieldset.alcance legend { font-size: 0.8125rem; font-weight: 600; color: var(--tinta); padding: 0 0.3rem; }
+.formulario fieldset.alcance p { grid-column: 1 / -1; }
 
 .fila-cola { border: 1px solid var(--borde); border-radius: var(--radio); padding: 0.9rem 1.05rem; margin-bottom: 0.75rem; }
 .fila-cola h3 { margin: 0 0 0.3rem; font-size: 0.95rem; }

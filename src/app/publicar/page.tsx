@@ -8,7 +8,7 @@
 // ===========================================================================
 
 import { perfilDelVisitante } from "../../lib/supabase-servidor.ts";
-import { leerMisBorradores } from "../../lib/consultas.ts";
+import { leerMisBorradores, leerUbicaciones } from "../../lib/consultas.ts";
 import { FormularioDePublicacion } from "./formulario.tsx";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +50,7 @@ export default async function Publicar() {
     );
   }
 
-  const mios = await leerMisBorradores();
+  const [mios, ubicaciones] = await Promise.all([leerMisBorradores(), leerUbicaciones()]);
 
   return (
     <article>
@@ -61,7 +61,7 @@ export default async function Publicar() {
         <strong>Vos no la aprobás</strong>: eso lo decide el canal o un moderador.
       </p>
 
-      <FormularioDePublicacion />
+      <FormularioDePublicacion ubicaciones={ubicaciones} />
 
       {mios.length === 0 ? null : (
         <>

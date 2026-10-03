@@ -57,6 +57,13 @@ export type DatosDeBorrador = {
   urlOriginal: string | null;
   seccion: string;
   imagen: ImagenDeBorrador | null;
+  /**
+   * A quién le importa. La base exige zona si es local y país si es nacional;
+   * el formulario lo repite para poder decir cuál falta.
+   */
+  alcance: "local" | "nacional" | "internacional";
+  pais: string | null;
+  idUbicacion: string | null;
 };
 
 export class ErrorDeNoticia extends Error {
@@ -93,6 +100,9 @@ export async function crearBorrador(
       url_imagen: datos.imagen?.url ?? null,
       credito_imagen: datos.imagen?.credito ?? null,
       texto_alterno_imagen: datos.imagen?.alterno ?? null,
+      alcance: datos.alcance,
+      pais: datos.pais,
+      id_ubicacion: datos.idUbicacion,
       id_autor: idAutor,
       estado: "borrador",
     })

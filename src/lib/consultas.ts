@@ -308,3 +308,26 @@ export async function leerAlertasDeContenido(): Promise<AlertaDeContenido[]> {
 
   return agruparAlertas((data ?? []) as unknown as FilaDeAlerta[]);
 }
+
+// ---------------------------------------------------------------------------
+// Ubicaciones
+// ---------------------------------------------------------------------------
+
+export type UbicacionDisponible = {
+  id: string;
+  nombre: string;
+  pais: string;
+  tipo: "departamento" | "pais";
+};
+
+/** La lista cerrada de ubicaciones: datos de referencia, públicos. */
+export async function leerUbicaciones(): Promise<UbicacionDisponible[]> {
+  const cliente = await clienteDelServidor();
+  const { data, error } = await cliente
+    .from("ubicaciones")
+    .select("id,nombre,pais,tipo")
+    .order("orden")
+    .order("nombre");
+  if (error !== null) throw new Error(`No se pudieron leer las ubicaciones: ${error.message}`);
+  return (data ?? []) as UbicacionDisponible[];
+}
