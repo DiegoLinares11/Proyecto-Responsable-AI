@@ -19,8 +19,8 @@ Estados: ✅ cumple · 🟡 parcial · ❌ falta.
 
 | Decisión | Elegida | Por qué |
 |---|---|---|
-| App móvil en iPhone y Android, sin tiendas | **PWA instalable**, servida por la misma aplicación Next.js que el portal | Sin cuenta de Apple ($99) ni de Google Play ($25), sin Mac. El login de Google por Firebase funciona en el navegador; en la ruta nativa sin cuenta pagada (Expo Go) no. Se comparte con un QR y se instala con «Agregar a inicio». **Pendiente de confirmar con el profesor** que cuenta como app móvil |
-| Autenticación | **Firebase Authentication con Google**, en la app y en el portal | Lo exige el enunciado. Supabase sigue siendo la base de datos y la frontera de RLS, aceptando los tokens de Firebase como proveedor de terceros |
+| App móvil en iPhone y Android, sin tiendas | **App nativa con Expo (React Native), probada en Expo Go** — `app-movil/` | Nativa de verdad y sin pagar: cada compañero instala Expo Go y escanea un QR. No hace falta la cuenta de Apple ($99) ni Mac. Se evaluó primero una PWA; se descartó porque el equipo prefiere que se sienta app, y el login con Google dejó de ser obstáculo al quedarse en Supabase (fila de abajo) |
+| Autenticación | **Supabase Auth con Google**, en la app y en el portal | El enunciado dice Firebase; según el profesor, Supabase es aceptable (**confirmarlo por escrito**). Con Firebase, el login de Google no funciona dentro de Expo Go; con Supabase sí, porque Google le contesta a Supabase y Supabase devuelve la sesión a la app por un enlace profundo. Además conserva intacta la frontera de RLS |
 | Chat | **Temporal**: el texto de las conversaciones no se guarda | El enunciado no exige historial. Guardarlo era una decisión de retención pendiente (informe, §8); no guardarlo la resuelve. Se conservan solo los metadatos de costo, que el tope de gasto necesita |
 | Presupuesto | USD 20 en créditos de API, incluidos desarrollo y pruebas | **Pendiente de confirmar con el profesor**: las pruebas del chatbot y el red team corrieron con una suscripción personal (ADR 0005), no con créditos de API |
 
@@ -28,26 +28,35 @@ Estados: ✅ cumple · 🟡 parcial · ❌ falta.
 
 ## 2. Requerimientos
 
-### R-01 · App móvil instalable en iPhone y Android — ❌
+### R-01 · App móvil en iPhone y Android — 🟡
+
+`app-movil/`: Expo SDK 57 con pestañas nativas. Chat (inicial), Portada,
+lectura de noticia con su ficha de validación, y Perfil. Lee las noticias
+reales por Supabase y conversa por el servidor del portal. `expo-doctor` pasa
+sus 21 comprobaciones. **Falta: probarla en un iPhone y un Android de verdad**, y
+el selector de ubicación (R-03).
 
 **Criterios de aceptación**
-- Se instala desde Safari (iPhone) y Chrome (Android) con su propio ícono y abre
-  a pantalla completa, sin barra del navegador.
-- Se comparte en clase con un QR; nadie necesita una tienda ni una cuenta de
-  desarrollador.
+- Abre en Expo Go en iPhone y en Android escaneando un QR; nadie necesita una
+  tienda ni una cuenta de desarrollador.
+- Pestañas nativas de cada sistema, no una imitación.
 - Tres vistas: **chat** (inicial), **feed** y **lectura de noticia**, más el
   selector de ubicación.
-- Usable con una mano a 375 px de ancho: navegación inferior, objetivos táctiles
-  de 44 px como mínimo.
+- Usable con una mano: objetivos táctiles de 44 px como mínimo, teclado que no
+  tapa la caja de texto del chat.
 
-### R-02 · Login con Google mediante Firebase Authentication — ❌
+### R-02 · Login con Google — 🟡
+
+El código de la app está listo (`app-movil/src/lib/sesion.tsx`); el servidor
+del chat ya acepta el token de la app y lo valida contra Supabase (probado:
+sin token 401, token inventado 401, token válido 200). **Falta: habilitar el
+proveedor Google en Supabase** (pasos en `app-movil/README.md`) y el botón de
+Google en el portal.
 
 **Criterios de aceptación**
-- La app y el portal inician sesión con Google por Firebase. No queda ningún
-  otro camino de entrada.
+- La app y el portal inician sesión con Google.
 - Las políticas de fila de Supabase siguen siendo la frontera: un usuario sin
-  `noticias_publicar` no puede publicar aunque llame a la API a mano. La suite
-  de RLS lo comprueba con identidades de Firebase.
+  `noticias_publicar` no puede publicar aunque llame a la API a mano.
 - El primer inicio de sesión crea el perfil como **lector**; nadie nace con
   privilegios (se conserva la regla de la Fase 1).
 
@@ -229,8 +238,8 @@ Una tarea está terminada cuando se cumplen todas estas condiciones:
 
 ## 5. Preguntas para el profesor
 
-1. ¿Una **PWA instalable** cuenta como «aplicación móvil en iPhone y Android»? Si
-   no, el respaldo es Expo Go, y el backend se reutiliza completo.
+1. El enunciado pide **Firebase Authentication**. ¿Es aceptable Supabase Auth con
+   Google? (El equipo entiende que sí; conviene tenerlo por escrito.)
 2. El presupuesto de USD 20 «incluye desarrollo y pruebas». Las pruebas del
    chatbot corrieron con una suscripción personal de Claude, no con créditos de
    API. ¿Es aceptable si se declara, o hay que repetirlas con créditos?
