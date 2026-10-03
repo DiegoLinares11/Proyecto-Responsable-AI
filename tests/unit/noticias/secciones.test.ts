@@ -31,6 +31,18 @@ describe("las secciones", () => {
     );
   });
 
+  // La app móvil es otro paquete y Metro no importa fuera de él, así que tiene
+  // su copia. Esta prueba es la que la mantiene honesta.
+  test("la copia de la app móvil coincide, en el mismo orden", () => {
+    const copia = readFileSync(join(RAIZ, "app-movil/src/lib/secciones.ts"), "utf8");
+    const bloque = copia.match(/export const SECCIONES[\s\S]*?\];/)?.[0];
+    assert.ok(bloque, "no encontré SECCIONES en la copia de la app");
+    assert.deepEqual(
+      [...bloque.matchAll(/clave: '([a-z_]+)'/g)].map((m) => m[1]),
+      seccionesDeLaBase(),
+    );
+  });
+
   test("cada una tiene nombre para mostrar", () => {
     for (const { clave } of SECCIONES) {
       assert.ok(NOMBRE_DE_SECCION[clave]?.length, clave);

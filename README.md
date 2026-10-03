@@ -64,6 +64,7 @@ corpus de ataques con el que se mide en [docs/plan-por-fases.md](docs/plan-por-f
 
 | Documento | Qué contiene |
 |---|---|
+| [app-movil/README.md](app-movil/README.md) | **La app móvil** (Expo): cómo correrla en Expo Go y configurar el login con Google |
 | [requisitos.md](docs/requisitos.md) | **El enunciado del curso traducido a requerimientos**, criterios de aceptación, estado y Definition of Done |
 | [informe-ia-responsable.md](docs/informe-ia-responsable.md) | El informe del curso: amenazas, decisiones, red team, sesgos y límites |
 | [plan-por-fases.md](docs/plan-por-fases.md) | Las 7 fases, con entregable y criterio de aceptación cada una |
