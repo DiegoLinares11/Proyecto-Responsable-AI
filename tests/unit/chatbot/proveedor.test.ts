@@ -101,6 +101,7 @@ describe("validacion de lo que devuelve el modelo", () => {
   test("las categorias validas pasan tal cual", () => {
     for (const categoria of [
       "consulta_noticias",
+      "cortesia",
       "fuera_de_dominio",
       "intento_desvio",
       "contenido_dañino",

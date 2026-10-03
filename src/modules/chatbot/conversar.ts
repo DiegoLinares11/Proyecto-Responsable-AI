@@ -19,6 +19,7 @@
 import {
   NEGATIVA_CONTENIDO_DANINO,
   NEGATIVA_FUERA_DE_DOMINIO,
+  RESPUESTA_DE_CORTESIA,
   NOTICIAS_EN_CONTEXTO,
   type CategoriaDeIntencion,
   type ContarMensajesDeHoy,
@@ -135,6 +136,23 @@ export async function conversar(
       bloqueado: true,
       capaQueCorto: "capa1",
       motivoBloqueo: `Clasificado como ${categoria}: ${clasificacion.valor.razonamiento}`,
+      categoria,
+      sospechas: capa0.sospechas,
+      noticiasCitadas: [],
+      confianza: null,
+      costo: clasificacion.costo,
+    });
+  }
+
+  // La cortesía se atiende y se termina acá. NO cuenta como bloqueo: el usuario
+  // recibió la respuesta que correspondía, solo que sin gastar una llamada al
+  // modelo grande.
+  if (categoria === "cortesia") {
+    return terminar({
+      respuesta: RESPUESTA_DE_CORTESIA,
+      bloqueado: false,
+      capaQueCorto: null,
+      motivoBloqueo: null,
       categoria,
       sospechas: capa0.sospechas,
       noticiasCitadas: [],

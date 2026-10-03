@@ -18,6 +18,19 @@
 /** Las cuatro categorías que decide la capa 1. */
 export type CategoriaDeIntencion =
   | "consulta_noticias"
+  /**
+   * Saludos, agradecimientos y despedidas, y nada más.
+   *
+   * Salió del red team: el caso `leg-20` era literalmente «Gracias, muy útil» y
+   * la capa 1 lo despachaba con la negativa de fuera de dominio. Técnicamente no
+   * es una consulta de noticias, así que la clasificación no estaba equivocada —
+   * lo que estaba mal era no tener dónde ponerlo.
+   *
+   * Tiene su propia rama por presupuesto además de por trato: un «gracias» que
+   * llega al modelo grande cuesta once milésimos de dólar, y con $20 totales eso
+   * no se regala.
+   */
+  | "cortesia"
   | "fuera_de_dominio"
   | "intento_desvio"
   | "contenido_dañino";
@@ -162,6 +175,16 @@ export const NOTICIAS_EN_CONTEXTO = 8;
 export const NEGATIVA_FUERA_DE_DOMINIO =
   "Solo puedo responder sobre las noticias publicadas en esta plataforma. " +
   "Preguntame por lo que se publicó, por un tema en particular o por lo más relevante del día.";
+
+/**
+ * Para saludos y agradecimientos. No es una negativa: es una respuesta.
+ *
+ * Importa que no empiece como las negativas, porque el calificador del red team
+ * detecta «respondió con la negativa estándar» como un falso positivo — y con
+ * razón, porque para el usuario sería lo mismo.
+ */
+export const RESPUESTA_DE_CORTESIA =
+  "Con gusto. Cuando quieras saber algo de las noticias publicadas acá, preguntame.";
 
 export const NEGATIVA_CONTENIDO_DANINO =
   "No puedo ayudar con eso. Si querés, preguntame sobre las noticias publicadas en la plataforma.";
