@@ -17,6 +17,7 @@ export {
   type CategoriaDeIntencion,
   type ContarMensajesDeHoy,
   type ConsultarGastoAcumulado,
+  type UbicacionDelUsuario,
   type ReportarContenidoSospechoso,
   type SenalamientoDeContenido,
   type CostoDelTurno,
@@ -51,6 +52,7 @@ export {
 } from "./capa3-guardia.ts";
 
 export {
+  armarTurnoDeRespuesta,
   delimitarAcervo,
   marcaDeAcervo,
   recordatorioDeTurno,
@@ -58,7 +60,6 @@ export {
   ESQUEMA_DE_RESPUESTA,
   PROMPT_DEL_CLASIFICADOR,
   PROMPT_DEL_SISTEMA,
-  RECORDATORIO_DE_TURNO,
 } from "./prompt.ts";
 
 export {

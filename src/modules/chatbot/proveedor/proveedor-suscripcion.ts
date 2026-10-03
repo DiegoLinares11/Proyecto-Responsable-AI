@@ -33,9 +33,7 @@ import {
   ESQUEMA_DE_RESPUESTA,
   PROMPT_DEL_CLASIFICADOR,
   PROMPT_DEL_SISTEMA,
-  delimitarAcervo,
-  marcaDeAcervo,
-  recordatorioDeTurno,
+  armarTurnoDeRespuesta,
 } from "../prompt.ts";
 import type { CostoDelTurno, RespuestaDelModelo, VeredictoCapa1 } from "../tipos.ts";
 import {
@@ -190,16 +188,6 @@ export function crearProveedorSuscripcion(
     },
 
     async responder(peticion: PeticionDeRespuesta): Promise<Respondido<RespuestaDelModelo>> {
-      // Una marca distinta por consulta: quien escribió el cuerpo de una noticia
-      // no la conoce, así que no puede cerrar el bloque ni abrir uno falso.
-      const marca = marcaDeAcervo();
-      const negativa =
-        peticion.tareaAjenaANegar === null
-          ? ""
-          : `\n\n<nota_para_el_asistente>El mensaje original también pedía: ` +
-            `"${peticion.tareaAjenaANegar}". Eso está fuera de lo que hacés. Respondé la ` +
-            `consulta de noticias y decí en una frase que lo otro no lo hacés.</nota_para_el_asistente>`;
-
       const historial = peticion.historial
         .map((t) => `${t.rol === "usuario" ? "Usuario" : "Asistente"}: ${t.contenido}`)
         .join("\n");
@@ -207,9 +195,7 @@ export function crearProveedorSuscripcion(
       const resultado = await consultar(
         PROMPT_DEL_SISTEMA + pedirJson(ESQUEMA_DE_RESPUESTA),
         (historial === "" ? "" : `<conversacion_previa>\n${historial}\n</conversacion_previa>\n\n`) +
-          `${delimitarAcervo(peticion.noticias)}\n\n` +
-          `<pregunta>\n${peticion.mensaje}\n</pregunta>${negativa}\n\n` +
-          recordatorioDeTurno(marca),
+          armarTurnoDeRespuesta(peticion),
       );
 
       return { valor: validarRespuesta(parsear(resultado.texto)), costo: medir(resultado) };

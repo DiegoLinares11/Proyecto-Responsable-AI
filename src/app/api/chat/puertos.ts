@@ -31,7 +31,7 @@ import {
 } from "../../../modules/chatbot/index.ts";
 
 const CAMPOS =
-  "id,titulo,resumen,publicada_en,puntaje_veracidad,relevancia,fuentes(nombre)";
+  "id,titulo,resumen,publicada_en,puntaje_veracidad,relevancia,alcance,fuentes(nombre),ubicaciones(nombre)";
 
 type FilaDeNoticia = {
   id: string;
@@ -40,7 +40,9 @@ type FilaDeNoticia = {
   publicada_en: string;
   puntaje_veracidad: number | null;
   relevancia: number | string;
+  alcance: "local" | "nacional" | "internacional";
   fuentes: { nombre: string } | null;
+  ubicaciones: { nombre: string } | null;
 };
 
 function aNoticiaDelModelo(fila: FilaDeNoticia): NoticiaParaElModelo {
@@ -52,6 +54,8 @@ function aNoticiaDelModelo(fila: FilaDeNoticia): NoticiaParaElModelo {
     fuente: fila.fuentes?.nombre ?? "fuente no registrada",
     puntajeVeracidad: fila.puntaje_veracidad,
     relevancia: Number(fila.relevancia),
+    alcance: fila.alcance,
+    zona: fila.ubicaciones?.nombre ?? null,
   };
 }
 
@@ -67,6 +71,38 @@ function terminos(consulta: string): string {
     .join(" ");
 }
 
+/** Búsqueda de texto entre lo verificado; si no encuentra nada, lo más relevante. */
+async function buscar(
+  cliente: SupabaseClient,
+  consulta: string,
+  limite: number,
+): Promise<NoticiaParaElModelo[]> {
+  const buscables = terminos(consulta);
+
+  if (buscables !== "") {
+    const { data } = await cliente
+      .from("noticias")
+      .select(CAMPOS)
+      .eq("estado", "verificada")
+      .textSearch("busqueda", buscables, { type: "plain", config: "spanish" })
+      .order("relevancia", { ascending: false })
+      .limit(limite);
+
+    if (data !== null && data.length > 0) {
+      return (data as unknown as FilaDeNoticia[]).map(aNoticiaDelModelo);
+    }
+  }
+
+  const { data } = await cliente
+    .from("noticias")
+    .select(CAMPOS)
+    .eq("estado", "verificada")
+    .order("relevancia", { ascending: false })
+    .limit(limite);
+
+  return ((data ?? []) as unknown as FilaDeNoticia[]).map(aNoticiaDelModelo);
+}
+
 export async function crearPuertosDelChatbot(
   cliente: SupabaseClient,
   proveedor: ProveedorLlm,
@@ -77,31 +113,28 @@ export async function crearPuertosDelChatbot(
   const deps: DependenciasDelChatbot = {
     proveedor,
 
-    recuperarNoticias: async (consulta, limite) => {
-      const buscables = terminos(consulta);
-
-      if (buscables !== "") {
-        const { data } = await cliente
-          .from("noticias")
-          .select(CAMPOS)
-          .eq("estado", "verificada")
-          .textSearch("busqueda", buscables, { type: "plain", config: "spanish" })
-          .order("relevancia", { ascending: false })
-          .limit(limite);
-
-        if (data !== null && data.length > 0) {
-          return (data as unknown as FilaDeNoticia[]).map(aNoticiaDelModelo);
-        }
-      }
+    // Además de lo que encuentre la búsqueda, entran hasta dos noticias locales
+    // de la zona del usuario: es lo que permite contestar «¿qué pasa en mi
+    // región?», que no comparte palabras con ningún titular. Van al final y
+    // aparte del límite, para no desplazar lo que se buscó.
+    recuperarNoticias: async (consulta, limite, ubicacion) => {
+      const encontradas = await buscar(cliente, consulta, limite);
+      if (!ubicacion) return encontradas;
 
       const { data } = await cliente
         .from("noticias")
         .select(CAMPOS)
         .eq("estado", "verificada")
+        .eq("alcance", "local")
+        .eq("id_ubicacion", ubicacion.id)
         .order("relevancia", { ascending: false })
-        .limit(limite);
+        .limit(2);
 
-      return ((data ?? []) as unknown as FilaDeNoticia[]).map(aNoticiaDelModelo);
+      const ya = new Set(encontradas.map((n) => n.id));
+      const locales = ((data ?? []) as unknown as FilaDeNoticia[])
+        .map(aNoticiaDelModelo)
+        .filter((n) => !ya.has(n.id));
+      return [...encontradas, ...locales];
     },
 
     verificarNoticias: async (ids) => {

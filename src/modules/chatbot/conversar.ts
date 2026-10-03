@@ -25,6 +25,7 @@ import {
   type ContarMensajesDeHoy,
   type ConsultarGastoAcumulado,
   type ReportarContenidoSospechoso,
+  type UbicacionDelUsuario,
   type GuardarTurno,
   type NivelDeConfianza,
   type RecuperarNoticias,
@@ -70,6 +71,8 @@ export type PeticionDeConversacion = {
   idConversacion: string;
   mensaje: string;
   historial?: readonly TurnoDeHistorial[];
+  /** La ubicación simulada, para las consultas sobre «mi región». */
+  ubicacion?: UbicacionDelUsuario | null;
 };
 
 /** Las categorías que no llegan al modelo grande, y con qué se les responde. */
@@ -186,13 +189,14 @@ export async function conversar(
   const consulta = esDesvio ? (clasificacion.valor.parteLegitima ?? peticion.mensaje) : peticion.mensaje;
 
   // --- Capa 2 --------------------------------------------------------------
-  const noticias = await deps.recuperarNoticias(consulta, limite);
+  const noticias = await deps.recuperarNoticias(consulta, limite, peticion.ubicacion ?? null);
 
   const respondido = await deps.proveedor.responder({
     mensaje: consulta,
     noticias,
     historial: peticion.historial ?? [],
     tareaAjenaANegar: esDesvio ? clasificacion.valor.tareaAjena : null,
+    ubicacion: peticion.ubicacion ?? null,
   });
 
   const costo = sumarCostos(clasificacion.costo, respondido.costo);

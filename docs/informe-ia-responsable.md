@@ -378,14 +378,19 @@ instrumento contra un arreglo al sistema. Y la corrección más grande —medir 
 resultado en vez del mecanismo— cambiaba la conclusión de «la defensa está rota»
 a «la defensa aguanta» sobre los mismos datos.
 
-**Cuatro veces, el sistema afirmó un control que no tenía.** El tope de gasto
+**Cinco veces, el sistema afirmó un control que no tenía.** El tope de gasto
 estaba descrito en la documentación de presupuesto y no en el código. El chatbot
 le decía al usuario que la noticia «queda reportada» sin reportarla. La pantalla
-de moderación exigía un motivo «para auditar» que no se guardaba. Y la
+de moderación exigía un motivo «para auditar» que no se guardaba. La
 arquitectura listaba «política de retención» para las conversaciones, que no
-existe. Ninguna fallaba de forma visible: eran afirmaciones —en un documento, en
-una pantalla, en una respuesta— que ninguna prueba comprobaba. Las tres primeras
-aparecieron mientras se cableaba otra cosa, no en una revisión. Lo que haría
+existe. Y la defensa contra la inyección indirecta generaba una marca aleatoria
+por turno —el comentario del código explicaba por qué protegía— que nunca llegaba
+al bloque de noticias: el bloque salía siempre con la misma etiqueta fija,
+mientras el recordatorio señalaba una que no estaba en el mensaje. Había pruebas
+de cada pieza y ninguna del mensaje que de verdad se mandaba. Ninguna de las
+cinco fallaba de forma visible: eran afirmaciones —en un documento, en una
+pantalla, en una respuesta, en un comentario— que ninguna prueba comprobaba.
+Cuatro aparecieron mientras se cableaba otra cosa, no en una revisión. Lo que haría
 falta es tratar cada afirmación sobre un control como algo que necesita su
 propia prueba, igual que el control mismo.
 

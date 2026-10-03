@@ -24,6 +24,7 @@ import type {
   RespuestaDelModelo,
   Sospecha,
   VeredictoCapa1,
+  UbicacionDelUsuario,
 } from "../tipos.ts";
 
 export type TurnoDeHistorial = {
@@ -49,6 +50,8 @@ export type PeticionDeRespuesta = {
    * negar. Va aparte del mensaje del usuario, nunca concatenado dentro de él.
    */
   tareaAjenaANegar: string | null;
+  /** Para que «mi región» signifique algo. */
+  ubicacion?: UbicacionDelUsuario | null;
 };
 
 export type Respondido<T> = {

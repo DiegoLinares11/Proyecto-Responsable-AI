@@ -58,13 +58,19 @@ async function atender(peticion: Request): Promise<NextResponse> {
   }
 
   let mensaje: string;
+  let idUbicacion: string | null = null;
 
   try {
-    const cuerpo = (await peticion.json()) as { mensaje?: unknown };
+    const cuerpo = (await peticion.json()) as { mensaje?: unknown; ubicacion?: unknown };
     if (typeof cuerpo.mensaje !== "string") {
       return NextResponse.json({ error: "Falta el campo «mensaje»." }, { status: 400 });
     }
     mensaje = cuerpo.mensaje;
+    // Solo un identificador con la forma de la lista cerrada; lo demás se
+    // ignora en vez de llegar a una consulta.
+    if (typeof cuerpo.ubicacion === "string" && /^[A-Z]{2}(-[A-Z]{2})?$/.test(cuerpo.ubicacion)) {
+      idUbicacion = cuerpo.ubicacion;
+    }
   } catch {
     return NextResponse.json({ error: "El cuerpo no es JSON." }, { status: 400 });
   }
@@ -100,8 +106,20 @@ async function atender(peticion: Request): Promise<NextResponse> {
       topeGastoUsd: configuracion.topeGastoUsd,
     });
 
+    // El nombre sale de la base, no del cliente: si el identificador no está en
+    // la lista, la conversación sigue sin ubicación.
+    const { data: ubicacion } =
+      idUbicacion === null
+        ? { data: null }
+        : await cliente.from("ubicaciones").select("id,nombre,pais").eq("id", idUbicacion).maybeSingle();
+
     const resultado = await conversar(
-      { idUsuario: perfil.usuario.id, idConversacion, mensaje },
+      {
+        idUsuario: perfil.usuario.id,
+        idConversacion,
+        mensaje,
+        ubicacion: (ubicacion as { id: string; nombre: string; pais: string } | null) ?? null,
+      },
       deps,
     );
 
