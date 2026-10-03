@@ -17,7 +17,8 @@
 //                          tiene permiso para lo último, y eso es a propósito.
 //
 //   decidirComoModerador — con la sesión del moderador. RLS exige
-//                          `noticias_moderar`.
+//                          `noticias_moderar`. El registro en auditoría lo
+//                          escribe el sistema, con la llave de servicio.
 //
 // La regla que gobierna todo: nada por debajo del umbral se publica
 // automáticamente (docs/validacion-noticias.md).
@@ -284,6 +285,18 @@ export type DecisionDeModerador = "aprobar" | "rechazar" | "archivar";
  * Va con la sesión del moderador: RLS exige `noticias_moderar`, así que el
  * permiso se comprueba en el motor y no aquí.
  *
+ * **El registro en auditoría NO va con esa sesión.** Durante las Fases 6 y 7 fue
+ * así, y nunca funcionó: `authenticated` solo tiene SELECT sobre la auditoría
+ * —a propósito, una bitácora que el cliente puede escribir no es bitácora— y
+ * `registrar` no lanza nunca, también a propósito. Las dos decisiones eran
+ * correctas por separado y juntas hacían que el motivo que la pantalla exige
+ * escribir «para poder auditar después» no se guardara en ningún lado, sin un
+ * solo error visible.
+ *
+ * El reparto ahora: la sesión del moderador hace el cambio de estado, que es lo
+ * que hay que autorizar; si pasa, el sistema escribe el registro de lo que
+ * pasó. Si la política rechaza el cambio, se lanza antes de auditar nada.
+ *
  * Aprobar una noticia de un dominio que no está en el registro **anota ese
  * dominio como candidato** en la auditoría. Es la forma en que se cumple la
  * promesa del ADR 0002 —que el sistema aprenda de la corrección humana— sin
@@ -300,6 +313,8 @@ export type DecisionDeModerador = "aprobar" | "rechazar" | "archivar";
  */
 export async function decidirComoModerador(
   clienteDelModerador: SupabaseClient,
+  /** Con la llave de servicio. Es el único que puede escribir la bitácora. */
+  clienteDeAuditoria: SupabaseClient,
   idNoticia: string,
   decision: DecisionDeModerador,
   idModerador: string,
@@ -334,7 +349,7 @@ export async function decidirComoModerador(
     throw new ErrorDeNoticia("base_de_datos", `No se pudo moderar: ${error.message}`);
   }
 
-  await registrar(clienteDelModerador, {
+  await registrar(clienteDeAuditoria, {
     entidad: "noticia",
     idEntidad: idNoticia,
     accion: `moderada_${decision}`,
@@ -351,7 +366,7 @@ export async function decidirComoModerador(
   if (decision === "aprobar" && url != null && yaRegistrada == null) {
     const dominio = candidatosDeUrl(url).at(-1);
     if (dominio !== undefined) {
-      await registrar(clienteDelModerador, {
+      await registrar(clienteDeAuditoria, {
         entidad: "fuente",
         idEntidad: dominio,
         accion: "candidata_al_registro",
