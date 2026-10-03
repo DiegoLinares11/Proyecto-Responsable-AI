@@ -214,6 +214,35 @@ sube la credibilidad sola: una aprobación dice que *la nota* es cierta, no que
 *el medio* sea confiable. Son dos juicios distintos y convertir uno en el otro
 haría que el sistema se inventara posiciones editoriales.
 
+#### Medido, no supuesto
+
+El 2 de octubre de 2026 se pasaron por el canal tres artículos reales, tomados
+de los feeds de medios del propio registro. Dos de ellos salieron así:
+
+| Señal | BBC — entrevista a Piketty | La Hora — sismos en Laguna de Ayarza |
+|---|---|---|
+| URL verificable | 20 / 20 | 20 / 20 |
+| Corroboración | 12 / 30 | 12 / 30 |
+| Coherencia | 20 / 20 | 20 / 20 |
+| Desmentidos | sin verificador | sin verificador |
+| **Credibilidad de la fuente** | **25.5 / 30** | **21 / 30** |
+| **Resultado** | **78 → se publica** | **73 → queda en revisión** |
+
+**Idénticas en las cuatro señales que se comprueban. Lo único que las separa es
+el registro que escribimos a mano**, y esos 4.5 puntos son exactamente la
+diferencia entre publicarse y no. El medio penalizado es el guatemalteco.
+
+No es un fallo del sistema: es el sistema haciendo lo que se le pidió. Pero
+muestra que «la credibilidad de la fuente vale 30 de 100» no es un parámetro
+técnico — **es el poder de decidir quién se publica**, y lo ejerce quien cura la
+tabla.
+
+El tercer artículo lo confirma por el otro lado: una nota de Prensa Libre sobre
+la muerte de un migrante guatemalteco durante una detención de ICE sacó **0 de 30
+en corroboración** —ningún otro medio del registro la cubría— y se quedó en 63.
+Una muerte que importa en Guatemala no se publica sola porque a la prensa
+internacional no le interesó.
+
 ### La corroboración favorece lo que ya tiene cobertura
 
 La señal cuenta cuántos medios independientes cubren el mismo hecho. Eso penaliza
