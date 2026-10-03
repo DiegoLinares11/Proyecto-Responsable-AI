@@ -8,9 +8,11 @@
     "scheme": "noticiasverificadas",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "gt.edu.uvg.noticiasverificadas"
     },
     "android": {
+      "package": "gt.edu.uvg.noticiasverificadas",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -33,7 +35,13 @@
           "imageWidth": 76
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Para sugerirte el departamento más cercano. Las coordenadas no salen del teléfono."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false,
