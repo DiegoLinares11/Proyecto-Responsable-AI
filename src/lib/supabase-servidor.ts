@@ -18,7 +18,7 @@
 
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 
 export async function clienteDelServidor(): Promise<SupabaseClient> {
   const almacen = await cookies();
@@ -46,6 +46,31 @@ export async function clienteDelServidor(): Promise<SupabaseClient> {
   );
 }
 
+/**
+ * El cliente con el token de la app móvil.
+ *
+ * La app no tiene la cookie del navegador: manda su token de Supabase en la
+ * cabecera `Authorization`. Este cliente viaja con ESE token, así que las
+ * políticas de fila deciden igual que con la cookie. Es la misma identidad por
+ * otro camino, no un atajo: la llave de servicio no entra acá.
+ */
+export function clienteConToken(token: string): SupabaseClient {
+  return createClient(
+    process.env["NEXT_PUBLIC_SUPABASE_URL"]!,
+    process.env["NEXT_PUBLIC_SUPABASE_ANON_KEY"]!,
+    {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    },
+  );
+}
+
+/** El token de `Authorization: Bearer …`, o null si la petición no trae uno. */
+export function tokenDePortador(cabecera: string | null): string | null {
+  const m = cabecera?.match(/^Bearer\s+(\S+)$/i);
+  return m?.[1] ?? null;
+}
+
 export type PerfilDelVisitante = {
   usuario: User;
   idRol: number;
@@ -64,12 +89,17 @@ export type PerfilDelVisitante = {
  * hacen las políticas de fila cuando la operación llega a la base. Esconder un
  * botón no es un control de seguridad; que el `insert` falle, sí.
  */
-export async function perfilDelVisitante(): Promise<PerfilDelVisitante | null> {
-  const cliente = await clienteDelServidor();
+export async function perfilDelVisitante(
+  opciones: { token?: string | null } = {},
+): Promise<PerfilDelVisitante | null> {
+  const token = opciones.token ?? null;
+  const cliente = token === null ? await clienteDelServidor() : clienteConToken(token);
 
   // `getUser` valida el token contra el servidor de auth. `getSession` solo lee
-  // la cookie, que el cliente puede haber tocado.
-  const { data: sesion } = await cliente.auth.getUser();
+  // la cookie, que el cliente puede haber tocado. Con el token de la app pasa
+  // lo mismo: se valida, no se le cree.
+  const { data: sesion } =
+    token === null ? await cliente.auth.getUser() : await cliente.auth.getUser(token);
   if (sesion.user === null) return null;
 
   const { data: perfil } = await cliente

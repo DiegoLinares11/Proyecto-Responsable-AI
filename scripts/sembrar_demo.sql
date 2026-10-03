@@ -240,3 +240,26 @@ where id in ('dddddddd-aaaa-0000-0000-000000000004', 'dddddddd-aaaa-0000-0000-00
 update public.noticias set seccion = 'guatemala'
 where id = '6090d9df-f831-492f-9cb0-c5a7c6964b15';
 
+
+-- ---------------------------------------------------------------------------
+-- Las columnas de tokens de auth.users, en cadena vacía y no en NULL
+--
+-- Las cuentas de demo se insertan por SQL directo en auth.users. El servidor de
+-- auth de Supabase lee estas columnas como texto y no tolera NULL: con NULL,
+-- cualquier operación sobre la cuenta —iniciar sesión, mandar un enlace,
+-- ponerle contraseña desde el panel— falla con «Database error finding user».
+-- Es decir: ninguna cuenta de demo podía usarse nunca, y no se notó porque
+-- hasta la app móvil nadie había intentado entrar con una.
+-- ---------------------------------------------------------------------------
+
+update auth.users set
+  confirmation_token         = coalesce(confirmation_token, ''),
+  recovery_token             = coalesce(recovery_token, ''),
+  email_change               = coalesce(email_change, ''),
+  email_change_token_new     = coalesce(email_change_token_new, ''),
+  email_change_token_current = coalesce(email_change_token_current, ''),
+  phone_change               = coalesce(phone_change, ''),
+  phone_change_token         = coalesce(phone_change_token, ''),
+  reauthentication_token     = coalesce(reauthentication_token, ''),
+  email_confirmed_at         = coalesce(email_confirmed_at, created_at)
+where id::text like 'dddddddd-%';
