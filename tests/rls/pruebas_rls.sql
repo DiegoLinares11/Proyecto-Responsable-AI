@@ -37,7 +37,9 @@ begin
   begin
     execute p_sql;
   exception
-    when insufficient_privilege or check_violation or unique_violation then
+    -- foreign_key_violation: una referencia a algo que no existe (una zona
+    -- inventada) es un rechazo legitimo de la base, no un error de la prueba.
+    when insufficient_privilege or check_violation or unique_violation or foreign_key_violation then
       raise notice 'OK      %', p_etiqueta;
       return;
     when others then
@@ -728,6 +730,94 @@ set role anon;
 
 select pg_temp.debe_fallar('select count(*) from public.alertas_de_contenido',
   'un visitante sin cuenta no llega a las alertas');
+
+reset role;
+
+-- ===========================================================================
+-- 15. Ubicación simulada y alcance geográfico
+--
+-- La lista de ubicaciones es pública y cerrada. El alcance de una noticia
+-- obliga a declarar de dónde es. Y la ubicación de cada usuario es solo suya:
+-- ni otro usuario ni un moderador la ven, porque moderar noticias no requiere
+-- saber dónde dice estar alguien.
+-- ===========================================================================
+
+\echo ''
+\echo '# 15. ubicacion simulada y alcance'
+
+reset role;
+set role anon;
+
+select pg_temp.debe_contar('select count(*) from public.ubicaciones',
+  27, 'cualquiera ve la lista de ubicaciones: 22 departamentos y 5 paises');
+
+select pg_temp.debe_fallar($q$
+  insert into public.ubicaciones (id, nombre, pais, tipo) values ('GT-XX', 'Inventada', 'GT', 'departamento')
+$q$, 'nadie del cliente agrega ubicaciones');
+
+select pg_temp.debe_fallar('select count(*) from public.preferencias_usuario',
+  'un visitante sin cuenta no llega a las preferencias');
+
+reset role;
+
+-- La regla del alcance vive en la base, no en el formulario.
+select pg_temp.debe_fallar($q$
+  update public.noticias set alcance = 'local', id_ubicacion = null
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una noticia local sin zona NO entra');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias set alcance = 'nacional', pais = null
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una noticia nacional sin pais NO entra');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias set alcance = 'local', id_ubicacion = 'GT-XX'
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una zona que no esta en la lista NO entra');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias set alcance = 'local', id_ubicacion = 'GT-QZ'
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una noticia local de Quetzaltenango SI entra');
+
+-- Cada quien su fila.
+select pg_temp.entrar_como('11111111-1111-1111-1111-111111111111');
+set role authenticated;
+
+select pg_temp.debe_pasar($q$
+  insert into public.preferencias_usuario (id_usuario, id_ubicacion)
+  values ('11111111-1111-1111-1111-111111111111', 'GT-PE')
+$q$, 'un usuario guarda su propia ubicacion');
+
+select pg_temp.debe_fallar($q$
+  insert into public.preferencias_usuario (id_usuario, id_ubicacion)
+  values ('22222222-2222-2222-2222-222222222222', 'GT-PE')
+$q$, 'nadie guarda la ubicacion de otro');
+
+select pg_temp.debe_pasar($q$
+  update public.preferencias_usuario set intereses_desde = now()
+   where id_usuario = '11111111-1111-1111-1111-111111111111'
+$q$, 'un usuario reinicia sus intereses');
+
+reset role;
+select pg_temp.entrar_como('22222222-2222-2222-2222-222222222222');
+set role authenticated;
+
+select pg_temp.debe_contar('select count(*) from public.preferencias_usuario',
+  0, 'otro usuario NO ve la ubicacion ajena');
+
+select pg_temp.debe_no_afectar_filas($q$
+  update public.preferencias_usuario set id_ubicacion = 'GT-GU'
+   where id_usuario = '11111111-1111-1111-1111-111111111111'
+$q$, 'otro usuario NO cambia la ubicacion ajena');
+
+reset role;
+select pg_temp.entrar_como('33333333-3333-3333-3333-333333333333');
+set role authenticated;
+
+select pg_temp.debe_contar('select count(*) from public.preferencias_usuario',
+  0, 'un moderador tampoco ve ubicaciones ajenas');
 
 reset role;
 

@@ -6,11 +6,12 @@
 // aunque alguien cambie esta consulta, porque el filtro vive en la base.
 // ===========================================================================
 
+import type { Alcance, NoticiaPersonalizable } from './personalizacion';
 import { supabase } from './supabase';
 
 export type Imagen = { url: string; credito: string; alterno: string };
 
-export type NoticiaDelFeed = {
+export type NoticiaDelFeed = NoticiaPersonalizable & {
   id: string;
   titulo: string;
   resumen: string;
@@ -20,6 +21,8 @@ export type NoticiaDelFeed = {
   fuente: string | null;
   puntajeVeracidad: number | null;
   relevancia: number;
+  /** El nombre de la zona, si es local: «Quetzaltenango». */
+  zona: string | null;
 };
 
 export type Senal = {
@@ -37,7 +40,7 @@ export type NoticiaCompleta = NoticiaDelFeed & {
 
 const CAMPOS =
   'id,titulo,resumen,publicada_en,seccion,url_imagen,credito_imagen,texto_alterno_imagen,' +
-  'puntaje_veracidad,relevancia,fuentes(nombre)';
+  'puntaje_veracidad,relevancia,alcance,pais,id_ubicacion,fuentes(nombre),ubicaciones(nombre)';
 
 type Fila = {
   id: string;
@@ -50,7 +53,11 @@ type Fila = {
   texto_alterno_imagen: string | null;
   puntaje_veracidad: number | null;
   relevancia: number | string;
+  alcance: Alcance;
+  pais: string | null;
+  id_ubicacion: string | null;
   fuentes: { nombre: string } | null;
+  ubicaciones: { nombre: string } | null;
 };
 
 function aNoticia(f: Fila): NoticiaDelFeed {
@@ -69,6 +76,10 @@ function aNoticia(f: Fila): NoticiaDelFeed {
     fuente: f.fuentes?.nombre ?? null,
     puntajeVeracidad: f.puntaje_veracidad,
     relevancia: Number(f.relevancia),
+    alcance: f.alcance,
+    pais: f.pais,
+    idUbicacion: f.id_ubicacion,
+    zona: f.ubicaciones?.nombre ?? null,
   };
 }
 

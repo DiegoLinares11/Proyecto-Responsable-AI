@@ -391,6 +391,7 @@ export type Database = {
       noticias: {
         Row: {
           actualizado_en: string
+          alcance: Database["public"]["Enums"]["alcance_geografico"]
           busqueda: unknown
           componente_fuente: number
           componente_interacciones: number
@@ -403,6 +404,8 @@ export type Database = {
           id: string
           id_autor: string
           id_fuente: number | null
+          id_ubicacion: string | null
+          pais: string | null
           penalizacion_estado: number
           publicada_en: string | null
           puntaje_veracidad: number | null
@@ -420,6 +423,7 @@ export type Database = {
         }
         Insert: {
           actualizado_en?: string
+          alcance?: Database["public"]["Enums"]["alcance_geografico"]
           busqueda?: unknown
           componente_fuente?: number
           componente_interacciones?: number
@@ -432,6 +436,8 @@ export type Database = {
           id?: string
           id_autor: string
           id_fuente?: number | null
+          id_ubicacion?: string | null
+          pais?: string | null
           penalizacion_estado?: number
           publicada_en?: string | null
           puntaje_veracidad?: number | null
@@ -449,6 +455,7 @@ export type Database = {
         }
         Update: {
           actualizado_en?: string
+          alcance?: Database["public"]["Enums"]["alcance_geografico"]
           busqueda?: unknown
           componente_fuente?: number
           componente_interacciones?: number
@@ -461,6 +468,8 @@ export type Database = {
           id?: string
           id_autor?: string
           id_fuente?: number | null
+          id_ubicacion?: string | null
+          pais?: string | null
           penalizacion_estado?: number
           publicada_en?: string | null
           puntaje_veracidad?: number | null
@@ -489,6 +498,13 @@ export type Database = {
             columns: ["id_fuente"]
             isOneToOne: false
             referencedRelation: "fuentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "noticias_id_ubicacion_fkey"
+            columns: ["id_ubicacion"]
+            isOneToOne: false
+            referencedRelation: "ubicaciones"
             referencedColumns: ["id"]
           },
           {
@@ -564,6 +580,42 @@ export type Database = {
           },
         ]
       }
+      preferencias_usuario: {
+        Row: {
+          actualizado_en: string
+          id_ubicacion: string
+          id_usuario: string
+          intereses_desde: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          id_ubicacion?: string
+          id_usuario: string
+          intereses_desde?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          id_ubicacion?: string
+          id_usuario?: string
+          intereses_desde?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferencias_usuario_id_ubicacion_fkey"
+            columns: ["id_ubicacion"]
+            isOneToOne: false
+            referencedRelation: "ubicaciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preferencias_usuario_id_usuario_fkey"
+            columns: ["id_usuario"]
+            isOneToOne: true
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           clave: string
@@ -629,6 +681,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ubicaciones: {
+        Row: {
+          id: string
+          nombre: string
+          orden: number
+          pais: string
+          tipo: string
+        }
+        Insert: {
+          id: string
+          nombre: string
+          orden?: number
+          pais: string
+          tipo: string
+        }
+        Update: {
+          id?: string
+          nombre?: string
+          orden?: number
+          pais?: string
+          tipo?: string
+        }
+        Relationships: []
       }
       usuarios: {
         Row: {
@@ -742,6 +818,7 @@ export type Database = {
     }
     Enums: {
       accion_restringible: "comentar" | "reaccionar"
+      alcance_geografico: "local" | "nacional" | "internacional"
       estado_noticia:
         | "borrador"
         | "en_revision"
@@ -899,6 +976,7 @@ export const Constants = {
   public: {
     Enums: {
       accion_restringible: ["comentar", "reaccionar"],
+      alcance_geografico: ["local", "nacional", "internacional"],
       estado_noticia: [
         "borrador",
         "en_revision",
