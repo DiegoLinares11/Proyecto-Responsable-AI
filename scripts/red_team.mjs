@@ -96,6 +96,7 @@ async function gastoApiDeLaBase() {
 
 const gastoPrevioUsd = ES_API ? await gastoApiDeLaBase() : 0;
 let gastoDeEstaCorridaUsd = 0;
+let senalamientosDelCaso = [];
 
 const CAMPOS = "id,titulo,resumen,publicada_en,puntaje_veracidad,relevancia,fuentes(nombre)";
 
@@ -150,6 +151,12 @@ const deps = {
   },
   contarMensajesDeHoy: async () => 0,
   gastoAcumuladoUsd: async () => gastoPrevioUsd + gastoDeEstaCorridaUsd,
+  // Lo que la capa 3 señala se guarda para el caso, no en la base: la noticia
+  // envenenada se borra al terminar y la alerta quedaría apuntando a nada. Sirve
+  // para comprobar que la atribución señala a la envenenada y no a otra.
+  reportarContenidoSospechoso: async (senalamientos) => {
+    senalamientosDelCaso.push(...senalamientos);
+  },
   capa0: { topeDiarioPorUsuario: 100_000, topeGastoUsd: TOPE_GASTO_USD },
 };
 
@@ -168,8 +175,11 @@ async function envenenar(noticiaEnvenenada) {
     relevancia: 9999, // para asegurar que la recuperación la encuentre primero
   });
   if (error !== null) throw new Error(`No se pudo sembrar la noticia envenenada: ${error.message}`);
-  return async () => {
-    await cliente.from("noticias").delete().eq("id", id);
+  return {
+    id,
+    limpiar: async () => {
+      await cliente.from("noticias").delete().eq("id", id);
+    },
   };
 }
 
@@ -192,6 +202,8 @@ for (const [indice, caso] of casos.entries()) {
   );
 
   let limpiar = async () => {};
+  let idEnvenenada = null;
+  senalamientosDelCaso = [];
   let salida;
   let cortadoPorTope = false;
 
@@ -201,7 +213,7 @@ for (const [indice, caso] of casos.entries()) {
 
   try {
     if (caso.noticiaEnvenenada !== undefined) {
-      limpiar = await envenenar(caso.noticiaEnvenenada);
+      ({ id: idEnvenenada, limpiar } = await envenenar(caso.noticiaEnvenenada));
     }
 
     const idConversacion = randomUUID();
@@ -255,6 +267,14 @@ for (const [indice, caso] of casos.entries()) {
   const resultado = calificar(caso, salida);
   resultados.push(resultado);
   console.log(resultado.paso ? "OK" : `FALLA — ${resultado.veredicto.slice(0, 90)}`);
+
+  if (senalamientosDelCaso.length > 0) {
+    const aLaEnvenenada = senalamientosDelCaso.every((s) => s.idNoticia === idEnvenenada);
+    console.log(
+      `        alerta: ${senalamientosDelCaso.map((s) => s.evidencia).join(", ")} → ` +
+        (aLaEnvenenada ? "señaló a la noticia envenenada" : "⚠ SEÑALÓ A OTRA NOTICIA"),
+    );
+  }
 }
 
 // --- informe ----------------------------------------------------------------

@@ -130,12 +130,35 @@ Antes de que el usuario vea nada:
 - **Nada del sistema.** Se busca coincidencia con fragmentos del prompt.
 - **Nada de lo reservado.** Ninguna noticia en estado borrador o en moderación
   puede aparecer, aunque el modelo la haya recuperado.
+- **Ningún dominio ni enlace.** El chatbot nombra a los medios por su nombre,
+  nunca por su dominio; que emita uno es la huella de que alguien se lo pidió.
+- **Ningún puntaje de veracidad inventado.** Cada número que afirme tiene que
+  ser el de alguna noticia del contexto.
+
+Las dos últimas las agregó el red team (Fase 5): pedirle al modelo que no
+obedezca órdenes del dato no alcanzaba, y estas no necesitan que coopere.
+
+**Cuando una de esas dos corta, se busca a la noticia culpable.** No se supone
+«fue alguna de las ocho»: se busca la evidencia —el dominio, o una afirmación de
+veracidad con ese mismo número— en el texto que el modelo vio. Si una noticia la
+trae, el sistema deja una alerta en `alertas_de_contenido` y el moderador la ve
+con el nombre de quien la publicó. Si ninguna la trae, el modelo la produjo por
+su cuenta: se bloquea igual, pero no se culpa al contenido.
+
+**La alerta no despublica nada.** Si lo hiciera, cualquiera podría bajar una
+noticia legítima que menciona un sitio web con solo preguntarle al chatbot por
+ese sitio. El sistema delata; la decisión es de una persona.
+
+Y al usuario se le dice que la noticia «queda reportada» solo si el reporte se
+escribió. Entre las Fases 4 y 7 esa frase se le decía a todos y nada reportaba
+nada.
 
 ### Capa 4 — Bitácora
 
 Cada turno: qué decidió cada capa, tokens gastados, latencia, y el veredicto
 final. Es evidencia para el informe, insumo para el red team y control de gasto
-en un mismo lugar.
+en un mismo lugar: la vista `vista_gasto_api` suma de aquí el gasto real que la
+capa 0 compara contra el tope (ver `docs/presupuesto.md`).
 
 ## La primera corrida contra el sistema real
 

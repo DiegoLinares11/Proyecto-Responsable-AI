@@ -17,6 +17,8 @@ export {
   type CategoriaDeIntencion,
   type ContarMensajesDeHoy,
   type ConsultarGastoAcumulado,
+  type ReportarContenidoSospechoso,
+  type SenalamientoDeContenido,
   type CostoDelTurno,
   type GuardarTurno,
   type NivelDeConfianza,
@@ -43,6 +45,8 @@ export {
   revisarSalida,
   huellasDelSistema,
   RESPUESTA_BLOQUEADA_POR_GUARDIA,
+  RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO,
+  RESPUESTA_BLOQUEADA_POR_CONTENIDO_SIN_REPORTE,
   type EntradaCapa3,
 } from "./capa3-guardia.ts";
 

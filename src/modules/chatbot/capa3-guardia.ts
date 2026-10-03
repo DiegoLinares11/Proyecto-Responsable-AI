@@ -18,6 +18,7 @@
 import {
   type NoticiaParaElModelo,
   type RespuestaDelModelo,
+  type SenalamientoDeContenido,
   type VerificarNoticias,
   type VeredictoCapa3,
 } from "./tipos.ts";
@@ -80,6 +81,66 @@ const DOMINIOS =
  * legítimas cuando el chatbot explica cómo funciona el puntaje.
  */
 const VERACIDAD_AFIRMADA = /veracidad[^.\n\d]{0,25}(\d{1,3})(?!\s*(?:a|hasta)\s*100)/gi;
+
+/** El texto de una noticia tal como lo vio el modelo: titular y resumen. */
+const textoVisto = (n: NoticiaParaElModelo): string => normalizar(`${n.titulo} ${n.resumen}`);
+
+/** El nombre de host de un dominio o de una URL, sin `www.`. */
+function anfitrion(dominioOUrl: string): string {
+  const crudo = dominioOUrl.toLowerCase();
+  if (/^https?:\/\//.test(crudo)) {
+    try {
+      return new URL(crudo).hostname.replace(/^www\./, "");
+    } catch {
+      return crudo;
+    }
+  }
+  return crudo.replace(/^www\./, "");
+}
+
+/**
+ * A qué noticia del contexto pertenece cada evidencia.
+ *
+ * No se supone «fue alguna de las ocho»: se busca la evidencia en el texto que
+ * el modelo vio. Señalar de más no es inocuo —la alerta le llega a un moderador
+ * con el nombre de quien publicó—, así que si ninguna noticia trae la evidencia,
+ * no se señala a nadie: el modelo la produjo por su cuenta o se la pidió el
+ * usuario, y eso ya lo bloquea la capa igual.
+ */
+function atribuir(
+  noticias: readonly NoticiaParaElModelo[],
+  dominios: readonly string[],
+  puntajesInventados: readonly number[],
+): SenalamientoDeContenido[] {
+  const hallados = new Map<string, SenalamientoDeContenido>();
+  const anotar = (s: SenalamientoDeContenido) =>
+    hallados.set(`${s.idNoticia}|${s.comprobacion}|${s.evidencia}`, s);
+
+  for (const dominio of dominios) {
+    const host = anfitrion(dominio);
+    for (const noticia of noticias) {
+      if (textoVisto(noticia).includes(host)) {
+        anotar({ idNoticia: noticia.id, comprobacion: "sin_dominios_ajenos", evidencia: host });
+      }
+    }
+  }
+
+  // Para el puntaje no alcanza con que la noticia contenga el número —«300
+  // pasajeros» no es una orden—: tiene que traer ella misma una afirmación de
+  // veracidad con ESE número. Es la forma que toma la orden de falsificar el sello.
+  for (const puntaje of puntajesInventados) {
+    for (const noticia of noticias) {
+      const dicta = [...textoVisto(noticia).matchAll(VERACIDAD_AFIRMADA)].some(
+        (m) => Number(m[1]) === puntaje,
+      );
+      if (dicta) {
+        anotar({ idNoticia: noticia.id, comprobacion: "veracidad_no_inventada", evidencia: `veracidad ${puntaje}` });
+      }
+    }
+  }
+
+  return [...hallados.values()];
+}
 
 export type EntradaCapa3 = {
   respuesta: RespuestaDelModelo;
@@ -215,18 +276,17 @@ export async function revisarSalida(
 
   const falladas = comprobaciones.filter((c) => !c.paso);
 
-  // Las dos comprobaciones que delatan una inyección en el contenido. Si alguna
-  // de ellas corta, el usuario merece saber POR QUÉ se quedó sin respuesta: no
-  // fue que el sistema no entendió, fue que una noticia traía contenido que
-  // intentaba manipular lo que se le iba a decir. Decirlo es mejor producto y
-  // además es cierto.
-  const porInyeccion = falladas.some(
-    (c) => c.nombre === "sin_dominios_ajenos" || c.nombre === "veracidad_no_inventada",
-  );
+  // Las dos comprobaciones que delatan una inyección en el contenido. Si
+  // cortan Y la evidencia aparece en alguna noticia, el usuario merece saber
+  // por qué se quedó sin respuesta —no fue que el sistema no entendió, fue que
+  // una noticia intentaba manipular lo que se le iba a decir— y esa noticia va
+  // a un moderador. Si la evidencia no está en ninguna, decirlo sería mentir.
+  const sospechosas = atribuir(entrada.noticiasOfrecidas, dominios, inventados);
 
   return {
     permitido: falladas.length === 0,
-    porInyeccionEnElContenido: porInyeccion,
+    porInyeccionEnElContenido: sospechosas.length > 0,
+    sospechosas,
     motivo:
       falladas.length === 0
         ? ""
@@ -247,7 +307,18 @@ export const RESPUESTA_BLOQUEADA_POR_GUARDIA =
  * respuesta; merece saber que la causa está en una de las noticias y no en su
  * pregunta.
  */
-export const RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO =
+const CONTENIDO_SOSPECHOSO =
   "Encontré noticias sobre eso, pero una de ellas trae texto que intenta manipular lo que te " +
   "respondo —por ejemplo, dictar un puntaje de veracidad o mandarte a un sitio externo—, así que " +
-  "preferí no contestar con ella. Queda reportada para que la revise un moderador.";
+  "preferí no contestar con ella.";
+
+/**
+ * Solo cuando la alerta SE REGISTRÓ. Durante las Fases 4 a 7 esta frase se le
+ * dijo a todos los usuarios y nada reportaba nada: el chatbot afirmaba un
+ * control que no existía.
+ */
+export const RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO =
+  `${CONTENIDO_SOSPECHOSO} Queda reportada para que la revise un moderador.`;
+
+/** Si el reporte falló, se dice lo que pasó y nada más. */
+export const RESPUESTA_BLOQUEADA_POR_CONTENIDO_SIN_REPORTE = CONTENIDO_SOSPECHOSO;

@@ -17,6 +17,9 @@
 // ===========================================================================
 
 import { clienteDelServidor } from "./supabase-servidor.ts";
+import { agruparAlertas, type AlertaDeContenido, type FilaDeAlerta } from "./alertas.ts";
+
+export type { AlertaDeContenido };
 
 export type SeccionDeNoticia =
   | "general" | "guatemala" | "mundo" | "politica"
@@ -292,4 +295,36 @@ export async function leerMisBorradores(): Promise<NoticiaEnRevision[]> {
     rafagaSospechosa: f["rafaga_sospechosa"] as boolean,
     rafagaMotivo: f["rafaga_motivo"] as string | null,
   }));
+}
+
+// ---------------------------------------------------------------------------
+// Alertas de contenido
+// ---------------------------------------------------------------------------
+
+/**
+ * Las alertas pendientes, agrupadas por noticia (ver `agruparAlertas`).
+ *
+ * Va con la sesión del visitante, y la política `alertas_lectura_por_moderador`
+ * decide qué vuelve: para cualquier rol sin `noticias_moderar`, la lista llega
+ * vacía.
+ */
+export async function leerAlertasDeContenido(): Promise<AlertaDeContenido[]> {
+  const cliente = await clienteDelServidor();
+
+  const { data, error } = await cliente
+    .from("alertas_de_contenido")
+    .select(
+      "id_noticia,comprobacion,evidencia,detectada_en," +
+        // `noticias` tiene dos llaves hacia `usuarios` —el autor y quien revisó una
+        // ráfaga—, así que el embebido se nombra; sin eso PostgREST responde 300 y
+        // la pantalla de moderación entera se cae.
+        "noticias(titulo,estado,autor:usuarios!noticias_id_autor_fkey(nombre),fuentes(nombre))",
+    )
+    .is("descartada_en", null)
+    .order("detectada_en", { ascending: false })
+    .limit(500);
+
+  if (error !== null) throw new Error(`No se pudieron leer las alertas: ${error.message}`);
+
+  return agruparAlertas((data ?? []) as unknown as FilaDeAlerta[]);
 }

@@ -416,7 +416,7 @@ select pg_temp.debe_contar($q$
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'interno'
-$q$, 8, 'las 8 funciones viven en el esquema interno');
+$q$, 9, 'las 9 funciones viven en el esquema interno (la novena sella el descarte de alertas)');
 
 -- Y que el esquema interno no se pueda atravesar sin haber iniciado sesion.
 select pg_temp.debe_contar(
@@ -640,6 +640,96 @@ $q$, 'con https, credito y texto alterno SI entra');
 select pg_temp.debe_contar(
   $q$select count(*) from public.noticias where seccion = 'general' and id = 'aaaaaaaa-0000-0000-0000-000000000009'$q$,
   1, 'una noticia sin seccion queda en general: no se le inventa una');
+
+-- ===========================================================================
+-- 14. Alertas de contenido
+--
+-- Las escribe el sistema cuando una noticia intenta manipular al chatbot. Lo
+-- que se comprueba: que nadie del cliente las fabrique, que solo un moderador
+-- las vea, y que descartarlas sea una decisión con nombre, fecha y motivo que
+-- no se puede falsificar ni reescribir.
+-- ===========================================================================
+
+\echo ''
+\echo '# 14. alertas de contenido'
+
+reset role;
+
+insert into public.alertas_de_contenido (id, id_noticia, comprobacion, evidencia)
+overriding system value
+values (900001, 'aaaaaaaa-0000-0000-0000-000000000001', 'sin_dominios_ajenos', 'ejemplo-malicioso.com');
+
+-- Un lector.
+select pg_temp.entrar_como('11111111-1111-1111-1111-111111111111');
+set role authenticated;
+
+select pg_temp.debe_contar('select count(*) from public.alertas_de_contenido',
+  0, 'un lector NO ve las alertas');
+
+select pg_temp.debe_fallar($q$
+  insert into public.alertas_de_contenido (id_noticia, comprobacion, evidencia)
+  values ('aaaaaaaa-0000-0000-0000-000000000001', 'sin_dominios_ajenos', 'inventada.com')
+$q$, 'nadie del cliente fabrica una alerta');
+
+select pg_temp.debe_no_afectar_filas($q$
+  update public.alertas_de_contenido
+     set descartada_por = '11111111-1111-1111-1111-111111111111',
+         motivo_descarte = 'Un lector intentando tapar la alerta'
+$q$, 'un lector NO puede descartar una alerta');
+
+reset role;
+
+-- Un moderador.
+select pg_temp.entrar_como('33333333-3333-3333-3333-333333333333');
+set role authenticated;
+
+select pg_temp.debe_contar('select count(*) from public.alertas_de_contenido',
+  1, 'un moderador SI ve la alerta');
+
+select pg_temp.debe_fallar($q$
+  update public.alertas_de_contenido
+     set descartada_por = '22222222-2222-2222-2222-222222222222',
+         motivo_descarte = 'Descartada a nombre de otra persona'
+   where id = 900001
+$q$, 'un moderador NO puede descartar a nombre de otro');
+
+select pg_temp.debe_fallar($q$
+  update public.alertas_de_contenido
+     set descartada_en = now() - interval '30 days'
+   where id = 900001
+$q$, 'nadie del cliente escribe la fecha del descarte');
+
+select pg_temp.debe_fallar($q$
+  update public.alertas_de_contenido
+     set evidencia = 'otra-cosa.com'
+   where id = 900001
+$q$, 'nadie del cliente reescribe la evidencia');
+
+select pg_temp.debe_pasar($q$
+  update public.alertas_de_contenido
+     set descartada_por = '33333333-3333-3333-3333-333333333333',
+         motivo_descarte = 'La noticia cita el sitio oficial del ministerio; no es una orden'
+   where id = 900001
+$q$, 'un moderador SI descarta, a su nombre y con motivo');
+
+select pg_temp.debe_contar($q$
+  select count(*) from public.alertas_de_contenido
+  where id = 900001 and descartada_en is not null
+$q$, 1, 'la fecha del descarte la puso el motor');
+
+select pg_temp.debe_no_afectar_filas($q$
+  update public.alertas_de_contenido
+     set motivo_descarte = 'Cambio el motivo despues de la decision'
+   where id = 900001
+$q$, 'un descarte ya hecho NO se reescribe');
+
+reset role;
+set role anon;
+
+select pg_temp.debe_fallar('select count(*) from public.alertas_de_contenido',
+  'un visitante sin cuenta no llega a las alertas');
+
+reset role;
 
 \echo ''
 \echo '=== todas las pruebas pasaron ==='

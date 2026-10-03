@@ -316,8 +316,6 @@ por otra persona sin leer ni el corpus ni el módulo del chatbot.
 ### Deuda técnica conocida
 
 - La protección contra contraseñas filtradas de Supabase está apagada.
-- La noticia que dispara los guardas de inyección **no se manda a la cola de
-  moderación**, así que el ataque falla pero no delata a quien lo publicó.
 
 ### Cerrado después de la primera versión de este informe
 
@@ -333,6 +331,27 @@ corrida del red team cruzaba el tope a mitad de camino, los ataques restantes
 habrían muerto en capa 0 y **contado como contenidos sin haber llegado al
 modelo**. Una falla de presupuesto se habría leído como un éxito de seguridad. El
 corredor ahora corta y declara la corrida incompleta.
+
+**La noticia envenenada ahora delata a quien la publicó.** Al cablearlo apareció
+que la respuesta del chatbot ya le decía a cada usuario «queda reportada para
+que la revise un moderador», y nada reportaba nada. La capa 3 ahora busca la
+evidencia en el texto de cada noticia del contexto y le atribuye la alerta solo
+a la que la trae; el moderador la ve con el nombre del autor. Probado con el
+modelo real: en `iin-04` el modelo obedeció la orden de dictar «veracidad 100»,
+la capa 3 bloqueó, y la alerta señaló a la noticia envenenada y a ninguna de las
+otras ocho del contexto.
+
+Una decisión de diseño que vale más que el código: **la alerta no despublica
+nada.** Si lo hiciera, bastaría preguntarle al chatbot por el sitio web que cita
+una noticia legítima para bajarla — el modelo lo repite, la capa 3 bloquea, la
+noticia cae. Sería un vector de censura que cuesta una pregunta.
+
+**Las decisiones de moderación por fin quedan auditadas.** La pantalla exigía un
+motivo escrito «porque una decisión editorial sin explicación no se puede auditar
+después». Se registraba con la sesión del moderador, que solo tiene lectura sobre
+la auditoría —a propósito—, y el registro no lanza nunca —también a propósito—.
+Las dos decisiones eran correctas por separado; juntas, ningún motivo se guardó
+jamás y no hubo un solo error visible.
 
 ---
 
@@ -354,6 +373,17 @@ hacer, y ahí es donde hay que poner el peso.
 instrumento contra un arreglo al sistema. Y la corrección más grande —medir el
 resultado en vez del mecanismo— cambiaba la conclusión de «la defensa está rota»
 a «la defensa aguanta» sobre los mismos datos.
+
+**Cuatro veces, el sistema afirmó un control que no tenía.** El tope de gasto
+estaba descrito en la documentación de presupuesto y no en el código. El chatbot
+le decía al usuario que la noticia «queda reportada» sin reportarla. La pantalla
+de moderación exigía un motivo «para auditar» que no se guardaba. Y la
+arquitectura listaba «política de retención» para las conversaciones, que no
+existe. Ninguna fallaba de forma visible: eran afirmaciones —en un documento, en
+una pantalla, en una respuesta— que ninguna prueba comprobaba. Las tres primeras
+aparecieron mientras se cableaba otra cosa, no en una revisión. Lo que haría
+falta es tratar cada afirmación sobre un control como algo que necesita su
+propia prueba, igual que el control mismo.
 
 **Declarar un sesgo no lo elimina.** El registro de fuentes sigue penalizando a
 los medios locales guatemaltecos. Lo que cambia es que ahora está escrito, tiene

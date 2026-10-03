@@ -147,6 +147,20 @@ export async function crearPuertosDelChatbot(
       return Number((data as { gasto_usd: number | string }).gasto_usd);
     },
 
+    // La alerta la escribe el sistema, no quien preguntó. El usuario no hizo
+    // nada, y para juzgar la noticia no hace falta saber quién preguntó: ni su
+    // id ni el de su conversación van en la fila.
+    reportarContenidoSospechoso: async (senalamientos) => {
+      const { error } = await cliente.from("alertas_de_contenido").insert(
+        senalamientos.map((s) => ({
+          id_noticia: s.idNoticia,
+          comprobacion: s.comprobacion,
+          evidencia: s.evidencia.slice(0, 300),
+        })),
+      );
+      if (error !== null) throw new Error(`No se pudo registrar la alerta: ${error.message}`);
+    },
+
     capa0: {
       topeDiarioPorUsuario: opciones.topeDiarioPorUsuario,
       topeGastoUsd: opciones.topeGastoUsd,

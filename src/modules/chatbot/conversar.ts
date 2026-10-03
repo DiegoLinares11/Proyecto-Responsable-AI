@@ -24,6 +24,7 @@ import {
   type CategoriaDeIntencion,
   type ContarMensajesDeHoy,
   type ConsultarGastoAcumulado,
+  type ReportarContenidoSospechoso,
   type GuardarTurno,
   type NivelDeConfianza,
   type RecuperarNoticias,
@@ -35,6 +36,7 @@ import { filtrarEntrada, type OpcionesCapa0 } from "./capa0-filtro.ts";
 import {
   revisarSalida,
   RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO,
+  RESPUESTA_BLOQUEADA_POR_CONTENIDO_SIN_REPORTE,
   RESPUESTA_BLOQUEADA_POR_GUARDIA,
 } from "./capa3-guardia.ts";
 import { PROMPT_DEL_SISTEMA } from "./prompt.ts";
@@ -57,6 +59,8 @@ export type DependenciasDelChatbot = {
    * es exactamente como estuvo el tope desde la Fase 4 hasta que se cableó.
    */
   gastoAcumuladoUsd: ConsultarGastoAcumulado;
+  /** Obligatorio por la misma razón: sin él, la noticia envenenada no delata a nadie. */
+  reportarContenidoSospechoso: ReportarContenidoSospechoso;
   capa0?: OpcionesCapa0;
   noticiasEnContexto?: number;
 };
@@ -204,10 +208,25 @@ export async function conversar(
   );
 
   if (!capa3.permitido) {
+    // Al usuario se le dice que la noticia quedó reportada solo si de verdad
+    // quedó. Y si el reporte falla, el turno sigue: igual que la bitácora, la
+    // alerta no puede ser un punto único de falla de la respuesta.
+    let reportada = false;
+    if (capa3.sospechosas.length > 0) {
+      try {
+        await deps.reportarContenidoSospechoso(capa3.sospechosas);
+        reportada = true;
+      } catch (error) {
+        console.error("No se pudo reportar el contenido sospechoso:", error);
+      }
+    }
+
     return terminar({
-      respuesta: capa3.porInyeccionEnElContenido
-        ? RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO
-        : RESPUESTA_BLOQUEADA_POR_GUARDIA,
+      respuesta: !capa3.porInyeccionEnElContenido
+        ? RESPUESTA_BLOQUEADA_POR_GUARDIA
+        : reportada
+          ? RESPUESTA_BLOQUEADA_POR_CONTENIDO_SOSPECHOSO
+          : RESPUESTA_BLOQUEADA_POR_CONTENIDO_SIN_REPORTE,
       bloqueado: true,
       capaQueCorto: "capa3",
       motivoBloqueo: capa3.motivo,
