@@ -141,9 +141,20 @@ const consultarConAgentSdk: ConsultarConSdk = async (instrucciones, mensaje) => 
   return { texto, costoUsd, tokensEntrada, tokensSalida, latenciaMs: Date.now() - inicio };
 };
 
+/**
+ * La marca con la que este proveedor registra sus turnos.
+ *
+ * No es un nombre de modelo: es la señal de que el costo es ESTIMADO. La vista
+ * `vista_gasto_api` excluye exactamente esta cadena para que el tope de gasto
+ * cuente solo dinero que de verdad se pagó. Cambiarla acá sin cambiar la
+ * migración haría que el desarrollo local consumiera el presupuesto del
+ * despliegue; por eso hay una prueba que la fija.
+ */
+export const MODELO_DE_SUSCRIPCION = "suscripcion";
+
 function medir(resultado: ResultadoDeConsulta): CostoDelTurno {
   return {
-    modelo: "suscripcion",
+    modelo: MODELO_DE_SUSCRIPCION,
     tokensEntrada: resultado.tokensEntrada,
     tokensSalida: resultado.tokensSalida,
     tokensCache: 0,

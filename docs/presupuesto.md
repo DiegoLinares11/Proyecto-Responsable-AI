@@ -66,8 +66,38 @@ con datos: primero se mide la calidad con Sonnet 5 y solo se sube si hace falta.
 por $0.0004, no en Sonnet por $0.011. En una corrida de red team con 100
 ataques, la diferencia es real.
 
-**Límite por usuario y global.** Tope de mensajes por usuario y por día, y un
-tope de gasto acumulado que apaga el chatbot antes que vaciar la cuenta.
+**Límite por usuario y global.** Tope de mensajes por usuario y por día
+(`TOPE_MENSAJES_POR_USUARIO_DIA`), y un tope de gasto acumulado
+(`TOPE_GASTO_USD_ACUMULADO`, $18 por omisión) que apaga el chatbot antes que
+vaciar la cuenta.
+
+> **Este párrafo fue falso a medias durante tres semanas.** Lo dice desde el 10
+> de septiembre; el cupo por usuario existía, pero el tope global era una
+> variable de entorno que ningún código leía. Se cableó el 3 de octubre. Un
+> control descrito en la documentación y ausente del código es peor que uno que
+> no se menciona: quien lee el documento deja de preocuparse.
+
+Cómo funciona ahora:
+
+- **Se compara en la capa 0, antes de cada turno.** Un turno negado por
+  presupuesto no llama a ningún modelo, ni siquiera al clasificador barato: un
+  tope que gasta para decidir que no hay presupuesto gasta justo lo que protege.
+- **Cuenta solo gasto real de API** (`vista_gasto_api`). Los costos del modo
+  suscripción son un estimado del SDK —una sola consulta del red team estima
+  $0.53, cuando por API serían centavos— y sumarlos apagaría el chatbot
+  desplegado por dinero que nunca se pagó.
+- **Falla cerrado.** Si el gasto no se puede leer, o la lectura no es un número,
+  el turno no sigue.
+- **El usuario no ve el monto.** El mensaje dice que el asistente se apagó, no
+  cuánto se gastó; ese número tampoco lo puede leer nadie en la base.
+- **El red team también lo respeta**, sumando su propio gasto al de la base. Si
+  cruza el tope a mitad de corrida, **corta sin calificar** los casos que
+  quedan: de lo contrario morirían en capa 0 y contarían como ataques contenidos
+  que nunca llegaron al modelo.
+
+Lo que no hace: no reemplaza al límite del lado de Anthropic. La garantía dura
+es que el crédito prepago no puede quedar en negativo; esto es lo que apaga el
+chatbot **antes**, con dos dólares de margen para poder medir.
 
 **Caché de verdad.** El prompt del sistema y las definiciones de herramientas
 no cambian entre llamadas. Se verifica midiendo los tokens leídos de caché: si

@@ -10,6 +10,7 @@ import { ConfiguracionInvalida, type ModoLlm, type ProveedorLlm } from "./tipos.
 import { crearProveedorApi, type OpcionesProveedorApi } from "./proveedor-api.ts";
 import {
   crearProveedorSuscripcion,
+  MODELO_DE_SUSCRIPCION,
   type OpcionesProveedorSuscripcion,
 } from "./proveedor-suscripcion.ts";
 
@@ -88,7 +89,7 @@ export function crearProveedor(opciones: OpcionesDeSeleccion = {}): ProveedorLlm
   return proveedor;
 }
 
-export { crearProveedorApi, crearProveedorSuscripcion };
+export { crearProveedorApi, crearProveedorSuscripcion, MODELO_DE_SUSCRIPCION };
 export { validarClasificacion, validarRespuesta } from "./validacion.ts";
 export {
   calcularCosto,

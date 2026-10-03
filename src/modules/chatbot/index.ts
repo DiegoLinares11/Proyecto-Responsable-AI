@@ -16,6 +16,7 @@ export {
   type CapaQueCorto,
   type CategoriaDeIntencion,
   type ContarMensajesDeHoy,
+  type ConsultarGastoAcumulado,
   type CostoDelTurno,
   type GuardarTurno,
   type NivelDeConfianza,
@@ -31,7 +32,12 @@ export {
   type VeredictoCapa3,
 } from "./tipos.ts";
 
-export { filtrarEntrada, CLAVES_DE_PATRON, type OpcionesCapa0 } from "./capa0-filtro.ts";
+export {
+  filtrarEntrada,
+  CLAVES_DE_PATRON,
+  TOPE_GASTO_USD_POR_OMISION,
+  type OpcionesCapa0,
+} from "./capa0-filtro.ts";
 
 export {
   revisarSalida,

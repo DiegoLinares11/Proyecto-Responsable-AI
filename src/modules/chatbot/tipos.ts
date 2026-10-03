@@ -154,8 +154,17 @@ export type VerificarNoticias = (ids: readonly string[]) => Promise<Set<string>>
 
 export type GuardarTurno = (turno: TurnoRegistrado) => Promise<void>;
 
-/** Cuántos mensajes lleva este usuario hoy. Para el tope de gasto. */
+/** Cuántos mensajes lleva este usuario hoy. Para el cupo diario por usuario. */
 export type ContarMensajesDeHoy = (idUsuario: string) => Promise<number>;
+
+/**
+ * Cuánto lleva gastado el proyecto en la API, en dólares. Para el tope GLOBAL:
+ * el cupo diario protege del abuso de un usuario; esto, de todos juntos.
+ *
+ * Si no se puede leer, tiene que LANZAR, no devolver cero. Un tope que deja
+ * pasar cuando no sabe cuánto se gastó es el mismo agujero que viene a cerrar.
+ */
+export type ConsultarGastoAcumulado = () => Promise<number>;
 
 // ---------------------------------------------------------------------------
 // Límites

@@ -72,6 +72,7 @@ export async function POST(peticion: Request) {
     const { idConversacion, deps } = await crearPuertosDelChatbot(cliente, proveedor, {
       idUsuario: perfil.usuario.id,
       topeDiarioPorUsuario: configuracion.topeMensajesPorUsuarioDia,
+      topeGastoUsd: configuracion.topeGastoUsd,
     });
 
     const resultado = await conversar(

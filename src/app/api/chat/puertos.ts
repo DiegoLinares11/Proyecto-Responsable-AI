@@ -70,7 +70,7 @@ function terminos(consulta: string): string {
 export async function crearPuertosDelChatbot(
   cliente: SupabaseClient,
   proveedor: ProveedorLlm,
-  opciones: { idUsuario: string; topeDiarioPorUsuario: number },
+  opciones: { idUsuario: string; topeDiarioPorUsuario: number; topeGastoUsd: number },
 ): Promise<{ idConversacion: string; deps: DependenciasDelChatbot }> {
   const idConversacion = await conversacionDelUsuario(cliente, opciones.idUsuario);
 
@@ -132,7 +132,25 @@ export async function crearPuertosDelChatbot(
       return count ?? 0;
     },
 
-    capa0: { topeDiarioPorUsuario: opciones.topeDiarioPorUsuario },
+    // Una fila con la suma, calculada en la base. Sumar del lado del cliente
+    // dejaría de contar a las 1000 filas, que es donde PostgREST corta por
+    // omisión — justo cuando el tope más importa.
+    gastoAcumuladoUsd: async () => {
+      const { data, error } = await cliente
+        .from("vista_gasto_api")
+        .select("gasto_usd")
+        .single();
+
+      if (error !== null) {
+        throw new Error(`No se pudo leer el gasto acumulado: ${error.message}`);
+      }
+      return Number((data as { gasto_usd: number | string }).gasto_usd);
+    },
+
+    capa0: {
+      topeDiarioPorUsuario: opciones.topeDiarioPorUsuario,
+      topeGastoUsd: opciones.topeGastoUsd,
+    },
     noticiasEnContexto: NOTICIAS_EN_CONTEXTO,
   };
 

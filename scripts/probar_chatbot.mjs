@@ -153,6 +153,18 @@ const guardarTurno = async (turno) => {
 
 const contarMensajesDeHoy = async () => 0;
 
+// El tope rige igual que en la aplicación: este script escribe sus turnos en la
+// base y en modo api gasta crédito de verdad. En modo suscripción no hay dinero
+// de por medio, y la vista tampoco cuenta esos turnos.
+const TOPE_GASTO_USD = Number(entorno.get("TOPE_GASTO_USD_ACUMULADO") || 18);
+const ES_API = (entorno.get("LLM_MODO") ?? "").trim().toLowerCase() === "api";
+
+const gastoAcumuladoUsd = async () => {
+  if (!ES_API) return 0;
+  const filas = await rest("vista_gasto_api?select=gasto_usd");
+  return Number(filas?.[0]?.gasto_usd ?? Number.NaN);
+};
+
 // ---------------------------------------------------------------------------
 
 const ID_USUARIO = "dddddddd-0000-0000-0000-000000000001";
@@ -189,7 +201,15 @@ const proveedor = crearProveedor({
 console.log(`modo: ${modo}   proveedor: ${proveedor.nombre}\n`);
 
 const idConversacion = await conversacionDePrueba();
-const deps = { proveedor, recuperarNoticias, verificarNoticias, guardarTurno, contarMensajesDeHoy };
+const deps = {
+  proveedor,
+  recuperarNoticias,
+  verificarNoticias,
+  guardarTurno,
+  contarMensajesDeHoy,
+  gastoAcumuladoUsd,
+  capa0: { topeGastoUsd: TOPE_GASTO_USD },
+};
 
 const mensajes = process.argv[2] !== undefined ? [process.argv[2]] : GUION;
 let gastoTotal = 0;

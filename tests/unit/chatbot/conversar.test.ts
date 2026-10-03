@@ -74,15 +74,19 @@ type GuionDelProveedor = {
 
 function proveedorFalso(guion: GuionDelProveedor = {}): ProveedorLlm & {
   vecesQueRespondio: () => number;
+  vecesQueClasifico: () => number;
 } {
   let respondio = 0;
+  let clasifico = 0;
 
   return {
     nombre: "doble-de-pruebas",
     aptoParaDespliegue: false,
     vecesQueRespondio: () => respondio,
+    vecesQueClasifico: () => clasifico,
 
     async clasificar(): Promise<Respondido<VeredictoCapa1>> {
+      clasifico++;
       return {
         valor: {
           categoria: guion.categoria ?? "consulta_noticias",
@@ -126,7 +130,7 @@ function proveedorFalso(guion: GuionDelProveedor = {}): ProveedorLlm & {
 
 function deps(
   guion: GuionDelProveedor = {},
-  extra: Partial<DependenciasDelChatbot> & { mensajesDeHoy?: number } = {},
+  extra: Partial<DependenciasDelChatbot> & { mensajesDeHoy?: number; gasto?: number } = {},
 ): DependenciasDelChatbot & { guardados: TurnoRegistrado[]; proveedor: ReturnType<typeof proveedorFalso> } {
   const guardados: TurnoRegistrado[] = [];
   const proveedor = extra.proveedor ?? proveedorFalso(guion);
@@ -143,6 +147,7 @@ function deps(
         guardados.push(turno);
       }),
     contarMensajesDeHoy: extra.contarMensajesDeHoy ?? (async () => extra.mensajesDeHoy ?? 0),
+    gastoAcumuladoUsd: extra.gastoAcumuladoUsd ?? (async () => extra.gasto ?? 0),
     guardados,
   };
 }
@@ -249,6 +254,52 @@ describe("el caso de la linked list", () => {
 });
 
 // ===========================================================================
+
+describe("el tope de gasto", () => {
+  // No basta con que el turno se niegue: tiene que negarse SIN haber gastado.
+  // Un tope que llama al clasificador para decidir que no hay presupuesto
+  // gasta justo el dinero que dice proteger.
+  test("al llegar al tope, el turno muere en capa 0 sin llamar a ningún modelo", async () => {
+    const d = deps({}, { gasto: 18 });
+    const r = await hablar("¿Qué pasó hoy con el presupuesto?", d);
+
+    assert.equal(r.bloqueado, true);
+    assert.equal(r.capaQueCorto, "capa0");
+    assert.equal(r.costo.costoUsd, 0);
+    assert.equal(d.proveedor.vecesQueClasifico(), 0);
+    assert.equal(d.proveedor.vecesQueRespondio(), 0);
+  });
+
+  test("el turno negado igual queda en la bitácora", async () => {
+    const d = deps({}, { gasto: 18 });
+    await hablar("¿Qué pasó hoy?", d);
+
+    assert.equal(d.guardados.length, 1);
+    assert.match(d.guardados[0]?.motivoBloqueo ?? "", /tope de gasto/);
+  });
+
+  // Si la base no contesta cuánto se gastó, el turno no sigue. Falla cerrado:
+  // la ruta devuelve 500 y el modelo no se llamó.
+  test("si no se puede leer el gasto, no se llama al modelo", async () => {
+    const d = deps({}, {
+      gastoAcumuladoUsd: async () => {
+        throw new Error("la base no contesta");
+      },
+    });
+
+    await assert.rejects(() => hablar("¿Qué pasó hoy?", d), /la base no contesta/);
+    assert.equal(d.proveedor.vecesQueClasifico(), 0);
+    assert.equal(d.proveedor.vecesQueRespondio(), 0);
+  });
+
+  test("por debajo del tope, la conversación sigue normal", async () => {
+    const d = deps({}, { gasto: 17.5 });
+    const r = await hablar("¿Qué pasó hoy con el presupuesto?", d);
+
+    assert.equal(r.bloqueado, false);
+    assert.equal(d.proveedor.vecesQueRespondio(), 1);
+  });
+});
 
 describe("lo que muere antes de llegar al modelo grande", () => {
   test("un mensaje enorme no gasta un token", async () => {
