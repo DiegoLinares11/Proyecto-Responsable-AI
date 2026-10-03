@@ -59,6 +59,25 @@ export async function enviarNoticia(
   // Lo desconocido cae en 'general' en vez de viajar como texto hasta la base.
   const seccion = interpretarSeccion(datos.get("seccion")) ?? "general";
 
+  // El alcance geográfico: a quién le importa la noticia. Es lo que permite
+  // que la app la ponga arriba para quien vive en esa zona (docs/requisitos.md,
+  // R-09). La regla vive en la base; acá se repite para decir qué falta.
+  const alcanceCrudo = String(datos.get("alcance") ?? "nacional");
+  const alcance = (["local", "nacional", "internacional"] as const).find((a) => a === alcanceCrudo);
+  if (alcance === undefined) return { error: "Alcance no reconocido." };
+
+  const zona = String(datos.get("zona") ?? "").trim();
+  const pais = String(datos.get("pais") ?? "").trim();
+  if (zona !== "" && !/^[A-Z]{2}(-[A-Z]{2})?$/.test(zona)) return { error: "Zona no reconocida." };
+  if (pais !== "" && !/^[A-Z]{2}$/.test(pais)) return { error: "País no reconocido." };
+
+  if (alcance === "local" && zona === "") {
+    return { error: "Una noticia local es local de algún lugar: elegí la zona." };
+  }
+  if (alcance === "nacional" && pais === "") {
+    return { error: "Una noticia nacional es de algún país: elegí el país." };
+  }
+
   // Las tres condiciones de la foto son las mismas que puso la migración. Acá se
   // repiten para poder decir cuál falta; la que manda sigue siendo la de la base.
   if (urlImagen !== "" && !urlImagen.startsWith("https://")) {
@@ -91,6 +110,9 @@ export async function enviarNoticia(
       cuerpo,
       urlOriginal: urlCruda === "" ? null : urlCruda,
       seccion,
+      alcance,
+      pais: alcance === "internacional" ? null : pais || null,
+      idUbicacion: alcance === "local" ? zona : null,
       imagen:
         urlImagen === ""
           ? null

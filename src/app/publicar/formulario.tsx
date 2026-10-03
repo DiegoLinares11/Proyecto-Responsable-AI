@@ -4,8 +4,15 @@ import { useActionState } from "react";
 
 import { enviarNoticia, type ResultadoDePublicacion } from "./acciones.ts";
 import { SECCIONES } from "../../lib/secciones.ts";
+import type { UbicacionDisponible } from "../../lib/consultas.ts";
 
-export function FormularioDePublicacion() {
+export function FormularioDePublicacion({ ubicaciones }: { ubicaciones: UbicacionDisponible[] }) {
+  const departamentos = ubicaciones.filter((u) => u.tipo === "departamento");
+  const paises = [
+    { id: "GT", nombre: "Guatemala" },
+    ...ubicaciones.filter((u) => u.tipo === "pais").map((u) => ({ id: u.pais, nombre: u.nombre })),
+  ];
+
   const [estado, accion, enviando] = useActionState<ResultadoDePublicacion, FormData>(
     enviarNoticia,
     undefined,
@@ -28,6 +35,43 @@ export function FormularioDePublicacion() {
             ))}
           </select>
         </label>
+        <fieldset className="alcance">
+          <legend>¿A quién le importa?</legend>
+          <label>
+            Alcance
+            <select name="alcance" defaultValue="nacional">
+              <option value="local">Local: de una zona</option>
+              <option value="nacional">Nacional: de un país</option>
+              <option value="internacional">Internacional</option>
+            </select>
+          </label>
+          <label>
+            Zona <span className="pista">(solo si es local)</span>
+            <select name="zona" defaultValue="">
+              <option value="">—</option>
+              {departamentos.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            País <span className="pista">(solo si es nacional)</span>
+            <select name="pais" defaultValue="GT">
+              {paises.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="pista" style={{ margin: 0 }}>
+            Esto decide dónde aparece en la app: una noticia local va arriba para quien eligió esa
+            zona, y nunca desaparece para los demás. Lo declara quien publica; ningún modelo lo
+            adivina.
+          </p>
+        </fieldset>
         <label>
           Resumen
           <textarea name="resumen" required minLength={20} maxLength={1000} rows={3} />
