@@ -33,8 +33,10 @@ Estados: ✅ cumple · 🟡 parcial · ❌ falta.
 `app-movil/`: Expo SDK 57 con pestañas nativas. Chat (inicial), Portada,
 lectura de noticia con su ficha de validación, y Perfil. Lee las noticias
 reales por Supabase y conversa por el servidor del portal. `expo-doctor` pasa
-sus 21 comprobaciones. **Falta: probarla en un iPhone y un Android de verdad**, y
-el selector de ubicación (R-03).
+sus 21 comprobaciones. Para Android hay además un perfil de compilación que da
+un APK instalable desde un link, gratis (`app-movil/eas.json`); en iPhone eso
+exige la cuenta paga de Apple, así que ahí se usa Expo Go. **Falta: probarla en
+un iPhone y un Android de verdad.**
 
 **Criterios de aceptación**
 - Abre en Expo Go en iPhone y en Android escaneando un QR; nadie necesita una
@@ -66,7 +68,11 @@ Lista cerrada de 27 ubicaciones (`ubicaciones`), elegida desde la portada o el
 perfil de la app. Con sesión vive en `preferencias_usuario`, que solo su dueño
 lee —ni un moderador—; sin sesión, en el teléfono. Probado en la app: la misma
 portada en la capital y en Quetzaltenango sale distinta. 13 aserciones en la
-suite de RLS. **Falta probarlo en dos teléfonos a la vez.**
+suite de RLS. El GPS es opcional y solo sugiere: el botón «Usar mi ubicación
+real» elige la cabecera departamental más cercana, calculada en el teléfono
+contra una tabla fija, sin geocodificación del sistema —que le manda las
+coordenadas a Apple o a Google— y sin guardar las coordenadas. Fuera de
+Guatemala no sugiere nada. **Falta probarlo en dos teléfonos a la vez.**
 
 **Criterios de aceptación**
 - El usuario elige una ubicación de una lista (departamentos de Guatemala y
