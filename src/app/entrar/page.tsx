@@ -1,10 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useActionState } from "react";
 
-import { entrar, registrarse, type ResultadoDeEntrada } from "./acciones.ts";
+import { entrar, entrarConGoogle, registrarse, type ResultadoDeEntrada } from "./acciones.ts";
 
+// `useSearchParams` necesita un límite de Suspense: sin él, `next build` no puede
+// pre-renderizar la página.
 export default function Entrar() {
+  return (
+    <Suspense>
+      <FormulariosDeEntrada />
+    </Suspense>
+  );
+}
+
+function FormulariosDeEntrada() {
+  const errorDeGoogle = useSearchParams().get("error") === "google";
   const [estadoEntrada, accionEntrar, entrando] = useActionState<ResultadoDeEntrada, FormData>(
     entrar,
     undefined,
@@ -20,6 +32,26 @@ export default function Entrar() {
       <p style={{ color: "var(--tinta-suave)", fontSize: "0.875rem" }}>
         Para leer el feed no hace falta cuenta. La necesitás para comentar, reaccionar, publicar o
         moderar.
+      </p>
+
+      {/* La misma cuenta que en la app del teléfono. */}
+      <form action={entrarConGoogle} className="formulario">
+        <button type="submit" className="boton-google">
+          <span aria-hidden="true" style={{ color: "#4285F4", fontWeight: 800 }}>
+            G
+          </span>{" "}
+          Entrar con Google
+        </button>
+        {errorDeGoogle ? (
+          <p className="error">
+            No se pudo entrar con Google. Si el problema sigue, revisá que esta dirección esté en
+            las Redirect URLs del proyecto de Supabase.
+          </p>
+        ) : null}
+      </form>
+
+      <p style={{ color: "var(--tinta-tenue)", fontSize: "0.8125rem", margin: "1.5rem 0 0" }}>
+        O con correo y contraseña:
       </p>
 
       <form action={accionEntrar} className="formulario">

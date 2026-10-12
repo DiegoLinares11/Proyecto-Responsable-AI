@@ -475,3 +475,10 @@ figure.ilustracion.muestra, .ilustracion.muestra { max-width: 22rem; margin: 0; 
 .fotos-libres .licencia { color: var(--tinta-tenue); font-size: 0.6875rem; }
 .elegida-detalle { display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8125rem; }
 .elegida-detalle p { margin: 0; }
+
+/* Entrar con Google: con borde, no relleno, para no confundirse con el botón
+   principal del formulario. */
+.formulario button.boton-google {
+  background: var(--papel); color: var(--tinta);
+  border: 1px solid var(--tinta);
+}

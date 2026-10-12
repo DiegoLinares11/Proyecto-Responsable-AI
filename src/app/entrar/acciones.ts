@@ -14,6 +14,7 @@
 // que no hay por qué regalar.
 // ===========================================================================
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { clienteDelServidor } from "../../lib/supabase-servidor.ts";
@@ -83,6 +84,28 @@ export async function registrarse(
   }
 
   redirect("/");
+}
+
+/**
+ * Entrar con Google, la misma cuenta que en la app (R-02, R-09).
+ *
+ * Supabase hace de intermediario: Google le contesta a Supabase, y Supabase
+ * vuelve acá a /auth/callback con un código de un solo uso. El verificador de
+ * ese código (PKCE) queda en una cookie del servidor, así que el código solo
+ * sirve en este navegador. La dirección de vuelta tiene que estar en la lista
+ * de Redirect URLs del proyecto: Supabase rechaza cualquier otra.
+ */
+export async function entrarConGoogle(): Promise<void> {
+  const origen = process.env["NEXT_PUBLIC_SITE_URL"] ?? (await headers()).get("origin") ?? "http://localhost:3000";
+
+  const cliente = await clienteDelServidor();
+  const { data, error } = await cliente.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${origen}/auth/callback` },
+  });
+
+  if (error !== null || !data.url) redirect("/entrar?error=google");
+  redirect(data.url);
 }
 
 export async function salir(): Promise<void> {
