@@ -419,6 +419,8 @@ export type Database = {
           texto_alterno_imagen: string | null
           titulo: string
           url_imagen: string | null
+          origen_imagen: Database["public"]["Enums"]["origen_imagen"] | null
+          url_fuente_imagen: string | null
           url_original: string | null
         }
         Insert: {
@@ -451,6 +453,8 @@ export type Database = {
           texto_alterno_imagen?: string | null
           titulo: string
           url_imagen?: string | null
+          origen_imagen?: Database["public"]["Enums"]["origen_imagen"] | null
+          url_fuente_imagen?: string | null
           url_original?: string | null
         }
         Update: {
@@ -483,6 +487,8 @@ export type Database = {
           texto_alterno_imagen?: string | null
           titulo?: string
           url_imagen?: string | null
+          origen_imagen?: Database["public"]["Enums"]["origen_imagen"] | null
+          url_fuente_imagen?: string | null
           url_original?: string | null
         }
         Relationships: [
@@ -819,6 +825,7 @@ export type Database = {
     Enums: {
       accion_restringible: "comentar" | "reaccionar"
       alcance_geografico: "local" | "nacional" | "internacional"
+      origen_imagen: "medio" | "licencia_libre" | "ilustracion" | "generada_ia"
       estado_noticia:
         | "borrador"
         | "en_revision"
@@ -977,6 +984,7 @@ export const Constants = {
     Enums: {
       accion_restringible: ["comentar", "reaccionar"],
       alcance_geografico: ["local", "nacional", "internacional"],
+      origen_imagen: ["medio", "licencia_libre", "ilustracion", "generada_ia"],
       estado_noticia: [
         "borrador",
         "en_revision",

@@ -14,6 +14,7 @@
 
 import { notFound } from "next/navigation";
 
+import { ImagenDeNoticia } from "../../imagen-de-noticia.tsx";
 import { leerNoticia, type SenalDeValidacion } from "../../../lib/consultas.ts";
 import { NOMBRE_DE_SECCION } from "../../../lib/secciones.ts";
 
@@ -61,7 +62,11 @@ export default async function Noticia({ params }: { params: Promise<{ id: string
 
   // El cuerpo se parte en párrafos. Un muro de texto corrido es ilegible, y
   // `pre-wrap` sobre una sola cadena era exactamente eso.
-  const parrafos = noticia.cuerpo.split(/\n{2,}/).filter((p) => p.trim() !== "");
+  // Muchos cuerpos empiezan repitiendo el resumen, que ya va arriba como
+  // entradilla: no se muestra dos veces.
+  const parrafos = noticia.cuerpo
+    .split(/\n{2,}/)
+    .filter((p) => p.trim() !== "" && p.trim() !== noticia.resumen.trim());
 
   return (
     <div className="lectura">
@@ -86,17 +91,7 @@ export default async function Noticia({ params }: { params: Promise<{ id: string
           )}
         </div>
 
-        {noticia.imagen === null ? null : (
-          <figure className="foto">
-            <img
-              src={noticia.imagen.url}
-              alt={noticia.imagen.alterno}
-              decoding="async"
-              referrerPolicy="no-referrer"
-            />
-            <figcaption>{noticia.imagen.credito}</figcaption>
-          </figure>
-        )}
+        <ImagenDeNoticia noticia={noticia} carga="eager" />
 
         <div className="cuerpo">
           {parrafos.map((parrafo, i) => (

@@ -9,7 +9,18 @@
 import type { Alcance, NoticiaPersonalizable } from './personalizacion';
 import { supabase } from './supabase';
 
-export type Imagen = { url: string; credito: string; alterno: string };
+/** De dónde sale una imagen (R-10). La app lo muestra siempre. */
+export type OrigenDeImagen = 'medio' | 'licencia_libre' | 'generada_ia';
+
+export type Imagen = {
+  url: string;
+  credito: string;
+  alterno: string;
+  /** Nulo solo en filas anteriores a la columna. */
+  origen: OrigenDeImagen | null;
+  /** La página con la licencia (Commons) o la nota del medio. */
+  urlFuente: string | null;
+};
 
 export type NoticiaDelFeed = NoticiaPersonalizable & {
   id: string;
@@ -39,7 +50,7 @@ export type NoticiaCompleta = NoticiaDelFeed & {
 };
 
 const CAMPOS =
-  'id,titulo,resumen,publicada_en,seccion,url_imagen,credito_imagen,texto_alterno_imagen,' +
+  'id,titulo,resumen,publicada_en,seccion,url_imagen,credito_imagen,texto_alterno_imagen,origen_imagen,url_fuente_imagen,' +
   'puntaje_veracidad,relevancia,alcance,pais,id_ubicacion,fuentes(nombre),ubicaciones(nombre)';
 
 type Fila = {
@@ -51,6 +62,8 @@ type Fila = {
   url_imagen: string | null;
   credito_imagen: string | null;
   texto_alterno_imagen: string | null;
+  origen_imagen: OrigenDeImagen | 'ilustracion' | null;
+  url_fuente_imagen: string | null;
   puntaje_veracidad: number | null;
   relevancia: number | string;
   alcance: Alcance;
@@ -71,7 +84,13 @@ function aNoticia(f: Fila): NoticiaDelFeed {
     // así para que la app no pueda pintar una foto sin ellos.
     imagen:
       f.url_imagen && f.credito_imagen && f.texto_alterno_imagen
-        ? { url: f.url_imagen, credito: f.credito_imagen, alterno: f.texto_alterno_imagen }
+        ? {
+            url: f.url_imagen,
+            credito: f.credito_imagen,
+            alterno: f.texto_alterno_imagen,
+            origen: f.origen_imagen === 'ilustracion' ? null : f.origen_imagen,
+            urlFuente: f.url_fuente_imagen,
+          }
         : null,
     fuente: f.fuentes?.nombre ?? null,
     puntajeVeracidad: f.puntaje_veracidad,

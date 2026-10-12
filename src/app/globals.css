@@ -162,6 +162,45 @@ figure.foto figcaption {
   font-size: 0.6875rem; color: var(--tinta-tenue);
   text-transform: uppercase; letter-spacing: 0.04em;
 }
+figure.foto figcaption a { color: inherit; }
+
+/* De dónde sale la imagen (R-10). Lo que no es foto del medio va en naranja:
+   una foto de archivo o una de IA no pueden pasar por foto del hecho. */
+figure.foto figcaption .origen { font-weight: 700; color: var(--tinta-suave); }
+figure.foto figcaption .origen.aviso { color: var(--alerta); }
+figure.foto.con-aviso { position: relative; }
+figure.foto .sobre-imagen {
+  position: absolute; left: 0.6rem; top: 0.6rem; right: 0.6rem;
+  padding: 0.35rem 0.55rem; border-radius: 4px;
+  background: rgba(18, 22, 28, 0.88); color: #fff;
+  font-size: 0.75rem; font-weight: 600; line-height: 1.3;
+}
+
+/* La ilustración tipográfica de una nota sin foto: la sección y el titular
+   sobre tinta. No hay archivo; se compone acá. */
+figure.ilustracion {
+  margin: 0 0 0.85rem;
+  aspect-ratio: 16 / 9;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 0.6rem;
+  padding: 1.1rem 1.25rem;
+  background: #12161c; color: #fff;
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+figure.ilustracion .rotulo { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.16em; color: #7db9ea; }
+figure.ilustracion .titular {
+  font-family: var(--titulares); font-style: italic;
+  font-size: clamp(1.05rem, 0.8rem + 1vw, 1.6rem); line-height: 1.15;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+figure.ilustracion .etiqueta {
+  align-self: flex-start;
+  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.08em; color: #c9d1da;
+  border: 1px solid #4a5260; border-radius: 3px; padding: 0.15rem 0.45rem;
+}
+@media (prefers-color-scheme: dark) {
+  figure.ilustracion { background: #1b2530; border: 1px solid #2e3a48; }
+}
 
 /* La nota principal. Una portada sin jerarquía es una lista. */
 .nota.principal { padding-bottom: 1.5rem; border-bottom: 1px solid var(--borde); }
@@ -177,8 +216,10 @@ figure.foto figcaption {
     gap: 1.6rem;
     align-items: start;
   }
-  .nota.principal figure.foto { margin-bottom: 0; }
-  .nota.principal figure.foto img { aspect-ratio: 3 / 2; }
+  .nota.principal figure.foto,
+  .nota.principal figure.ilustracion { margin-bottom: 0; }
+  .nota.principal figure.foto img,
+  .nota.principal figure.ilustracion { aspect-ratio: 3 / 2; }
 }
 
 /* Las destacadas, en rejilla, como las tarjetas de cualquier portada. */
@@ -392,3 +433,45 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 .fila-cola .evidencias { margin: 0.6rem 0 0; padding-left: 1.1rem; font-size: 0.8125rem; color: var(--tinta-suave); }
 .fila-cola .evidencias li { margin-bottom: 0.2rem; }
 .fila-cola .evidencias code { color: var(--peligro); font-size: 0.78rem; }
+
+/* --- La imagen al publicar (R-10) ------------------------------------------ */
+.formulario fieldset.imagen {
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  padding: 0.9rem; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;
+}
+.formulario fieldset.imagen legend { font-size: 0.8125rem; font-weight: 600; color: var(--tinta); padding: 0 0.3rem; }
+.opciones-imagen { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+.formulario .opciones-imagen label.opcion {
+  flex-direction: row; align-items: flex-start; gap: 0.55rem;
+  border: 1px solid var(--borde); border-radius: var(--radio); padding: 0.6rem 0.7rem;
+  color: var(--tinta); cursor: pointer;
+}
+.formulario .opciones-imagen label.opcion.elegida { border-color: var(--tinta); background: var(--papel-hundido); }
+.formulario .opciones-imagen label.opcion > span { display: flex; flex-direction: column; gap: 0.2rem; }
+.formulario .opciones-imagen input[type="radio"] { margin-top: 0.2rem; }
+figure.ilustracion.muestra, .ilustracion.muestra { max-width: 22rem; margin: 0; }
+.ilustracion.muestra {
+  aspect-ratio: 16 / 9; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 0.9rem 1rem; background: #12161c; color: #fff; border-radius: var(--radio);
+}
+.ilustracion.muestra .rotulo { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.16em; color: #7db9ea; }
+.ilustracion.muestra .titular { font-family: var(--titulares); font-style: italic; font-size: 1.1rem; line-height: 1.15; }
+.ilustracion.muestra .etiqueta { align-self: flex-start; font-size: 0.5625rem; letter-spacing: 0.08em; color: #c9d1da; border: 1px solid #4a5260; border-radius: 3px; padding: 0.1rem 0.4rem; }
+.buscador-imagen { display: flex; flex-direction: column; gap: 0.7rem; }
+.buscador-imagen .fila-busqueda { display: flex; gap: 0.5rem; }
+.buscador-imagen .fila-busqueda input { flex: 1; }
+.buscador-imagen .fila-busqueda button { white-space: nowrap; }
+.fotos-libres {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+}
+.formulario .fotos-libres button.foto-libre {
+  width: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 0.25rem;
+  padding: 0.35rem; text-align: left; background: var(--papel); color: var(--tinta);
+  border: 1px solid var(--borde); border-radius: var(--radio); font-size: 0.75rem; font-weight: 500;
+}
+.formulario .fotos-libres button.foto-libre.elegida { border: 2px solid var(--acento); padding: calc(0.35rem - 1px); }
+.fotos-libres img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; background: var(--papel-hundido); }
+.fotos-libres .licencia { color: var(--tinta-tenue); font-size: 0.6875rem; }
+.elegida-detalle { display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8125rem; }
+.elegida-detalle p { margin: 0; }

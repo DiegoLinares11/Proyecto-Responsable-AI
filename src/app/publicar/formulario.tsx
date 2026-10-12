@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { enviarNoticia, type ResultadoDePublicacion } from "./acciones.ts";
+import { SelectorDeImagen } from "./selector-de-imagen.tsx";
 import { SECCIONES } from "../../lib/secciones.ts";
 import type { UbicacionDisponible } from "../../lib/consultas.ts";
 
@@ -89,27 +90,7 @@ export function FormularioDePublicacion({ ubicaciones }: { ubicaciones: Ubicacio
           fuente y la comprobación de la URL son 50 de los 100 puntos, y el umbral es 75.
         </p>
 
-        <label>
-          Imagen de portada <span className="pista">(opcional, solo https)</span>
-          <input name="url_imagen" type="url" placeholder="https://..." />
-        </label>
-        <label>
-          Crédito de la imagen <span className="pista">(obligatorio si hay imagen)</span>
-          <input name="credito_imagen" maxLength={200} placeholder="Fotografía: nombre / medio" />
-        </label>
-        <label>
-          Texto alternativo <span className="pista">(obligatorio si hay imagen)</span>
-          <input
-            name="texto_alterno_imagen"
-            maxLength={300}
-            placeholder="Qué se ve en la foto, para quien no puede verla"
-          />
-        </label>
-        <p style={{ fontSize: "0.78rem", color: "var(--tinta-suave)", margin: 0 }}>
-          El crédito y el texto alternativo no son opcionales cuando hay foto, y la regla vive en
-          la base de datos: publicar la imagen de alguien sin atribuirla, en una plataforma que
-          argumenta sobre la procedencia, sería contradecirse en la portada.
-        </p>
+        <SelectorDeImagen />
         <button type="submit" disabled={enviando}>
           {enviando ? "Validando… (puede tardar medio minuto)" : "Enviar a validación"}
         </button>

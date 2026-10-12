@@ -172,11 +172,33 @@ Existen `/publicar` y `/moderacion`, con Supabase Auth.
 
 ### R-10 · Imagen para una noticia sin imagen — 🟡
 
-La app ya muestra, para una nota sin foto, la ilustración tipográfica: la
-sección y el titular en la letra del medio, sobre tinta, y en la grande la
-etiqueta «Ilustración · no es una fotografía» (`app-movil/src/componentes/ilustracion.tsx`).
-**Falta: el flujo en el portal (buscar en Wikimedia Commons o generar la
-ilustración) y guardar en la base el origen de cada imagen.**
+Hecho, salvo la prueba de punta a punta con sesión:
+
+- **La base guarda el origen** de cada imagen (`origen_imagen`: medio, licencia
+  libre, ilustración o generada por IA) y la página de su licencia
+  (`url_fuente_imagen`). Las reglas viven en CHECK: una foto sin origen no
+  entra, la ilustración no tiene archivo, una licencia libre sin enlace a su
+  fuente no entra. Seis aserciones en la sección 16 de la suite de RLS, que
+  además encontraron un error de la primera versión: con el origen nulo, el
+  CHECK daba NULL y dejaba pasar la foto.
+- **Al publicar, el portal ofrece tres caminos**: la ilustración tipográfica
+  (por defecto: es la única que nunca pasa por foto), una foto de archivo de
+  Wikimedia Commons, o la foto del medio. De Commons solo pasan CC0, dominio
+  público, CC BY y CC BY-SA, y el crédito («autor · licencia · Wikimedia
+  Commons») lo arma el servidor: al guardar vuelve a consultar el archivo, así
+  que el formulario dice cuál foto, pero no de quién es ni con qué licencia.
+  12 pruebas en `tests/unit/imagenes/`.
+- **La interfaz lo muestra siempre**, en el portal y en la app: «Foto del medio»,
+  «Foto de archivo · no es del hecho» (casi nunca lo es: la de «incendio
+  forestal» suele ser de otro incendio), «Generada por IA · no es una
+  fotografía» encima de la imagen, y la ilustración con su etiqueta. En las
+  miniaturas de la app, una marca «ARCHIVO» o «IA».
+- Nadie genera imágenes con IA: la categoría existe para que, si se usa, la base
+  la distinga y la interfaz la rotule.
+
+**Falta: publicar una noticia desde el formulario con una cuenta de
+publicador.** La búsqueda y la verificación contra Commons se probaron con red,
+pero no dentro del formulario con sesión.
 
 **Criterios de aceptación**
 - Si la noticia no trae imagen, el portal ofrece, dentro del mismo flujo:

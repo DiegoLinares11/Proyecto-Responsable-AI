@@ -7,19 +7,29 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Tipos, useColores } from '@/constants/tema';
 
-export function SelloMarca({ tamano = 30, etiqueta }: { tamano?: number; etiqueta?: string }) {
+export function SelloMarca({
+  tamano = 30,
+  etiqueta,
+  tinta,
+}: {
+  tamano?: number;
+  etiqueta?: string;
+  /** Sobre un fondo oscuro fijo (la ilustración), el check va claro. */
+  tinta?: string;
+}) {
   const c = useColores();
+  const trazo = tinta ?? c.tinta;
   // Sin etiqueta es decoración: ni `accessible={false}`, que en la web llega
   // al DOM como un atributo inválido.
   const accesible = etiqueta === undefined ? {} : { accessible: true, accessibilityLabel: etiqueta };
   return (
     <Svg width={tamano} height={tamano} viewBox="0 0 64 64" {...accesible}>
       <Circle cx={32} cy={32} r={29} fill="none" stroke={c.marca} strokeWidth={4} />
-      <Circle cx={32} cy={32} r={22} fill="none" stroke={c.tinta} strokeWidth={1.5} />
+      <Circle cx={32} cy={32} r={22} fill="none" stroke={trazo} strokeWidth={1.5} />
       <Path
         d="M22 33 L29 40 L43 24"
         fill="none"
-        stroke={c.tinta}
+        stroke={trazo}
         strokeWidth={4.5}
         strokeLinecap="round"
         strokeLinejoin="round"
