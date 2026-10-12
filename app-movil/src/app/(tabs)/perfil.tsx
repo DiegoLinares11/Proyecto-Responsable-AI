@@ -83,7 +83,7 @@ export default function Perfil() {
           <View style={e.fila}>
             <View style={{ flex: 1 }}>
               <Text style={e.nombre}>📍 {ubicacion.nombre}</Text>
-              <Text style={e.texto}>Simulada: no se usa el GPS.</Text>
+              <Text style={e.texto}>Simulada: la elegís vos.</Text>
             </View>
             <Text style={e.cambiar}>Cambiar</Text>
           </View>
