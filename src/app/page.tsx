@@ -1,208 +1,109 @@
 // ===========================================================================
-// La portada
+// La redacción
 //
-// Lo que distingue a esta pantalla de cualquier otra portada de noticias es el
-// «¿por qué está aquí?»: cada posición trae el desglose de su relevancia con los
-// números que la sustentan. Un ordenamiento que no se puede explicar es lo que
-// este curso enseña a no construir (ADR 0003), y la forma de no construirlo es
-// mostrarlo.
+// El portal no es una segunda portada. Los lectores leen en la app —en el
+// teléfono o en la web—, que ordena para su ubicación y sus intereses y dice
+// por qué cada noticia está donde está. Dos portadas con órdenes distintos
+// confundían más de lo que mostraban.
 //
-// La jerarquía —una nota principal grande, una rejilla de destacadas, un riel de
-// titulares— no es decoración: es la lectura en diagonal que hace cualquier
-// lector de diario, y el orden lo sigue poniendo la fórmula, no un editor.
+// Acá trabaja quien publica, modera o administra: cada uno ve lo que su rol le
+// permite. Esto decide QUÉ MOSTRAR; lo que cada uno PUEDE hacer lo deciden las
+// políticas de fila.
 // ===========================================================================
 
-import { Fragment } from "react";
-
-import { ImagenDeNoticia } from "./imagen-de-noticia.tsx";
-import { leerFeed, type NoticiaDelFeed } from "../lib/consultas.ts";
-import { interpretarSeccion, NOMBRE_DE_SECCION } from "../lib/secciones.ts";
+import { URL_DE_LA_APP } from "../lib/app.ts";
+import { leerAlertasDeContenido, leerColaDeModeracion } from "../lib/consultas.ts";
+import { perfilDelVisitante } from "../lib/supabase-servidor.ts";
 
 export const dynamic = "force-dynamic";
 
-function fecha(iso: string): string {
-  return new Date(iso).toLocaleString("es-GT", {
-    day: "numeric",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function SelloDeVeracidad({ puntaje }: { puntaje: number | null }) {
-  if (puntaje === null) {
-    return <span className="sello aviso">sin evaluar</span>;
-  }
-  if (puntaje >= 75) {
-    return <span className="sello">verificada · {puntaje}/100</span>;
-  }
-  return <span className="sello aviso">veracidad {puntaje}/100</span>;
-}
-
-function PorQueEstaAqui({ noticia }: { noticia: NoticiaDelFeed }) {
-  const renglones: ReadonlyArray<readonly [string, number, string]> = [
-    [
-      "Interacciones en la plataforma",
-      noticia.componentes.interacciones,
-      "Reacciones, comentarios y lecturas, con rendimiento decreciente y ponderadas por la antigüedad de cada cuenta.",
-    ],
-    [
-      "Reacciones de cuentas verificadas",
-      noticia.componentes.verificadas,
-      "Ponderadas por la autoridad de cada cuenta: una fuente acreditada pesa más que una recién creada.",
-    ],
-    [
-      "Credibilidad de la fuente",
-      noticia.componentes.fuente,
-      noticia.credibilidadFuente === null
-        ? "Esta fuente no está en el registro, así que no aporta credibilidad."
-        : `${noticia.fuente} tiene ${noticia.credibilidadFuente} de 100 en el registro de fuentes.`,
-    ],
-    [
-      "Veracidad",
-      noticia.componentes.veracidad,
-      "Resultado del canal de validación. Entra al cuadrado, para que raspar el umbral no valga casi lo mismo que estar sólidamente corroborado.",
-    ],
-  ];
-
+function TarjetaDeTarea({
+  href,
+  titulo,
+  texto,
+  cifra,
+}: {
+  href: string;
+  titulo: string;
+  texto: string;
+  cifra?: string;
+}) {
   return (
-    <details className="porque">
-      <summary>¿Por qué está aquí? (relevancia {noticia.relevancia.toFixed(3)})</summary>
-      <table>
-        <tbody>
-          {renglones.map(([concepto, valor, explicacion]) => (
-            <Fragment key={concepto}>
-              <tr>
-                <td>{concepto}</td>
-                <td className="valor">+{valor.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td className="explica" colSpan={2}>
-                  {explicacion}
-                </td>
-              </tr>
-            </Fragment>
-          ))}
-        </tbody>
-      </table>
-      <p className="cierre">
-        El total se divide por la antigüedad, para que lo viejo con mucho acumulado no se quede
-        arriba para siempre. <a href="/como-funciona">La fórmula completa está acá.</a>
-      </p>
-    </details>
+    <a href={href} className="tarea">
+      <span className="tarea-titulo">{titulo}</span>
+      {cifra ? <span className="tarea-cifra">{cifra}</span> : null}
+      <span className="tarea-texto">{texto}</span>
+    </a>
   );
 }
 
-function Nota({ noticia, principal = false }: { noticia: NoticiaDelFeed; principal?: boolean }) {
+export default async function Redaccion() {
+  const perfil = await perfilDelVisitante();
+
+  const modera = perfil?.permisos.has("noticias_moderar") === true;
+  const publica = perfil?.permisos.has("noticias_publicar") === true;
+  const administra = perfil?.permisos.has("usuarios_administrar") === true;
+
+  // Las cifras de moderación solo para quien modera: con otra sesión, las
+  // políticas devolverían cero filas y la cifra mentiría.
+  const [cola, alertas] = modera
+    ? await Promise.all([leerColaDeModeracion(), leerAlertasDeContenido()])
+    : [[], []];
+  const alertasAbiertas = alertas.length;
+
   return (
-    <article className={principal ? "nota principal" : "nota"}>
-      <ImagenDeNoticia noticia={noticia} />
-      <div className="texto">
-        <span className="antetitulo">{NOMBRE_DE_SECCION[noticia.seccion]}</span>
-        <h2>
-          <a href={`/noticia/${noticia.id}`}>{noticia.titulo}</a>
-        </h2>
-        <p className="resumen">{noticia.resumen}</p>
-        <div className="meta">
-          <SelloDeVeracidad puntaje={noticia.puntajeVeracidad} />
-          <span className="fuente">{noticia.fuente ?? "fuente no registrada"}</span>
-          <span>{fecha(noticia.publicadaEn)}</span>
-          {noticia.rafagaSospechosa ? (
-            <span className="sello malo">tracción en revisión</span>
+    <article className="redaccion">
+      <h2>La redacción</h2>
+      <p className="entrada">
+        Acá se publica, se modera y se administra. Las noticias se leen en la app, en el teléfono o en
+        la web: ahí cada portada se ordena para la ubicación y los intereses de quien lee, y cada
+        noticia dice por qué está donde está.
+      </p>
+      <p>
+        <a className="boton-app" href={URL_DE_LA_APP}>
+          Abrir la app de noticias ↗
+        </a>
+      </p>
+
+      {perfil === null ? (
+        <p className="aviso-redaccion">
+          ¿Publicás, moderás o administrás? <a href="/entrar">Entrá</a> con tu cuenta.
+        </p>
+      ) : !publica && !modera && !administra ? (
+        <p className="aviso-redaccion">
+          Tu cuenta es <strong>{perfil.rol}</strong>: lee en la app. Para publicar o moderar, un
+          administrador te da el permiso; nadie se lo asigna solo.
+        </p>
+      ) : (
+        <div className="tareas">
+          {publica ? (
+            <TarjetaDeTarea
+              href="/publicar"
+              titulo="Publicar"
+              texto="Mandá una noticia al canal de validación: cinco señales, sin IA, antes de que llegue a la app."
+            />
+          ) : null}
+          {modera ? (
+            <TarjetaDeTarea
+              href="/moderacion"
+              titulo="Moderación"
+              cifra={`${cola.length} en revisión · ${alertasAbiertas} ${alertasAbiertas === 1 ? "alerta" : "alertas"}`}
+              texto="Las noticias que el canal dejó en revisión, y las publicadas que intentaron manipular al chatbot."
+            />
+          ) : null}
+          {administra ? (
+            <TarjetaDeTarea
+              href="/administracion"
+              titulo="Administración"
+              texto="Quién puede publicar y quién puede moderar, con un motivo que queda en la auditoría."
+            />
           ) : null}
         </div>
-        <PorQueEstaAqui noticia={noticia} />
-      </div>
-    </article>
-  );
-}
+      )}
 
-export default async function Portada({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const seccion = interpretarSeccion((await searchParams)["seccion"]);
-  const noticias = await leerFeed({ seccion });
-
-  // El corte es por posición en el ranking, no por criterio editorial. Quien
-  // decide qué va arriba sigue siendo la fórmula.
-  const [principal, ...resto] = noticias;
-
-  if (principal === undefined) {
-    return (
-      <p className="vacio">
-        {seccion === null ? (
-          <>
-            Todavía no hay noticias verificadas. Una noticia solo aparece acá cuando el canal de
-            validación la dio por buena o cuando un moderador la aprobó.
-          </>
-        ) : (
-          <>
-            No hay noticias verificadas en {NOMBRE_DE_SECCION[seccion]}.{" "}
-            <a href="/">Ver la portada completa.</a>
-          </>
-        )}
+      <p className="pie-redaccion">
+        <a href="/como-funciona">Cómo se valida y cómo se ordena cada noticia</a>
       </p>
-    );
-  }
-
-  const destacadas = resto.slice(0, 4);
-  const titulares = resto.slice(4);
-
-  return (
-    <div className="portada">
-      <div>
-        {seccion !== null ? (
-          <p className="meta" style={{ marginBottom: "1rem" }}>
-            <span className="antetitulo" style={{ marginBottom: 0 }}>
-              {NOMBRE_DE_SECCION[seccion]}
-            </span>
-            <a href="/">Ver la portada completa</a>
-          </p>
-        ) : null}
-        <Nota noticia={principal} principal />
-        {destacadas.length > 0 ? (
-          <div className="rejilla">
-            {destacadas.map((noticia) => (
-              <Nota key={noticia.id} noticia={noticia} />
-            ))}
-          </div>
-        ) : null}
-      </div>
-
-      <aside className="riel">
-        {titulares.length > 0 ? (
-          <section>
-            <h2>Más titulares</h2>
-            <ol className="titulares">
-              {titulares.map((noticia) => (
-                <li key={noticia.id}>
-                  <a href={`/noticia/${noticia.id}`}>{noticia.titulo}</a>
-                  <span className="pie">
-                    {NOMBRE_DE_SECCION[noticia.seccion]} · {noticia.fuente ?? "sin registrar"}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
-        ) : null}
-
-        <section className="metodo">
-          <h2>Cómo se ordena</h2>
-          <p>
-            El orden no lo decide un editor ni un modelo. Sale de una fórmula con cuatro
-            componentes, dividida por la antigüedad de la nota.
-          </p>
-          <p>
-            Cada titular trae su desglose: abrí <strong>¿Por qué está aquí?</strong> y vas a ver
-            los números exactos que lo pusieron en esa posición.
-          </p>
-          <p>
-            <a href="/como-funciona">La fórmula completa, con sus pesos y sus sesgos conocidos.</a>
-          </p>
-        </section>
-      </aside>
-    </div>
+    </article>
   );
 }

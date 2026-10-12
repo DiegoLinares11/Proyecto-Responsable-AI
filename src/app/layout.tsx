@@ -2,22 +2,15 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, Newsreader, Public_Sans } from "next/font/google";
 
 import "./globals.css";
-import { VentanaDelChatbot } from "./ventana-chatbot.tsx";
 import { perfilDelVisitante } from "../lib/supabase-servidor.ts";
 import { salir } from "./entrar/acciones.ts";
-import { SECCIONES } from "../lib/secciones.ts";
+import { URL_DE_LA_APP } from "../lib/app.ts";
 
 export const metadata: Metadata = {
-  title: "Noticias Verificadas",
+  title: "Noticias Verificadas · Redacción",
   description:
-    "Plataforma de noticias con validación de fuentes y ranking auditable. Proyecto de CC3106 Responsible AI.",
+    "La redacción de Noticias Verificadas: publicar, moderar y administrar. Proyecto de CC3106 Responsible AI.",
 };
-
-// Las secciones de la cabecera. Cada una filtra la portada de verdad; una barra
-// de navegación decorativa es precisamente el adorno que este proyecto no
-// quiere, porque promete una organización que no existe. «Última hora» no va:
-// es lo que ya muestra la portada.
-const SECCIONES_DE_LA_CABECERA = SECCIONES.filter((s) => s.clave !== "general");
 
 // Las letras de la identidad. next/font las baja al compilar y las sirve desde
 // este mismo portal: el navegador del lector no le pide nada a Google.
@@ -49,7 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <header className="marca">
             <div className="fila">
               <h1>
-                <a href="/" aria-label="Noticias Verificadas, portada">
+                <a href="/" aria-label="Noticias Verificadas, redacción">
                   <Sello />
                   <span className="palabras">
                     <span className="antes">NOTICIAS</span>
@@ -58,8 +51,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </a>
               </h1>
               <p className="lema">
-                Cada noticia pasa por cinco señales antes de publicarse, y el orden lo calcula una
-                fórmula que podés revisar.
+                La redacción: acá se publica, se modera y se administra. Las noticias se leen en la
+                app.
               </p>
 
               <span className="sesion">
@@ -79,36 +72,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
 
             <nav>
-              <a href="/">Portada</a>
-              {SECCIONES_DE_LA_CABECERA.map(({ clave, nombre }) => (
-                <a key={clave} href={`/?seccion=${clave}`}>
-                  {nombre}
-                </a>
-              ))}
-
+              <a href="/">Redacción</a>
+              {perfil?.permisos.has("noticias_publicar") === true ? <a href="/publicar">Publicar</a> : null}
+              {perfil?.permisos.has("noticias_moderar") === true ? <a href="/moderacion">Moderación</a> : null}
+              {perfil?.permisos.has("usuarios_administrar") === true ? (
+                <a href="/administracion">Administración</a>
+              ) : null}
               <a className="interno" href="/como-funciona">
                 ¿Cómo funciona?
               </a>
-              {perfil?.permisos.has("noticias_publicar") === true ? (
-                <a className="interno" href="/publicar">
-                  Publicar
-                </a>
-              ) : null}
-              {perfil?.permisos.has("noticias_moderar") === true ? (
-                <a className="interno" href="/moderacion">
-                  Moderación
-                </a>
-              ) : null}
-              {perfil?.permisos.has("usuarios_administrar") === true ? (
-                <a className="interno" href="/administracion">
-                  Administración
-                </a>
-              ) : null}
+              <a className="interno a-la-app" href={URL_DE_LA_APP}>
+                Leer en la app ↗
+              </a>
             </nav>
           </header>
           {children}
         </div>
-        <VentanaDelChatbot />
       </body>
     </html>
   );
