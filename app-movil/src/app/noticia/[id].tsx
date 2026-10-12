@@ -18,6 +18,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { FotoDeNoticia } from '@/componentes/foto';
 import { Afuera } from '@/componentes/iconos';
 import { IlustracionTipografica } from '@/componentes/ilustracion';
+import { PorQueEnTuPortada } from '@/componentes/por-que-aqui';
 import { Sello } from '@/componentes/sello';
 import { ANCHOS, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { leerNoticia, type NoticiaCompleta, type Senal } from '@/lib/noticias';
@@ -136,6 +137,8 @@ export default function Lectura() {
           senales.map((s) => <FilaDeSenal key={s.senal} senal={s} e={e} />)
         )}
       </View>
+
+      <PorQueEnTuPortada noticia={noticia} />
     </ScrollView>
   );
 }

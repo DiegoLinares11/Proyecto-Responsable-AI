@@ -5,6 +5,18 @@ publicadores sube noticias, cada noticia se valida contra fuentes confiables
 antes de mostrarse, el orden del feed se calcula con una fórmula auditable y un
 chatbot responde preguntas sobre el acervo sin salirse de ese dominio.
 
+## Dos piezas
+
+| | Qué es | Para quién |
+|---|---|---|
+| **La app** (`app-movil/`, Expo) | La única portada: lectura, chat y perfil. En el teléfono (iOS y Android) y en la web | Lectores |
+| **La redacción** (este repositorio, Next.js) | Publicar, moderar y administrar cuentas. También sirve el chat a la app (`/api/chat`) | Quien publica, modera o administra |
+
+El portal no tiene portada propia: dos portadas con órdenes distintos —la de la
+app, personalizada; la del portal, global— confundían más de lo que mostraban.
+El «¿por qué está aquí?» con los números de la relevancia vive en la lectura de
+cada noticia en la app.
+
 ## Integrantes
 
 - Diego Linares 221256

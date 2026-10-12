@@ -32,6 +32,8 @@ export type NoticiaDelFeed = NoticiaPersonalizable & {
   fuente: string | null;
   puntajeVeracidad: number | null;
   relevancia: number;
+  /** Los cuatro sumandos de la relevancia global (docs/ranking-relevancia.md). */
+  componentes: { interacciones: number; verificadas: number; fuente: number; veracidad: number };
   /** El nombre de la zona, si es local: «Quetzaltenango». */
   zona: string | null;
 };
@@ -51,7 +53,8 @@ export type NoticiaCompleta = NoticiaDelFeed & {
 
 const CAMPOS =
   'id,titulo,resumen,publicada_en,seccion,url_imagen,credito_imagen,texto_alterno_imagen,origen_imagen,url_fuente_imagen,' +
-  'puntaje_veracidad,relevancia,alcance,pais,id_ubicacion,fuentes(nombre),ubicaciones(nombre)';
+  'puntaje_veracidad,relevancia,alcance,pais,id_ubicacion,fuentes(nombre),ubicaciones(nombre),' +
+  'componente_interacciones,componente_verificadas,componente_fuente,componente_veracidad';
 
 type Fila = {
   id: string;
@@ -66,6 +69,10 @@ type Fila = {
   url_fuente_imagen: string | null;
   puntaje_veracidad: number | null;
   relevancia: number | string;
+  componente_interacciones: number | string;
+  componente_verificadas: number | string;
+  componente_fuente: number | string;
+  componente_veracidad: number | string;
   alcance: Alcance;
   pais: string | null;
   id_ubicacion: string | null;
@@ -95,6 +102,12 @@ function aNoticia(f: Fila): NoticiaDelFeed {
     fuente: f.fuentes?.nombre ?? null,
     puntajeVeracidad: f.puntaje_veracidad,
     relevancia: Number(f.relevancia),
+    componentes: {
+      interacciones: Number(f.componente_interacciones),
+      verificadas: Number(f.componente_verificadas),
+      fuente: Number(f.componente_fuente),
+      veracidad: Number(f.componente_veracidad),
+    },
     alcance: f.alcance,
     pais: f.pais,
     idUbicacion: f.id_ubicacion,

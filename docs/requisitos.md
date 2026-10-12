@@ -106,7 +106,10 @@ de las conversaciones**, y distinguir lo que está en desarrollo (R-13).
 
 Tres tamaños de tarjeta en la app, ordenados por relevancia personal, y una
 línea por noticia que dice por qué está ahí («De tu zona · Quetzaltenango»,
-«Para que no te pierdas lo nacional»).
+«Para que no te pierdas lo nacional»). En una pantalla ancha (la web, una
+tableta) la portada se arma como un diario en línea: la principal grande, cuatro
+destacadas en rejilla a su lado y el resto en columnas. Es la única portada: el
+portal es la redacción, no una segunda portada con otro orden.
 
 **Criterios de aceptación**
 - El orden, el tamaño y la posición dependen del usuario: su ubicación y sus
@@ -255,7 +258,9 @@ Newsreader, lo que ordena y explica la plataforma en Public Sans, los números
 de la verificación en IBM Plex Mono, y lo que escribe la IA en cursiva con la
 etiqueta «IA». La ficha de verificación dice en naranja lo que no se pudo
 comprobar —por ejemplo, desmentidos sin verificador configurado— en vez de
-mostrar solo lo que salió bien.
+mostrar solo lo que salió bien. Y la lectura de cada noticia dice por qué está
+en tu portada, con los números: los cuatro componentes de la relevancia global,
+tu factor de ubicación, tu factor de interés y el resultado.
 
 **Criterios de aceptación**
 - Lo que escribió el medio, lo que resumió el sistema y lo que generó la IA se

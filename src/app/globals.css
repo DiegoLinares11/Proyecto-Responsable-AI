@@ -372,35 +372,6 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 
 .vacio { color: var(--tinta-suave); text-align: center; padding: 3rem 1rem; }
 
-/* --- Chatbot -------------------------------------------------------------- */
-
-.chat { position: fixed; right: 1rem; bottom: 1rem; width: min(26rem, calc(100vw - 2rem)); z-index: 10; }
-.chat button.abrir {
-  float: right; border: 1px solid var(--borde); background: var(--acento); color: white;
-  padding: 0.6rem 1rem; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.875rem;
-  box-shadow: 0 2px 12px rgb(0 0 0 / 0.18);
-}
-.chat .panel {
-  background: var(--papel); border: 1px solid var(--borde); border-radius: var(--radio);
-  box-shadow: 0 8px 32px rgb(0 0 0 / 0.18); overflow: hidden; display: flex; flex-direction: column;
-  max-height: min(32rem, 70vh);
-}
-.chat .panel header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--borde); font-size: 0.875rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-.chat .panel header button { background: none; border: none; cursor: pointer; color: var(--tinta-suave); font: inherit; font-size: 1.1rem; line-height: 1; }
-.chat .turnos { overflow-y: auto; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-.chat .turno { font-size: 0.875rem; }
-.chat .turno.usuario { align-self: flex-end; max-width: 85%; background: var(--papel-hundido); padding: 0.5rem 0.75rem; border-radius: var(--radio); }
-.chat .turno.asistente { white-space: pre-wrap; }
-.chat .turno .nota { display: block; margin-top: 0.35rem; font-size: 0.72rem; color: var(--tinta-suave); }
-.chat form { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid var(--borde); }
-.chat input {
-  flex: 1; font: inherit; font-size: 0.875rem; padding: 0.5rem 0.65rem;
-  border: 1px solid var(--borde); border-radius: var(--radio);
-  background: var(--papel); color: var(--tinta);
-}
-.chat form button { font: inherit; font-size: 0.875rem; padding: 0.5rem 0.9rem; border: none; border-radius: var(--radio); background: var(--acento); color: white; cursor: pointer; }
-.chat form button:disabled { opacity: 0.5; cursor: default; }
-
 .aviso-deuda {
   border: 1px dashed var(--alerta); border-radius: var(--radio);
   padding: 0.75rem 1rem; margin-bottom: 1.5rem;
@@ -535,3 +506,25 @@ ol.historial .motivo { display: block; color: var(--tinta-suave); margin-top: 0.
 .rejilla figure.ilustracion .titular { font-size: 1rem; line-height: 1.2; -webkit-line-clamp: 4; }
 .rejilla figure.ilustracion .etiqueta { font-size: 0.5rem; letter-spacing: 0.06em; padding: 0.1rem 0.35rem; }
 .rejilla figure.ilustracion .rotulo { font-size: 0.5625rem; }
+
+/* --- La redacción (inicio del portal) ------------------------------------- */
+.redaccion { max-width: 52rem; }
+.redaccion h2 { font: 600 2rem/1.1 var(--titulares); margin: 0 0 0.6rem; }
+.redaccion .entrada { color: var(--tinta-suave); max-width: 40rem; }
+.boton-app {
+  display: inline-block; padding: 0.6rem 1rem; border-radius: var(--radio);
+  background: var(--tinta); color: var(--papel); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+}
+.aviso-redaccion { margin-top: 1.5rem; padding: 0.9rem 1rem; background: var(--papel-hundido); border-radius: var(--radio); font-size: 0.9rem; }
+.tareas { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin-top: 1.75rem; }
+a.tarea {
+  display: flex; flex-direction: column; gap: 0.4rem; padding: 1.1rem 1.2rem;
+  border: 1px solid var(--borde-fuerte); border-radius: var(--radio);
+  color: var(--tinta); text-decoration: none;
+}
+a.tarea:hover { border-color: var(--tinta); }
+.tarea-titulo { font: 600 1.35rem/1.15 var(--titulares); }
+.tarea-cifra { font-family: var(--numeros); font-size: 0.8125rem; color: var(--acento); }
+.tarea-texto { font-size: 0.875rem; color: var(--tinta-suave); line-height: 1.45; }
+.pie-redaccion { margin-top: 2.5rem; font-size: 0.875rem; }
+.marca nav a.a-la-app { margin-left: auto; }
