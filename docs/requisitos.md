@@ -162,9 +162,14 @@ El formulario de publicar ya registra el alcance y la zona o el país, con la
 misma regla que impone la base.
 
 Existen `/publicar` y `/moderacion`, con Supabase Auth, y se entra con Google con
-la misma cuenta de la app. Los roles los cambia un administrador desde el servidor
-con `scripts/asignar_rol.mjs`, que deja el rol anterior, el nuevo y el motivo en
-`auditoria`; desde una sesión, el trigger `impedir_autoascenso` lo rechaza.
+la misma cuenta de la app. En `/administracion`, una cuenta con
+`usuarios_administrar` hace publicador o moderador a quien entró como lector, con
+un motivo que queda en `auditoria` junto con quién lo hizo; abajo se ve el
+historial. El permiso se comprueba con la sesión y la escritura va por el
+servidor, porque desde una sesión el trigger `impedir_autoascenso` lo rechaza.
+Nadie cambia su propio rol, y un administrador se nombra o se quita solo en el
+servidor (`scripts/asignar_rol.mjs`): con una sesión robada no se toma el
+sistema. 8 pruebas de esas reglas en `tests/unit/usuarios/`.
 
 **Criterios de aceptación**
 - Entrada con Firebase (R-02).

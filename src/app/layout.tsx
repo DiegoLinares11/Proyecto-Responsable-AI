@@ -75,6 +75,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   Moderación
                 </a>
               ) : null}
+              {perfil?.permisos.has("usuarios_administrar") === true ? (
+                <a className="interno" href="/administracion">
+                  Administración
+                </a>
+              ) : null}
             </nav>
           </header>
           {children}
