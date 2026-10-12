@@ -12,7 +12,8 @@ import { useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Espacio, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { Pin } from '@/componentes/iconos';
+import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { departamentoMasCercano } from '@/lib/cercania';
 import { usePreferencias } from '@/lib/preferencias';
 
@@ -76,7 +77,10 @@ export function SelectorDeUbicacion({ visible, cerrar }: { visible: boolean; cer
             {buscando ? (
               <ActivityIndicator color={c.acento} />
             ) : (
-              <Text style={e.botonGpsTexto}>📍 Usar mi ubicación real (aproximada)</Text>
+              <View style={e.filaGps}>
+                <Pin color={c.tinta} tamano={16} />
+                <Text style={e.botonGpsTexto}>Usar mi ubicación real (aproximada)</Text>
+              </View>
             )}
           </Pressable>
           <Text style={e.nota}>
@@ -101,7 +105,7 @@ export function SelectorDeUbicacion({ visible, cerrar }: { visible: boolean; cer
                 style={[e.opcion, elegida ? e.opcionElegida : null]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: elegida }}>
-                <Text style={[e.opcionTexto, elegida ? { color: c.acento, fontWeight: '700' } : null]}>
+                <Text style={[e.opcionTexto, elegida ? { color: c.acento, fontFamily: Tipos.textoFuerte } : null]}>
                   {item.nombre}
                 </Text>
                 {elegida ? <Text style={e.marca}>✓</Text> : null}
@@ -125,9 +129,9 @@ function crearEstilos(c: Paleta) {
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.borde,
     },
-    titulo: { fontFamily: Tipos.titulares, fontSize: 24, fontWeight: '700', color: c.tinta },
+    titulo: { fontFamily: Tipos.titular, fontSize: 24, color: c.tinta },
     nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 18, color: c.tintaSuave, marginTop: 4 },
-    listo: { fontFamily: Tipos.texto, fontSize: 16, fontWeight: '700', color: c.acento, paddingTop: 4 },
+    listo: { fontFamily: Tipos.textoFuerte, fontSize: 16, color: c.acento, paddingTop: 4 },
     gps: {
       padding: Espacio.l,
       gap: Espacio.s,
@@ -136,21 +140,19 @@ function crearEstilos(c: Paleta) {
     },
     botonGps: {
       minHeight: 46,
-      borderRadius: 999,
+      borderRadius: Radio.medio,
       borderWidth: 1,
-      borderColor: c.acento,
+      borderColor: c.tinta,
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: Espacio.l,
     },
-    botonGpsTexto: { fontFamily: Tipos.texto, fontSize: 15, fontWeight: '600', color: c.acento },
+    filaGps: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    botonGpsTexto: { fontFamily: Tipos.textoMedio, fontSize: 15, color: c.tinta },
     aviso: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 18, color: c.tinta },
     grupo: {
-      fontFamily: Tipos.texto,
-      fontSize: 12,
-      fontWeight: '800',
-      letterSpacing: 1.2,
-      color: c.tintaSuave,
+      ...ROTULO,
+      color: c.acento,
       backgroundColor: c.papel,
       paddingHorizontal: Espacio.l,
       paddingTop: Espacio.l,
@@ -166,6 +168,6 @@ function crearEstilos(c: Paleta) {
     },
     opcionElegida: { backgroundColor: c.papelHundido },
     opcionTexto: { flex: 1, fontFamily: Tipos.texto, fontSize: 16, color: c.tinta },
-    marca: { fontSize: 18, color: c.acento, fontWeight: '700' },
+    marca: { fontSize: 18, color: c.acento, fontFamily: Tipos.textoFuerte },
   });
 }

@@ -27,9 +27,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Abajo, Pin } from '@/componentes/iconos';
+import { IlustracionTipografica } from '@/componentes/ilustracion';
+import { Logotipo } from '@/componentes/marca';
 import { Sello } from '@/componentes/sello';
 import { SelectorDeUbicacion } from '@/componentes/selector-de-ubicacion';
-import { Espacio, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { haceCuanto, leerFeed, type NoticiaDelFeed } from '@/lib/noticias';
 import { personalizar } from '@/lib/personalizacion';
 import { porQue, type Razon } from '@/lib/porque';
@@ -101,21 +104,27 @@ export default function Portada() {
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={refrescar} tintColor={c.acento} />}
         ListHeaderComponent={
           <View style={e.cabecera}>
-            <Text style={e.fecha}>{hoy}</Text>
-            <Text style={e.marca}>Portada</Text>
-            <Pressable
-              onPress={() => setEligiendo(true)}
-              style={e.ubicacion}
-              accessibilityRole="button"
-              accessibilityLabel={`Ubicación simulada: ${ubicacion.nombre}. Tocá para cambiarla.`}>
-              <Text style={e.ubicacionTexto}>📍 {ubicacion.nombre}</Text>
-              <Text style={e.ubicacionCambiar}>cambiar</Text>
-            </Pressable>
-            <Text style={e.subtitulo}>
-              Ordenada para {ubicacion.nombre}
-              {lecturas.length > 0 ? ' y lo que leés' : ''}, sin esconder lo local, lo nacional ni lo
-              internacional. Cada noticia dice por qué está donde está.
-            </Text>
+            <View style={e.filaMarca}>
+              <Logotipo />
+              <Pressable
+                onPress={() => setEligiendo(true)}
+                style={e.ubicacion}
+                accessibilityRole="button"
+                accessibilityLabel={`Ubicación simulada: ${ubicacion.nombre}. Tocá para cambiarla.`}>
+                <Pin color={c.acento} />
+                <Text style={e.ubicacionTexto} numberOfLines={1}>
+                  {ubicacion.nombre}
+                </Text>
+                <Abajo color={c.tinta} />
+              </Pressable>
+            </View>
+            <View style={e.filaFecha}>
+              <Text style={e.fecha}>{hoy}</Text>
+              <Text style={e.fecha}>{lecturas.length > 0 ? 'Para tu zona y lo que leés' : 'Ordenada para tu zona'}</Text>
+            </View>
+            {/* La doble raya de la cabecera de un diario. */}
+            <View style={e.rayaGruesa} />
+            <View style={e.rayaFina} />
             <SelectorDeUbicacion visible={eligiendo} cerrar={() => setEligiendo(false)} />
           </View>
         }
@@ -127,6 +136,14 @@ export default function Portada() {
           ) : (
             <Text style={e.vacio}>Todavía no hay noticias verificadas.</Text>
           )
+        }
+        ListFooterComponent={
+          lista && lista.length > 0 ? (
+            <Text style={e.pie}>
+              Sin esconder lo local, lo nacional ni lo internacional. Cada noticia dice por qué está donde
+              está.
+            </Text>
+          ) : null
         }
         renderItem={({ item, index }) => {
           const props = { noticia: item.noticia, razon: porQue(item), e, onPress: () => abrir(item.noticia.id) };
@@ -150,6 +167,12 @@ type PropsDeTarjeta = {
   onPress: () => void;
 };
 
+/** «SALUD · QUETZALTENANGO»: la sección y, si es local, la zona. */
+function antetitulo(noticia: NoticiaDelFeed): string {
+  const seccion = nombreDeSeccion(noticia.seccion);
+  return (noticia.zona ? `${seccion} · ${noticia.zona}` : seccion).toUpperCase();
+}
+
 /** La línea de «por qué está aquí». */
 function PorQue({ razon, e }: { razon: Razon; e: ReturnType<typeof crearEstilos> }) {
   return (
@@ -160,10 +183,10 @@ function PorQue({ razon, e }: { razon: Razon; e: ReturnType<typeof crearEstilos>
   );
 }
 
-function Meta({ noticia, e }: Pick<PropsDeTarjeta, 'noticia' | 'e'>) {
+function Meta({ noticia, e, compacta = false }: Pick<PropsDeTarjeta, 'noticia' | 'e'> & { compacta?: boolean }) {
   return (
     <View style={e.meta}>
-      <Sello puntaje={noticia.puntajeVeracidad} />
+      <Sello puntaje={noticia.puntajeVeracidad} compacto={compacta} />
       <Text style={e.metaFuente} numberOfLines={1}>
         {noticia.fuente ?? 'fuente no registrada'}
       </Text>
@@ -174,7 +197,7 @@ function Meta({ noticia, e }: Pick<PropsDeTarjeta, 'noticia' | 'e'>) {
 
 function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
-    <Pressable onPress={onPress} style={e.principal}>
+    <Pressable onPress={onPress} style={e.principal} accessibilityRole="link">
       {noticia.imagen ? (
         <Image
           source={noticia.imagen.url}
@@ -183,9 +206,13 @@ function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
           contentFit="cover"
           transition={200}
         />
-      ) : null}
+      ) : (
+        <View style={{ marginBottom: Espacio.m }}>
+          <IlustracionTipografica seccion={nombreDeSeccion(noticia.seccion)} titulo={noticia.titulo} />
+        </View>
+      )}
       <View style={e.cuerpoPrincipal}>
-        <Text style={e.antetitulo}>{nombreDeSeccion(noticia.seccion)}</Text>
+        <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
         <Text style={e.tituloPrincipal}>{noticia.titulo}</Text>
         <Text style={e.resumen} numberOfLines={3}>
           {noticia.resumen}
@@ -199,13 +226,13 @@ function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
 
 function Destacada({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
-    <Pressable onPress={onPress} style={e.destacada}>
+    <Pressable onPress={onPress} style={e.destacada} accessibilityRole="link">
       <View style={{ flex: 1, gap: 6 }}>
-        <Text style={e.antetitulo}>{nombreDeSeccion(noticia.seccion)}</Text>
+        <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
         <Text style={e.tituloDestacada} numberOfLines={4}>
           {noticia.titulo}
         </Text>
-        <Meta noticia={noticia} e={e} />
+        <Meta noticia={noticia} e={e} compacta />
         <PorQue razon={razon} e={e} />
       </View>
       {noticia.imagen ? (
@@ -215,7 +242,9 @@ function Destacada({ noticia, razon, e, onPress }: PropsDeTarjeta) {
           style={e.imagenDestacada}
           contentFit="cover"
         />
-      ) : null}
+      ) : (
+        <IlustracionTipografica seccion={nombreDeSeccion(noticia.seccion)} titulo={noticia.titulo} chica />
+      )}
     </Pressable>
   );
 }
@@ -223,15 +252,22 @@ function Destacada({ noticia, razon, e, onPress }: PropsDeTarjeta) {
 function Titular({ noticia, razon, e, onPress, primero }: PropsDeTarjeta & { primero: boolean }) {
   return (
     <>
-      {primero ? <Text style={e.encabezadoTitulares}>MÁS TITULARES</Text> : null}
-      <Pressable onPress={onPress} style={e.titular}>
+      {primero ? (
+        <View style={e.encabezadoTitulares}>
+          <Text style={e.encabezadoTitularesTexto}>MÁS TITULARES</Text>
+        </View>
+      ) : null}
+      <Pressable onPress={onPress} style={e.titular} accessibilityRole="link">
         <Text style={e.tituloTitular} numberOfLines={3}>
           {noticia.titulo}
         </Text>
-        <Text style={e.metaTexto}>
-          {nombreDeSeccion(noticia.seccion)} · {noticia.fuente ?? 'sin registrar'} ·{' '}
-          {haceCuanto(noticia.publicadaEn)}
-        </Text>
+        <View style={e.meta}>
+          <Sello puntaje={noticia.puntajeVeracidad} compacto />
+          <Text style={e.metaTexto}>
+            {nombreDeSeccion(noticia.seccion)} · {noticia.fuente ?? 'sin registrar'} ·{' '}
+            {haceCuanto(noticia.publicadaEn)}
+          </Text>
+        </View>
         <PorQue razon={razon} e={e} />
       </Pressable>
     </>
@@ -241,75 +277,57 @@ function Titular({ noticia, razon, e, onPress, primero }: PropsDeTarjeta & { pri
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
-    cabecera: {
-      paddingHorizontal: Espacio.l,
-      paddingTop: Espacio.s,
-      paddingBottom: Espacio.m,
-      borderBottomWidth: 2,
-      borderBottomColor: c.tinta,
-      marginBottom: Espacio.l,
-    },
-    fecha: {
-      fontFamily: Tipos.texto,
-      fontSize: 12,
-      color: c.tintaSuave,
-    },
-    marca: { fontFamily: Tipos.titulares, fontSize: 34, fontWeight: '700', color: c.tinta },
-    subtitulo: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 18, color: c.tintaSuave, marginTop: 4 },
+    cabecera: { paddingHorizontal: Espacio.l, paddingTop: Espacio.s, marginBottom: Espacio.l },
+    filaMarca: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m },
     ubicacion: {
+      marginLeft: 'auto',
+      flexShrink: 1,
+      minHeight: 44,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
-      alignSelf: 'flex-start',
-      marginTop: Espacio.s,
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-      borderRadius: 999,
+      gap: 6,
+      paddingHorizontal: 10,
+      borderRadius: Radio.medio,
       backgroundColor: c.papelHundido,
-      borderWidth: 1,
-      borderColor: c.borde,
     },
-    ubicacionTexto: { fontFamily: Tipos.texto, fontSize: 14, fontWeight: '700', color: c.tinta },
-    ubicacionCambiar: { fontFamily: Tipos.texto, fontSize: 13, color: c.acento },
-    razon: { fontFamily: Tipos.texto, fontSize: 12, color: c.tintaTenue, marginTop: 2 },
-    razonZona: { color: c.verificado, fontWeight: '700' },
-    razonCobertura: { color: c.acento, fontWeight: '600' },
+    ubicacionTexto: { fontFamily: Tipos.textoMedio, fontSize: 13, color: c.tinta, flexShrink: 1 },
+    filaFecha: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: Espacio.s,
+      marginTop: Espacio.m,
+      marginBottom: 6,
+    },
+    fecha: { fontFamily: Tipos.textoMedio, fontSize: 12, color: c.tintaSuave },
+    rayaGruesa: { height: 3, backgroundColor: c.tinta },
+    rayaFina: { height: 1, backgroundColor: c.tinta, marginTop: 2 },
 
-    antetitulo: {
-      fontFamily: Tipos.texto,
-      fontSize: 11,
-      fontWeight: '800',
-      letterSpacing: 1,
-      textTransform: 'uppercase',
-      color: c.acento,
-    },
-    resumen: { fontFamily: Tipos.texto, fontSize: 15, lineHeight: 21, color: c.tintaSuave },
+    razon: { fontFamily: Tipos.texto, fontSize: 12, color: c.tintaTenue },
+    razonZona: { fontFamily: Tipos.textoMedio, color: c.acento },
+    razonCobertura: { fontFamily: Tipos.textoMedio, color: c.tintaSuave },
+
+    antetitulo: { ...ROTULO, color: c.acento },
+    resumen: { fontFamily: Tipos.lectura, fontSize: 16, lineHeight: 23, color: c.tintaSuave },
     meta: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-    metaFuente: { fontFamily: Tipos.texto, fontSize: 12, fontWeight: '700', color: c.tinta, flexShrink: 1 },
+    metaFuente: { fontFamily: Tipos.textoMedio, fontSize: 12, color: c.tinta, flexShrink: 1 },
     metaTexto: { fontFamily: Tipos.texto, fontSize: 12, color: c.tintaTenue },
 
     principal: {
       marginHorizontal: Espacio.l,
-      marginBottom: Espacio.xl,
-      paddingBottom: Espacio.xl,
-      borderBottomWidth: StyleSheet.hairlineWidth,
+      marginBottom: Espacio.l,
+      paddingBottom: Espacio.l,
+      borderBottomWidth: 1,
       borderBottomColor: c.borde,
     },
     imagenPrincipal: {
       width: '100%',
       aspectRatio: 16 / 10,
-      borderRadius: 10,
-      backgroundColor: c.papelHundido,
+      borderRadius: Radio.chico,
+      backgroundColor: c.fotoVacia,
       marginBottom: Espacio.m,
     },
     cuerpoPrincipal: { gap: Espacio.s },
-    tituloPrincipal: {
-      fontFamily: Tipos.titulares,
-      fontSize: 28,
-      lineHeight: 32,
-      fontWeight: '700',
-      color: c.tinta,
-    },
+    tituloPrincipal: { fontFamily: Tipos.titular, fontSize: 26, lineHeight: 30, color: c.tinta },
 
     destacada: {
       flexDirection: 'row',
@@ -317,50 +335,38 @@ function crearEstilos(c: Paleta) {
       marginHorizontal: Espacio.l,
       marginBottom: Espacio.l,
       paddingBottom: Espacio.l,
-      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomWidth: 1,
       borderBottomColor: c.borde,
     },
-    tituloDestacada: {
-      fontFamily: Tipos.titulares,
-      fontSize: 18,
-      lineHeight: 22,
-      fontWeight: '700',
-      color: c.tinta,
-    },
-    imagenDestacada: {
-      width: 104,
-      height: 104,
-      borderRadius: 8,
-      backgroundColor: c.papelHundido,
-    },
+    tituloDestacada: { fontFamily: Tipos.titular, fontSize: 18, lineHeight: 22, color: c.tinta },
+    imagenDestacada: { width: 92, height: 92, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
 
     encabezadoTitulares: {
-      fontFamily: Tipos.texto,
-      fontSize: 12,
-      fontWeight: '800',
-      letterSpacing: 1.2,
-      color: c.tinta,
       marginHorizontal: Espacio.l,
       marginTop: Espacio.s,
-      paddingBottom: Espacio.s,
-      borderBottomWidth: 2,
+      paddingBottom: 6,
+      borderBottomWidth: 3,
       borderBottomColor: c.tinta,
     },
+    encabezadoTitularesTexto: { ...ROTULO, color: c.tinta },
     titular: {
       marginHorizontal: Espacio.l,
       paddingVertical: Espacio.m,
-      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomWidth: 1,
       borderBottomColor: c.borde,
-      gap: 4,
+      gap: 6,
     },
-    tituloTitular: {
-      fontFamily: Tipos.titulares,
-      fontSize: 16,
-      lineHeight: 21,
-      fontWeight: '600',
-      color: c.tinta,
-    },
+    tituloTitular: { fontFamily: Tipos.titular, fontSize: 16, lineHeight: 21, color: c.tinta },
 
+    pie: {
+      fontFamily: Tipos.texto,
+      fontSize: 12,
+      lineHeight: 17,
+      color: c.tintaTenue,
+      textAlign: 'center',
+      paddingHorizontal: Espacio.xl,
+      paddingVertical: Espacio.xl,
+    },
     error: { margin: Espacio.l, fontFamily: Tipos.texto, color: c.peligro },
     vacio: { margin: Espacio.l, fontFamily: Tipos.texto, color: c.tintaSuave, textAlign: 'center' },
   });
