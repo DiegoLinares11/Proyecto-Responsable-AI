@@ -170,7 +170,13 @@ Existen `/publicar` y `/moderacion`, con Supabase Auth.
   de publicar lo aprieta alguien con permiso. Hoy el canal publica solo lo que
   pasa de 75, y el enunciado pide que lo haga una persona.
 
-### R-10 · Imagen para una noticia sin imagen — ❌
+### R-10 · Imagen para una noticia sin imagen — 🟡
+
+La app ya muestra, para una nota sin foto, la ilustración tipográfica: la
+sección y el titular en la letra del medio, sobre tinta, y en la grande la
+etiqueta «Ilustración · no es una fotografía» (`app-movil/src/componentes/ilustracion.tsx`).
+**Falta: el flujo en el portal (buscar en Wikimedia Commons o generar la
+ilustración) y guardar en la base el origen de cada imagen.**
 
 **Criterios de aceptación**
 - Si la noticia no trae imagen, el portal ofrece, dentro del mismo flujo:
@@ -211,6 +217,13 @@ contenido envenenado (Fases 2, 5 y posteriores).
   puntaje que haya que interpretar.
 
 ### R-14 · Transparencia en la interfaz — 🟡
+
+En la app, la identidad lo separa a la vista: lo que dice el medio va en
+Newsreader, lo que ordena y explica la plataforma en Public Sans, los números
+de la verificación en IBM Plex Mono, y lo que escribe la IA en cursiva con la
+etiqueta «IA». La ficha de verificación dice en naranja lo que no se pudo
+comprobar —por ejemplo, desmentidos sin verificador configurado— en vez de
+mostrar solo lo que salió bien.
 
 **Criterios de aceptación**
 - Lo que escribió el medio, lo que resumió el sistema y lo que generó la IA se

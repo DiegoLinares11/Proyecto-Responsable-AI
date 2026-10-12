@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Tipos, useColores } from '@/constants/tema';
+import { Radio, Tipos, useColores } from '@/constants/tema';
 import { useSesion } from '@/lib/sesion';
 
 export function BotonGoogle() {
@@ -30,7 +30,7 @@ export function BotonGoogle() {
         accessibilityRole="button"
         style={({ pressed }) => [
           estilos.boton,
-          { borderColor: c.borde, backgroundColor: c.papel, opacity: pressed || entrando ? 0.7 : 1 },
+          { borderColor: c.tinta, backgroundColor: c.papel, opacity: pressed || entrando ? 0.7 : 1 },
         ]}>
         {entrando ? (
           <ActivityIndicator color={c.tinta} />
@@ -50,14 +50,14 @@ const estilos = StyleSheet.create({
   boton: {
     minHeight: 48,
     borderWidth: 1,
-    borderRadius: 999,
+    borderRadius: Radio.medio,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
     paddingHorizontal: 20,
   },
-  g: { fontSize: 18, fontWeight: '800', color: '#4285F4', fontFamily: Tipos.texto },
-  texto: { fontSize: 15, fontWeight: '600', fontFamily: Tipos.texto },
+  g: { fontSize: 18, color: '#4285F4', fontFamily: Tipos.textoFuerte },
+  texto: { fontSize: 15, fontFamily: Tipos.textoMedio },
   error: { fontSize: 13, textAlign: 'center', fontFamily: Tipos.texto },
 });

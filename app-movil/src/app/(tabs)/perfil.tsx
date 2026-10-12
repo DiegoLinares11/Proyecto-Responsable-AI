@@ -11,8 +11,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BotonGoogle } from '@/componentes/boton-google';
-import { Espacio, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { Pin } from '@/componentes/iconos';
 import { SelectorDeUbicacion } from '@/componentes/selector-de-ubicacion';
+import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { FACTORES_GEOGRAFICOS, factorDeInteres, INTERES } from '@/lib/personalizacion';
 import { usePreferencias } from '@/lib/preferencias';
 import { SECCIONES } from '@/lib/secciones';
@@ -54,7 +55,9 @@ export default function Perfil() {
   return (
     <SafeAreaView style={e.pantalla} edges={['top']}>
       <ScrollView contentContainerStyle={e.contenido}>
-        <Text style={e.titulo}>Perfil</Text>
+        <Text style={e.titulo} accessibilityRole="header">
+          Perfil
+        </Text>
 
         <View style={e.tarjeta}>
           {sesion === null ? (
@@ -82,7 +85,10 @@ export default function Perfil() {
         <Pressable onPress={() => setEligiendo(true)} style={e.tarjeta} accessibilityRole="button">
           <View style={e.fila}>
             <View style={{ flex: 1 }}>
-              <Text style={e.nombre}>📍 {ubicacion.nombre}</Text>
+              <View style={e.filaPin}>
+                <Pin color={c.acento} tamano={16} />
+                <Text style={e.nombre}>{ubicacion.nombre}</Text>
+              </View>
               <Text style={e.texto}>Simulada: la elegís vos.</Text>
             </View>
             <Text style={e.cambiar}>Cambiar</Text>
@@ -160,46 +166,48 @@ function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
     contenido: { padding: Espacio.l, gap: Espacio.m, paddingBottom: 48 },
-    titulo: { fontFamily: Tipos.titulares, fontSize: 34, fontWeight: '700', color: c.tinta },
-    seccion: {
-      fontFamily: Tipos.texto,
-      fontSize: 12,
-      fontWeight: '800',
-      letterSpacing: 1.2,
-      color: c.tintaSuave,
-      marginTop: Espacio.m,
+    titulo: {
+      fontFamily: Tipos.titular,
+      fontSize: 32,
+      lineHeight: 36,
+      color: c.tinta,
+      paddingBottom: Espacio.s,
+      borderBottomWidth: 3,
+      borderBottomColor: c.tinta,
     },
+    seccion: { ...ROTULO, color: c.acento, marginTop: Espacio.m },
     tarjeta: {
       backgroundColor: c.papelHundido,
-      borderRadius: 14,
+      borderRadius: Radio.medio,
       padding: Espacio.l,
       gap: Espacio.m,
     },
     fila: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m },
+    filaPin: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     avatar: {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: c.acento,
+      backgroundColor: c.primario,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    inicial: { color: c.sobreAcento, fontSize: 18, fontWeight: '700' },
-    nombre: { fontFamily: Tipos.texto, fontSize: 16, fontWeight: '700', color: c.tinta },
+    inicial: { color: c.sobrePrimario, fontSize: 18, fontFamily: Tipos.titular },
+    nombre: { fontFamily: Tipos.textoFuerte, fontSize: 16, color: c.tinta },
     correo: { fontFamily: Tipos.texto, fontSize: 13, color: c.tintaSuave },
-    salir: { fontFamily: Tipos.texto, fontSize: 15, color: c.peligro, fontWeight: '600' },
-    cambiar: { fontFamily: Tipos.texto, fontSize: 15, color: c.acento, fontWeight: '600' },
+    salir: { fontFamily: Tipos.textoMedio, fontSize: 15, color: c.peligro, padding: Espacio.s },
+    cambiar: { fontFamily: Tipos.textoMedio, fontSize: 15, color: c.acento },
     interes: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s },
     interesNombre: { width: 92, fontFamily: Tipos.texto, fontSize: 13, color: c.tinta },
     barraFondo: { flex: 1, height: 6, borderRadius: 3, backgroundColor: c.borde, overflow: 'hidden' },
     barra: { height: 6, borderRadius: 3, backgroundColor: c.acento },
-    interesValor: { width: 44, textAlign: 'right', fontFamily: Tipos.texto, fontSize: 12, color: c.tintaSuave },
-    notaPequena: { fontFamily: Tipos.texto, fontSize: 12, color: c.tintaTenue },
-    reiniciar: { fontFamily: Tipos.texto, fontSize: 14, color: c.peligro, fontWeight: '600' },
-    formula: { fontFamily: Tipos.titulares, fontSize: 17, fontWeight: '700', color: c.tinta },
+    interesValor: { width: 48, textAlign: 'right', fontFamily: Tipos.numeros, fontSize: 12, color: c.tinta },
+    notaPequena: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 17, color: c.tintaSuave },
+    reiniciar: { fontFamily: Tipos.textoMedio, fontSize: 14, color: c.peligro },
+    formula: { fontFamily: Tipos.numeros, fontSize: 15, color: c.tinta },
     texto: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 20, color: c.tintaSuave },
-    punto: { gap: 4, paddingVertical: Espacio.s },
-    puntoTitulo: { fontFamily: Tipos.titulares, fontSize: 17, fontWeight: '700', color: c.tinta },
+    punto: { gap: 4, paddingVertical: Espacio.s, borderBottomWidth: 1, borderBottomColor: c.borde },
+    puntoTitulo: { fontFamily: Tipos.titular, fontSize: 18, lineHeight: 22, color: c.tinta },
     pie: {
       fontFamily: Tipos.texto,
       fontSize: 12,

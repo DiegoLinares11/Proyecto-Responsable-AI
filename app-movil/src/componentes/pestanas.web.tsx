@@ -9,11 +9,16 @@ import { Tipos, useColores } from '@/constants/tema';
 function Boton({ children, isFocused, ...props }: TabTriggerSlotProps) {
   const c = useColores();
   return (
-    <Pressable {...props} style={estilos.boton}>
+    <Pressable
+      {...props}
+      style={[estilos.boton, { borderTopColor: isFocused ? c.marca : 'transparent' }]}>
       <Text
         style={[
           estilos.etiqueta,
-          { color: isFocused ? c.acento : c.tintaSuave, fontWeight: isFocused ? '700' : '500' },
+          {
+            color: isFocused ? c.tinta : c.tintaSuave,
+            fontFamily: isFocused ? Tipos.textoFuerte : Tipos.textoMedio,
+          },
         ]}>
         {children}
       </Text>
@@ -29,7 +34,7 @@ export default function Pestanas() {
       <TabList asChild>
         {/* `asChild` no acepta un arreglo de estilos: hay que aplanarlo. */}
         <View
-          style={StyleSheet.flatten([estilos.barra, { backgroundColor: c.papel, borderTopColor: c.borde }])}>
+          style={StyleSheet.flatten([estilos.barra, { backgroundColor: c.papel, borderTopColor: c.bordeFuerte }])}>
           <TabTrigger name="index" href="/" asChild>
             <Boton>Chat</Boton>
           </TabTrigger>
@@ -46,7 +51,7 @@ export default function Pestanas() {
 }
 
 const estilos = StyleSheet.create({
-  barra: { flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, paddingBottom: 6 },
-  boton: { flex: 1, alignItems: 'center', paddingVertical: 12 },
-  etiqueta: { fontSize: 13, fontFamily: Tipos.texto },
+  barra: { flexDirection: 'row', borderTopWidth: 1 },
+  boton: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 56, borderTopWidth: 2, marginTop: -1 },
+  etiqueta: { fontSize: 13 },
 });

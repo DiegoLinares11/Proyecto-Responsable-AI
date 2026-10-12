@@ -10,7 +10,7 @@ export default function Pestanas() {
   const c = useColores();
 
   return (
-    <NativeTabs backgroundColor={c.papel} indicatorColor={c.papelHundido} tintColor={c.acento}>
+    <NativeTabs backgroundColor={c.papel} indicatorColor={c.verificadoFondo} tintColor={c.acento}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Chat</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="bubble.left.and.bubble.right.fill" md="chat" />

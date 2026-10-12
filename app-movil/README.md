@@ -17,6 +17,11 @@ de cada noticia con su ficha de validación, y **Perfil**.
   sesión en `Authorization: Bearer`. La llave de la API del modelo y las cinco
   capas de defensa viven en el servidor: una llave dentro de la app la puede
   sacar cualquiera que la descargue.
+- **La identidad separa voces.** Lo que dice el medio en Newsreader, lo que
+  explica la plataforma en Public Sans, los números de la verificación en IBM
+  Plex Mono y lo que escribe la IA en cursiva con la etiqueta «IA». El celeste
+  de la bandera marca lo verificado; el naranja, lo no confirmado
+  (`src/constants/tema.ts`). La propuesta de diseño está en un lienzo aparte.
 - **La ubicación es simulada.** El usuario la elige de una lista; el botón «Usar
   mi ubicación real» solo sugiere la cabecera departamental más cercana,
   calculada en el teléfono (`src/lib/cercania.ts`): las coordenadas no salen de
