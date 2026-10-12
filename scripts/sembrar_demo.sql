@@ -95,8 +95,8 @@ values
   -- A. Bien sustentada: fuente fuerte, veracidad alta, tracción moderada.
   ('dddddddd-aaaa-0000-0000-000000000001',
    'Congreso aprueba el presupuesto general con modificaciones al gasto social',
-   'El Congreso aprobo el presupuesto con cambios en las asignaciones al gasto social, segun la version publicada.',
-   repeat('El Congreso aprobo el presupuesto general con modificaciones al gasto social. ', 5),
+   'El Congreso aprobó el presupuesto con cambios en las asignaciones al gasto social, según la versión publicada.',
+   repeat('El Congreso aprobó el presupuesto general con modificaciones al gasto social. ', 5),
    'https://www.prensalibre.com/politica/demo-presupuesto/',
    (select id from public.fuentes where dominio = 'prensalibre.com'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 92, now() - interval '6 hours'),
@@ -105,9 +105,9 @@ values
   -- veracidad justo encima del umbral. Entra al feed, y sirve para ver que la
   -- tracción sola no le gana a una bien sustentada.
   ('dddddddd-aaaa-0000-0000-000000000002',
-   'Aseguran que habra un bono extraordinario para todos los trabajadores',
-   'Circula la version de un bono extraordinario para todos los trabajadores, sin confirmacion oficial disponible.',
-   repeat('Circula la version de un bono extraordinario para todos los trabajadores. ', 5),
+   'Aseguran que habrá un bono extraordinario para todos los trabajadores',
+   'Circula la versión de un bono extraordinario para todos los trabajadores, sin confirmación oficial disponible.',
+   repeat('Circula la versión de un bono extraordinario para todos los trabajadores. ', 5),
    'https://medio-desconocido-demo.info/bono',
    null,
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 76, now() - interval '3 hours'),
@@ -115,8 +115,8 @@ values
   -- C. Vieja pero buena: mismo perfil que A, con tres días encima.
   ('dddddddd-aaaa-0000-0000-000000000003',
    'La Corte de Constitucionalidad resuelve el amparo sobre la reforma electoral',
-   'La Corte resolvio el amparo presentado contra la reforma electoral, segun la resolucion publicada esta semana.',
-   repeat('La Corte de Constitucionalidad resolvio el amparo sobre la reforma electoral. ', 5),
+   'La Corte resolvió el amparo presentado contra la reforma electoral, según la resolución publicada esta semana.',
+   repeat('La Corte de Constitucionalidad resolvió el amparo sobre la reforma electoral. ', 5),
    'https://www.prensalibre.com/politica/demo-corte/',
    (select id from public.fuentes where dominio = 'prensalibre.com'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 90, now() - interval '72 hours'),
@@ -124,8 +124,8 @@ values
   -- D. La víctima del inflado: fuente floja, y 50 cuentas nuevas empujándola.
   ('dddddddd-aaaa-0000-0000-000000000004',
    'Reportan una supuesta renuncia en el gabinete que nadie ha confirmado',
-   'Se reporta una supuesta renuncia en el gabinete, sin que ninguna fuente oficial la haya confirmado todavia.',
-   repeat('Se reporta una supuesta renuncia en el gabinete sin confirmacion oficial. ', 5),
+   'Se reporta una supuesta renuncia en el gabinete, sin que ninguna fuente oficial la haya confirmado todavía.',
+   repeat('Se reporta una supuesta renuncia en el gabinete sin confirmación oficial. ', 5),
    'https://otro-medio-demo.info/renuncia',
    null,
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 52, now() - interval '6 hours'),
@@ -135,13 +135,14 @@ values
   -- a la cola de moderación. Sin `publicada_en`, que es lo que exige la
   -- restricción `noticias_publicada_tiene_fecha`.
   ('dddddddd-aaaa-0000-0000-000000000005',
-   'Version no confirmada sobre cambios en el gabinete de gobierno',
-   'Circula una version no confirmada sobre cambios en el gabinete; el canal de validacion la dejo en revision.',
-   repeat('Circula una version no confirmada sobre cambios en el gabinete de gobierno. ', 5),
+   'Versión no confirmada sobre cambios en el gabinete de gobierno',
+   'Circula una versión no confirmada sobre cambios en el gabinete; el canal de validación la dejó en revisión.',
+   repeat('Circula una versión no confirmada sobre cambios en el gabinete de gobierno. ', 5),
    'https://tercer-medio-demo.info/gabinete',
    null,
    'dddddddd-0000-0000-0000-000000000001', 'en_revision', 55, null)
-on conflict (id) do nothing;
+-- Si ya existen, se corrige solo el texto: el resto (estado, fechas, puntaje) no se toca.
+on conflict (id) do update set titulo = excluded.titulo, resumen = excluded.resumen, cuerpo = excluded.cuerpo;
 
 -- ---------------------------------------------------------------------------
 -- Interacciones
@@ -163,7 +164,7 @@ on conflict do nothing;
 insert into public.comentarios (id_noticia, id_usuario, contenido, creado_en)
 select 'dddddddd-aaaa-0000-0000-000000000001',
        ('dddddddd-1000-0000-0000-' || lpad(n::text, 12, '0'))::uuid,
-       'Comentario de demostracion numero ' || n,
+       'Comentario de demostración número ' || n,
        now() - (n || ' minutes')::interval
 from generate_series(1, 6) as n
 on conflict do nothing;
@@ -207,31 +208,31 @@ select 'dddddddd-aaaa-0000-0000-000000000004',
        'reaccion', now() - ((n % 30) || ' minutes')::interval
 from generate_series(1, 50) as n
 on conflict do nothing;
--- Secciones e imagenes para los datos de demostracion.
+-- Secciones e imágenes para los datos de demostración.
 --
--- El credito dice que son imagenes de demostracion porque lo son. Poner una foto
+-- El crédito dice que son imágenes de demostración porque lo son. Poner una foto
 -- de archivo sin decirlo, en una plataforma cuyo argumento entero es la
 -- procedencia, seria contradecirse en la portada.
 
 update public.noticias set
   seccion = 'politica',
   url_imagen = 'https://picsum.photos/seed/congreso/1200/675',
-  credito_imagen = 'Imagen de demostracion - Lorem Picsum',
-  texto_alterno_imagen = 'Fotografia generica de archivo usada como marcador en los datos de prueba'
+  credito_imagen = 'Imagen de demostración · Lorem Picsum',
+  texto_alterno_imagen = 'Fotografía genérica de archivo usada como marcador en los datos de prueba'
 where id = 'dddddddd-aaaa-0000-0000-000000000001';
 
 update public.noticias set
   seccion = 'economia',
   url_imagen = 'https://picsum.photos/seed/bono/1200/675',
-  credito_imagen = 'Imagen de demostracion - Lorem Picsum',
-  texto_alterno_imagen = 'Fotografia generica de archivo usada como marcador en los datos de prueba'
+  credito_imagen = 'Imagen de demostración · Lorem Picsum',
+  texto_alterno_imagen = 'Fotografía genérica de archivo usada como marcador en los datos de prueba'
 where id = 'dddddddd-aaaa-0000-0000-000000000002';
 
 update public.noticias set
   seccion = 'politica',
   url_imagen = 'https://picsum.photos/seed/corte/1200/675',
-  credito_imagen = 'Imagen de demostracion - Lorem Picsum',
-  texto_alterno_imagen = 'Fotografia generica de archivo usada como marcador en los datos de prueba'
+  credito_imagen = 'Imagen de demostración · Lorem Picsum',
+  texto_alterno_imagen = 'Fotografía genérica de archivo usada como marcador en los datos de prueba'
 where id = 'dddddddd-aaaa-0000-0000-000000000003';
 
 update public.noticias set seccion = 'politica'

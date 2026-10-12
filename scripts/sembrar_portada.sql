@@ -31,77 +31,77 @@ values
   -- Internacional, fuente de máxima credibilidad y publicada hace poco: es la
   -- candidata natural a encabezar la portada.
   ('dddddddd-aaaa-0000-0000-000000000011',
-   'Las principales economias acuerdan una hoja de ruta para reducir emisiones',
-   'Los paises participantes publicaron un calendario de metas intermedias y un mecanismo de revision anual.',
-   repeat('Los paises participantes acordaron una hoja de ruta con metas intermedias y revision anual. ', 5),
+   'Las principales economías acuerdan una hoja de ruta para reducir emisiones',
+   'Los países participantes publicaron un calendario de metas intermedias y un mecanismo de revisión anual.',
+   repeat('Los países participantes acordaron una hoja de ruta con metas intermedias y revisión anual. ', 5),
    'https://www.reuters.com/demo/hoja-de-ruta-emisiones/',
    (select id from public.fuentes where dominio = 'reuters.com'),
    'dddddddd-0000-0000-0000-000000000003', 'verificada', 94, now() - interval '2 hours', 'mundo',
    'https://picsum.photos/seed/cumbre/1200/675',
-   'Imagen de demostracion - Lorem Picsum',
-   'Fotografia generica de archivo usada como marcador en los datos de prueba'),
+   'Imagen de demostración · Lorem Picsum',
+   'Fotografía genérica de archivo usada como marcador en los datos de prueba'),
 
   ('dddddddd-aaaa-0000-0000-000000000012',
-   'El banco central mantiene la tasa de interes sin cambios por tercer mes',
-   'La decision se tomo por unanimidad y la autoridad monetaria dejo abierta la posibilidad de ajustes.',
-   repeat('La autoridad monetaria decidio por unanimidad mantener la tasa de interes sin cambios. ', 5),
+   'El banco central mantiene la tasa de interés sin cambios por tercer mes',
+   'La decisión se tomó por unanimidad y la autoridad monetaria dejó abierta la posibilidad de ajustes.',
+   repeat('La autoridad monetaria decidió por unanimidad mantener la tasa de interés sin cambios. ', 5),
    'https://apnews.com/demo/tasa-de-interes/',
    (select id from public.fuentes where dominio = 'apnews.com'),
    'dddddddd-0000-0000-0000-000000000003', 'verificada', 93, now() - interval '5 hours', 'economia',
    'https://picsum.photos/seed/banco/1200/675',
-   'Imagen de demostracion - Lorem Picsum',
-   'Fotografia generica de archivo usada como marcador en los datos de prueba'),
+   'Imagen de demostración · Lorem Picsum',
+   'Fotografía genérica de archivo usada como marcador en los datos de prueba'),
 
   ('dddddddd-aaaa-0000-0000-000000000013',
-   'Una mision internacional evalua los danios tras el paso de la tormenta',
-   'El equipo recorrio las zonas afectadas y adelanto que el informe preliminar se publicara esta semana.',
-   repeat('La mision internacional recorrio las zonas afectadas para evaluar los danios de la tormenta. ', 5),
+   'Una misión internacional evalúa los daños tras el paso de la tormenta',
+   'El equipo recorrió las zonas afectadas y adelantó que el informe preliminar se publicará esta semana.',
+   repeat('La misión internacional recorrió las zonas afectadas para evaluar los daños de la tormenta. ', 5),
    'https://www.afp.com/demo/mision-tormenta/',
    (select id from public.fuentes where dominio = 'afp.com'),
    'dddddddd-0000-0000-0000-000000000003', 'verificada', 91, now() - interval '9 hours', 'mundo',
    'https://picsum.photos/seed/tormenta/1200/675',
-   'Imagen de demostracion - Lorem Picsum',
-   'Fotografia generica de archivo usada como marcador en los datos de prueba'),
+   'Imagen de demostración · Lorem Picsum',
+   'Fotografía genérica de archivo usada como marcador en los datos de prueba'),
 
   ('dddddddd-aaaa-0000-0000-000000000014',
-   'El ministerio publica los resultados de la evaluacion docente',
-   'El informe desglosa los resultados por departamento e incluye el calendario de los procesos de formacion.',
-   repeat('El ministerio publico los resultados de la evaluacion docente desglosados por departamento. ', 5),
+   'El ministerio publica los resultados de la evaluación docente',
+   'El informe desglosa los resultados por departamento e incluye el calendario de los procesos de formación.',
+   repeat('El ministerio publicó los resultados de la evaluación docente desglosados por departamento. ', 5),
    'https://www.prensalibre.com/demo/evaluacion-docente/',
    (select id from public.fuentes where dominio = 'prensalibre.com'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 89, now() - interval '7 hours', 'guatemala',
    'https://picsum.photos/seed/escuela/1200/675',
-   'Imagen de demostracion - Lorem Picsum',
-   'Fotografia generica de archivo usada como marcador en los datos de prueba'),
+   'Imagen de demostración · Lorem Picsum',
+   'Fotografía genérica de archivo usada como marcador en los datos de prueba'),
 
   ('dddddddd-aaaa-0000-0000-000000000015',
-   'La seleccion nacional define su clasificacion en el ultimo partido de la fase',
-   'El resultado del proximo encuentro decide el paso a la siguiente ronda sin depender de otros marcadores.',
-   repeat('La seleccion define su clasificacion en el ultimo partido de la fase de grupos. ', 5),
+   'La selección nacional define su clasificación en el último partido de la fase',
+   'El resultado del próximo encuentro decide el paso a la siguiente ronda sin depender de otros marcadores.',
+   repeat('La selección define su clasificación en el último partido de la fase de grupos. ', 5),
    'https://www.bbc.com/demo/clasificacion/',
    (select id from public.fuentes where dominio = 'bbc.com'),
    'dddddddd-0000-0000-0000-000000000003', 'verificada', 88, now() - interval '4 hours', 'deportes',
    'https://picsum.photos/seed/estadio/1200/675',
-   'Imagen de demostracion - Lorem Picsum',
-   'Fotografia generica de archivo usada como marcador en los datos de prueba'),
+   'Imagen de demostración · Lorem Picsum',
+   'Fotografía genérica de archivo usada como marcador en los datos de prueba'),
 
   ('dddddddd-aaaa-0000-0000-000000000016',
-   'Un informe senala que el consumo electrico de los centros de datos se duplico',
-   'El estudio compara el consumo de los ultimos cinco anios y proyecta la demanda para la proxima decada.',
-   repeat('El informe compara el consumo electrico de los centros de datos en los ultimos cinco anios. ', 5),
+   'Un informe señala que el consumo eléctrico de los centros de datos se duplicó',
+   'El estudio compara el consumo de los últimos cinco años y proyecta la demanda para la próxima década.',
+   repeat('El informe compara el consumo eléctrico de los centros de datos en los últimos cinco años. ', 5),
    'https://elpais.com/demo/centros-de-datos/',
    (select id from public.fuentes where dominio = 'elpais.com'),
    'dddddddd-0000-0000-0000-000000000003', 'verificada', 87, now() - interval '14 hours', 'tecnologia',
    'https://picsum.photos/seed/servidores/1200/675',
-   'Imagen de demostracion - Lorem Picsum',
-   'Fotografia generica de archivo usada como marcador en los datos de prueba'),
+   'Imagen de demostración · Lorem Picsum',
+   'Fotografía genérica de archivo usada como marcador en los datos de prueba'),
 
   -- Las tres siguientes van sin foto: caen en el riel de titulares, que no las
   -- muestra, y sirven para comprobar que la portada no se rompe sin imagen.
   ('dddddddd-aaaa-0000-0000-000000000017',
-   'El festival de cine centroamericano anuncia la lista de peliculas seleccionadas',
-   'La programacion incluye largometrajes y cortos de la region, con funciones en tres sedes.',
-   repeat('El festival anuncio la lista de peliculas seleccionadas para esta edicion. ', 5),
+   'El festival de cine centroamericano anuncia la lista de películas seleccionadas',
+   'La programación incluye largometrajes y cortos de la región, con funciones en tres sedes.',
+   repeat('El festival anunció la lista de películas seleccionadas para esta edición. ', 5),
    'https://www.prensalibre.com/demo/festival-cine/',
    (select id from public.fuentes where dominio = 'prensalibre.com'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 82, now() - interval '20 hours', 'cultura',
@@ -109,7 +109,7 @@ values
 
   ('dddddddd-aaaa-0000-0000-000000000018',
    'Las autoridades municipales presentan el plan de movilidad para la zona central',
-   'El plan contempla cambios de circulacion por etapas y un periodo de consulta antes de aplicarse.',
+   'El plan contempla cambios de circulación por etapas y un periodo de consulta antes de aplicarse.',
    repeat('Las autoridades presentaron el plan de movilidad para la zona central por etapas. ', 5),
    'https://lahora.gt/demo/plan-movilidad/',
    (select id from public.fuentes where dominio = 'lahora.gt'),
@@ -119,14 +119,15 @@ values
   -- Medio digital, credibilidad intermedia y veracidad apenas sobre el umbral:
   -- entra, pero queda abajo. Es el contraste que hace visible la formula.
   ('dddddddd-aaaa-0000-0000-000000000019',
-   'Usuarios reportan fallas intermitentes en un servicio de mensajeria',
-   'Los reportes se concentraron en un periodo de dos horas y la empresa confirmo que atendia el incidente.',
-   repeat('Los usuarios reportaron fallas intermitentes en el servicio de mensajeria durante dos horas. ', 5),
+   'Usuarios reportan fallas intermitentes en un servicio de mensajería',
+   'Los reportes se concentraron en un periodo de dos horas y la empresa confirmó que atendía el incidente.',
+   repeat('Los usuarios reportaron fallas intermitentes en el servicio de mensajería durante dos horas. ', 5),
    'https://www.soy502.com/demo/fallas-mensajeria/',
    (select id from public.fuentes where dominio = 'soy502.com'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 77, now() - interval '30 hours', 'tecnologia',
    null, null, null)
-on conflict (id) do nothing;
+-- Si ya existen, se corrige solo el texto: el resto (estado, fechas, puntaje) no se toca.
+on conflict (id) do update set titulo = excluded.titulo, resumen = excluded.resumen, cuerpo = excluded.cuerpo, credito_imagen = excluded.credito_imagen, texto_alterno_imagen = excluded.texto_alterno_imagen;
 
 -- ---------------------------------------------------------------------------
 -- Interacciones
@@ -167,7 +168,7 @@ on conflict do nothing;
 
 insert into public.comentarios (id_noticia, id_usuario, contenido, creado_en)
 select noticia, ('dddddddd-1000-0000-0000-' || lpad(n::text, 12, '0'))::uuid,
-       'Comentario de demostracion numero ' || n,
+       'Comentario de demostración número ' || n,
        now() - (n || ' minutes')::interval
 from (values
   ('dddddddd-aaaa-0000-0000-000000000011'::uuid, 7),
@@ -177,20 +178,24 @@ from (values
 where n <= t.cuantos
 on conflict do nothing;
 -- ---------------------------------------------------------------------------
--- Cuerpos en parrafos
+-- Cuerpos en párrafos
 --
 -- `repeat(...)` daba una sola frase repetida sin saltos, y la pantalla de nota
--- completa parte el cuerpo en parrafos: con ese dato el tratamiento tipografico
--- era invisible. Tres parrafos, y el ultimo dice que es texto de demostracion
--- porque lo es.
+-- completa parte el cuerpo en párrafos: con ese dato el tratamiento tipográfico
+-- era invisible. Tres párrafos, y los dos últimos dicen que es texto de
+-- demostración porque lo es.
+--
+-- Una versión anterior decía que la coincidencia con otros medios «es la que
+-- midió la señal de corroboración». Era falso: estas notas no pasaron por el
+-- canal y no tienen desglose, como dice la ficha justo debajo. Una nota de
+-- demostración no puede afirmar un control que no tuvo (informe, §9).
 -- ---------------------------------------------------------------------------
 
 update public.noticias set cuerpo =
   resumen || chr(10) || chr(10) ||
-  'Lo publicado por la fuente original coincide con lo que reportan otros medios sobre el mismo hecho. ' ||
-  'Esa coincidencia es la que midio la senal de corroboracion independiente, y es la que explica buena ' ||
-  'parte del puntaje de veracidad que aparece arriba.' || chr(10) || chr(10) ||
-  'Este es texto de demostracion para la portada del proyecto. El contenido real de la nota vive en el ' ||
-  'enlace al articulo original; la plataforma guarda el titular, el resumen y el cuerpo que escribio ' ||
-  'quien publico, y el desglose de las cinco senales que decidieron si se publicaba.'
+  'Esta es una noticia de demostración: no pasó por el canal de validación, así que no tiene el ' ||
+  'desglose de las cinco señales y su puntaje de veracidad se sembró a mano.' || chr(10) || chr(10) ||
+  'En una nota real, el contenido vive en el enlace al artículo original; la plataforma guarda el ' ||
+  'titular, el resumen y el cuerpo que escribió quien publicó, y el desglose de las cinco señales que ' ||
+  'decidieron si se publicaba.'
 where id::text like 'dddddddd-aaaa-0000-0000-00000000001%';
