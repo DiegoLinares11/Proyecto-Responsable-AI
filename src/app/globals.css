@@ -482,3 +482,36 @@ figure.ilustracion.muestra, .ilustracion.muestra { max-width: 22rem; margin: 0; 
   background: var(--papel); color: var(--tinta);
   border: 1px solid var(--tinta);
 }
+
+/* --- Administración ---------------------------------------------------------- */
+.tabla-con-desplazamiento { overflow-x: auto; }
+table.cuentas { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+table.cuentas th {
+  text-align: left; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--tinta-suave); border-bottom: 2px solid var(--tinta); padding: 0.5rem 0.6rem;
+}
+table.cuentas td { border-bottom: 1px solid var(--borde); padding: 0.7rem 0.6rem; vertical-align: top; }
+table.cuentas .correo { display: block; color: var(--tinta-suave); font-size: 0.8125rem; }
+table.cuentas .rol { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; }
+table.cuentas .rol-publicador, table.cuentas .rol-moderador { color: var(--acento); }
+table.cuentas .rol-administrador { color: var(--tinta); }
+table.cuentas .pista { color: var(--tinta-tenue); font-size: 0.8125rem; }
+form.cambio-de-rol { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+form.cambio-de-rol select, form.cambio-de-rol input {
+  font: inherit; font-size: 0.8125rem; padding: 0.35rem 0.5rem;
+  border: 1px solid var(--borde-fuerte); border-radius: 6px; background: var(--papel); color: var(--tinta);
+}
+form.cambio-de-rol input { min-width: 14rem; flex: 1; }
+form.cambio-de-rol button {
+  font: inherit; font-size: 0.8125rem; font-weight: 600; padding: 0.4rem 0.8rem;
+  border: 0; border-radius: 6px; background: var(--tinta); color: var(--papel); cursor: pointer;
+}
+form.cambio-de-rol button:disabled { opacity: 0.5; }
+form.cambio-de-rol .error, form.cambio-de-rol .exito { flex-basis: 100%; margin: 0; font-size: 0.8125rem; }
+form.cambio-de-rol .error { color: var(--peligro); }
+form.cambio-de-rol .exito { color: var(--verificado); }
+.oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+ol.historial { list-style: none; padding: 0; margin: 0; font-size: 0.8125rem; }
+ol.historial li { padding: 0.5rem 0; border-bottom: 1px solid var(--borde); }
+ol.historial .cuando { color: var(--tinta-tenue); }
+ol.historial .motivo { display: block; color: var(--tinta-suave); margin-top: 0.15rem; }
