@@ -121,6 +121,9 @@ export const FUENTES = {
 
 export const Espacio = { xs: 4, s: 8, m: 12, l: 16, xl: 24, xxl: 32 } as const;
 
+/** En una pantalla ancha, la app es una columna de este ancho: la de un diario. */
+export const ANCHO_DE_COLUMNA = 640;
+
 /** Esquinas: rectas, de diario. */
 export const Radio = { chico: 3, medio: 4 } as const;
 
