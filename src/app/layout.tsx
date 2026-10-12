@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { IBM_Plex_Mono, Newsreader, Public_Sans } from "next/font/google";
 
 import "./globals.css";
 import { VentanaDelChatbot } from "./ventana-chatbot.tsx";
@@ -18,6 +19,23 @@ export const metadata: Metadata = {
 // es lo que ya muestra la portada.
 const SECCIONES_DE_LA_CABECERA = SECCIONES.filter((s) => s.clave !== "general");
 
+// Las letras de la identidad. next/font las baja al compilar y las sirve desde
+// este mismo portal: el navegador del lector no le pide nada a Google.
+const titulares = Newsreader({ subsets: ["latin"], style: ["normal", "italic"], variable: "--fuente-titulares", display: "swap" });
+const texto = Public_Sans({ subsets: ["latin"], style: ["normal", "italic"], variable: "--fuente-texto", display: "swap" });
+const numeros = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--fuente-numeros", display: "swap" });
+
+/** El sello: un check en dos anillos, celeste y tinta. El mismo de la app. */
+function Sello() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="29" fill="none" stroke="#3b8fd0" strokeWidth="4" />
+      <circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M22 33 L29 40 L43 24" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Esto decide QUÉ MOSTRAR, no qué se puede hacer. La autorización vive en las
   // políticas de fila: un enlace escondido no protege nada, un `insert` que
@@ -25,13 +43,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const perfil = await perfilDelVisitante();
 
   return (
-    <html lang="es-GT">
+    <html lang="es-GT" className={`${titulares.variable} ${texto.variable} ${numeros.variable}`}>
       <body>
         <div className="contenedor">
           <header className="marca">
             <div className="fila">
               <h1>
-                <a href="/">Noticias Verificadas</a>
+                <a href="/" aria-label="Noticias Verificadas, portada">
+                  <Sello />
+                  <span className="palabras">
+                    <span className="antes">NOTICIAS</span>
+                    <span className="nombre">Verificadas</span>
+                  </span>
+                </a>
               </h1>
               <p className="lema">
                 Cada noticia pasa por cinco señales antes de publicarse, y el orden lo calcula una

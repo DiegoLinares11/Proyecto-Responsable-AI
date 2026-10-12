@@ -1,26 +1,32 @@
 /* Noticias Verificadas — hoja de estilos única.
-   Sin framework y sin fuentes remotas: son cinco pantallas, el presupuesto no da
-   para discutir sobre bundles, y una fuente de Google la pide el navegador del
-   lector, que es exactamente la fuga que la portada declara no querer. */
+   Sin framework. Las letras (Newsreader, Public Sans, IBM Plex Mono) las baja
+   next/font al compilar y las sirve el propio portal: el navegador del lector
+   nunca le pide nada a Google, que es la fuga que la portada declara no querer.
+   Es la misma identidad de la app (app-movil/src/constants/tema.ts): lo del
+   medio en serif, lo de la plataforma en sans, los números de la verificación
+   en mono; celeste para lo verificado, naranja para lo no confirmado. */
 
 :root {
-  --tinta: #16181d;
-  --tinta-suave: #5a6072;
-  --tinta-tenue: #878da0;
+  --tinta: #12161c;
+  --tinta-suave: #4a5260;
+  --tinta-tenue: #6b7380;
   --papel: #ffffff;
-  --papel-hundido: #f4f5f8;
-  --borde: #e2e4ec;
-  --borde-fuerte: #c9ccd8;
-  --acento: #1f5fd0;
-  --verificado: #0f7a4f;
-  --alerta: #b4530b;
-  --peligro: #b3261e;
-  --radio: 8px;
+  --papel-hundido: #f1f3f5;
+  --borde: #e1e5ea;
+  --borde-fuerte: #c3cad3;
+  --acento: #1a62a6;
+  --marca: #3b8fd0;
+  --verificado: #1a62a6;
+  --verificado-fondo: #e4f0fa;
+  --alerta: #b84e08;
+  --peligro: #8f1d14;
+  --radio: 4px;
 
   /* Los titulares van en serif. No es nostalgia: separa visualmente lo que el
      medio afirma de lo que la plataforma calcula, que acá va todo en sans. */
-  --titulares: Georgia, "Times New Roman", "Liberation Serif", serif;
-  --texto: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --titulares: var(--fuente-titulares), Georgia, "Times New Roman", serif;
+  --texto: var(--fuente-texto), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --numeros: var(--fuente-numeros), ui-monospace, "Cascadia Mono", monospace;
   --ancho: 74rem;
 
   color-scheme: light dark;
@@ -28,17 +34,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --tinta: #e9eaf0;
-    --tinta-suave: #a0a6b8;
-    --tinta-tenue: #777e92;
-    --papel: #101218;
-    --papel-hundido: #181b23;
-    --borde: #272b36;
-    --borde-fuerte: #3a3f4e;
-    --acento: #7aa5f0;
-    --verificado: #4cc38a;
-    --alerta: #e2a03f;
-    --peligro: #f2726a;
+    --tinta: #e8ecf1;
+    --tinta-suave: #a1aab6;
+    --tinta-tenue: #8a93a0;
+    --papel: #0d1116;
+    --papel-hundido: #171c23;
+    --borde: #262d37;
+    --borde-fuerte: #3a4350;
+    --acento: #7db9ea;
+    --verificado: #9bcbf2;
+    --verificado-fondo: #12304a;
+    --alerta: #f2a65a;
+    --peligro: #f08a80;
   }
 }
 
@@ -62,19 +69,24 @@ a { color: var(--acento); }
 
 /* --- Masthead ------------------------------------------------------------- */
 
+/* La doble raya de la cabecera de un diario, como en la app. */
 header.marca {
-  border-bottom: 2px solid var(--tinta);
+  border-bottom: 4px double var(--tinta);
   margin-bottom: 1.5rem;
 }
 .marca .fila {
   display: flex; align-items: baseline; gap: 1.25rem;
   padding: 1.15rem 0 0.9rem;
 }
-.marca h1 {
-  font: 700 1.6rem/1 var(--titulares);
-  margin: 0; letter-spacing: -0.02em; white-space: nowrap;
+.marca h1 { margin: 0; align-self: center; white-space: nowrap; }
+.marca h1 a {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  color: inherit; text-decoration: none;
 }
-.marca h1 a { color: inherit; text-decoration: none; }
+.marca h1 svg { width: 2.1rem; height: 2.1rem; flex: none; color: var(--tinta); }
+.marca h1 .palabras { display: flex; flex-direction: column; }
+.marca h1 .antes { font: 700 0.6rem/1 var(--texto); letter-spacing: 0.22em; color: var(--tinta-suave); }
+.marca h1 .nombre { font: 600 1.55rem/1.05 var(--titulares); letter-spacing: -0.01em; }
 .marca .lema {
   margin: 0; color: var(--tinta-suave); font-size: 0.8125rem; line-height: 1.4;
   border-left: 1px solid var(--borde); padding-left: 1.25rem;
@@ -109,7 +121,7 @@ header.marca {
    diario en el teléfono antes que gastar tres renglones en la navegación. */
 @media (max-width: 48rem) {
   .marca .fila { flex-wrap: wrap; row-gap: 0.4rem; align-items: center; padding-bottom: 0.7rem; }
-  .marca h1 { font-size: 1.3rem; }
+  .marca h1 .nombre { font-size: 1.3rem; }
   .marca .lema { order: 3; flex-basis: 100%; border-left: none; padding-left: 0; max-width: none; }
 
   .marca nav {
@@ -274,9 +286,10 @@ figure.ilustracion .etiqueta {
   font-weight: 700; font-size: 0.6875rem;
   letter-spacing: 0.03em; text-transform: uppercase;
   padding: 0.18rem 0.45rem; border-radius: 3px;
-  background: color-mix(in srgb, var(--verificado) 13%, transparent);
+  background: var(--verificado-fondo);
   color: var(--verificado);
 }
+.sello .numero, .meta .numero { font-family: var(--numeros); font-weight: 500; }
 .sello.aviso { background: color-mix(in srgb, var(--alerta) 15%, transparent); color: var(--alerta); }
 .sello.malo  { background: color-mix(in srgb, var(--peligro) 13%, transparent); color: var(--peligro); }
 
@@ -515,3 +528,10 @@ ol.historial { list-style: none; padding: 0; margin: 0; font-size: 0.8125rem; }
 ol.historial li { padding: 0.5rem 0; border-bottom: 1px solid var(--borde); }
 ol.historial .cuando { color: var(--tinta-tenue); }
 ol.historial .motivo { display: block; color: var(--tinta-suave); margin-top: 0.15rem; }
+
+/* En las tarjetas de la rejilla la ilustración es chica: letra y etiqueta a su
+   medida, para que el titular no quede en dos palabras. */
+.rejilla figure.ilustracion { padding: 0.75rem 0.85rem; gap: 0.4rem; }
+.rejilla figure.ilustracion .titular { font-size: 1rem; line-height: 1.2; -webkit-line-clamp: 4; }
+.rejilla figure.ilustracion .etiqueta { font-size: 0.5rem; letter-spacing: 0.06em; padding: 0.1rem 0.35rem; }
+.rejilla figure.ilustracion .rotulo { font-size: 0.5625rem; }
