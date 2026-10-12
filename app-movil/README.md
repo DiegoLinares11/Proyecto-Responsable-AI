@@ -6,7 +6,8 @@ desarrollador pagas. En Android también se puede instalar con su propio ícono
 desde un link (ver «Compartirla por un link»).
 
 Pantallas: **Chat** (la inicial), **Portada** con jerarquía de diario, **lectura**
-de cada noticia con su ficha de validación, y **Perfil**.
+de cada noticia con su ficha de validación, **Perfil** y, solo para cuentas con
+permiso, **Redacción**: publicar, moderar y administrar cuentas.
 
 ## Cómo está armada
 
@@ -17,6 +18,12 @@ de cada noticia con su ficha de validación, y **Perfil**.
   sesión en `Authorization: Bearer`. La llave de la API del modelo y las cinco
   capas de defensa viven en el servidor: una llave dentro de la app la puede
   sacar cualquiera que la descargue.
+- **La redacción también pasa por el servidor** (`/api/redaccion/*`), con el
+  mismo token. La pestaña aparece si el rol tiene algún permiso de la redacción
+  (`src/lib/permisos.tsx` lo lee de Supabase con la sesión), pero eso solo
+  decide qué se muestra: el servidor vuelve a comprobar el permiso en cada
+  petición y las políticas de fila, debajo. Un lector que abre `/redaccion` a
+  mano ve que no tiene acceso; uno que llama a la API, un 403.
 - **La identidad separa voces.** Lo que dice el medio en Newsreader, lo que
   explica la plataforma en Public Sans, los números de la verificación en IBM
   Plex Mono y lo que escribe la IA en cursiva con la etiqueta «IA». El celeste

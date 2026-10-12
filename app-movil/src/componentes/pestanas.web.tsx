@@ -14,8 +14,15 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Logotipo } from '@/componentes/marca';
 import { ANCHOS, Espacio, Tipos, useColores, useDisposicion } from '@/constants/tema';
+import { usePermisos } from '@/lib/permisos';
 
-function Boton({ children, isFocused, ancha, ...props }: TabTriggerSlotProps & { ancha?: boolean }) {
+function Boton({
+  children,
+  isFocused,
+  ancha,
+  oculto,
+  ...props
+}: TabTriggerSlotProps & { ancha?: boolean; oculto?: boolean }) {
   const c = useColores();
   return (
     <Pressable
@@ -25,6 +32,7 @@ function Boton({ children, isFocused, ancha, ...props }: TabTriggerSlotProps & {
         ancha
           ? { borderBottomColor: isFocused ? c.marca : 'transparent' }
           : { borderTopColor: isFocused ? c.marca : 'transparent' },
+        oculto && { display: 'none' },
       ]}>
       <Text
         style={{
@@ -40,7 +48,7 @@ function Boton({ children, isFocused, ancha, ...props }: TabTriggerSlotProps & {
 
 /** Abajo, el orden del teléfono (el chat primero, como pide el enunciado);
  *  arriba, el de un diario: la portada primero. */
-function botones(ancha: boolean) {
+function botones(ancha: boolean, conRedaccion: boolean) {
   const chat = (
     <TabTrigger key="index" name="index" href="/" asChild>
       <Boton ancha={ancha}>Chat</Boton>
@@ -56,12 +64,24 @@ function botones(ancha: boolean) {
       <Boton ancha={ancha}>Perfil</Boton>
     </TabTrigger>
   );
-  return ancha ? [portada, chat, perfil] : [chat, portada, perfil];
+  // El botón, solo para cuentas con algún permiso de la redacción. La ruta
+  // existe siempre: si dependiera del permiso, abrir /redaccion directo
+  // mandaría al chat, porque el permiso llega después del primer dibujo. La
+  // pantalla misma le explica al lector que no tiene acceso.
+  const redaccion = (
+    <TabTrigger key="redaccion" name="redaccion" href="/redaccion" asChild>
+      <Boton ancha={ancha} oculto={!conRedaccion}>
+        Redacción
+      </Boton>
+    </TabTrigger>
+  );
+  return ancha ? [portada, chat, redaccion, perfil] : [chat, portada, redaccion, perfil];
 }
 
 export default function Pestanas() {
   const c = useColores();
   const { ancha, anchoVentana } = useDisposicion();
+  const { redaccion } = usePermisos();
 
   if (ancha) {
     // El contenido de la cabecera mide lo mismo que la portada (ANCHOS.portada)
@@ -78,7 +98,7 @@ export default function Pestanas() {
             ])}>
             <Logotipo />
             <View style={{ flex: 1 }} />
-            {botones(true)}
+            {botones(true, redaccion)}
           </View>
         </TabList>
         <TabSlot style={{ flex: 1 }} />
@@ -91,7 +111,7 @@ export default function Pestanas() {
       <TabSlot style={{ flex: 1 }} />
       <TabList asChild>
         <View style={StyleSheet.flatten([estilos.barra, { backgroundColor: c.papel, borderTopColor: c.bordeFuerte }])}>
-          {botones(false)}
+          {botones(false, redaccion)}
         </View>
       </TabList>
     </Tabs>

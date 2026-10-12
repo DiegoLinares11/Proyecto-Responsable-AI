@@ -9,12 +9,19 @@ chatbot responde preguntas sobre el acervo sin salirse de ese dominio.
 
 | | Qué es | Para quién |
 |---|---|---|
-| **La app** (`app-movil/`, Expo) | La única portada: lectura, chat y perfil. En el teléfono (iOS y Android) y en la web | Lectores |
-| **La redacción** (este repositorio, Next.js) | Publicar, moderar y administrar cuentas. También sirve el chat a la app (`/api/chat`) | Quien publica, modera o administra |
+| **La app** (`app-movil/`, Expo) | Todo lo que se ve: portada, lectura, chat, perfil y, para quien tiene permiso, la pestaña **Redacción** (publicar, moderar, administrar cuentas). En el teléfono (iOS y Android) y en la web | Lectores, y quien publica, modera o administra |
+| **El servidor** (este repositorio, Next.js) | El backend: el chat (`/api/chat`) y la redacción (`/api/redaccion/*`), con las llaves que no pueden viajar en la app. Sus páginas `/publicar`, `/moderacion` y `/administracion` siguen como respaldo | Nadie lo abre a diario |
 
-El portal no tiene portada propia: dos portadas con órdenes distintos —la de la
-app, personalizada; la del portal, global— confundían más de lo que mostraban.
-El «¿por qué está aquí?» con los números de la relevancia vive en la lectura de
+La pestaña **Redacción** aparece solo si el rol de la cuenta tiene algún permiso
+de la redacción, y adentro cada sección solo si tiene la suya. Eso decide qué se
+muestra; lo que cada uno puede hacer lo vuelve a comprobar el servidor en cada
+petición (token en `Authorization: Bearer`) y, debajo, las políticas de fila.
+Las páginas del portal y la API usan la misma implementación
+(`src/modules/redaccion`), así que las reglas son idénticas por los dos caminos.
+
+No hay una segunda portada: dos portadas con órdenes distintos —la de la app,
+personalizada; la del portal, global— confundían más de lo que mostraban. El
+«¿por qué está aquí?» con los números de la relevancia vive en la lectura de
 cada noticia en la app.
 
 ## Integrantes

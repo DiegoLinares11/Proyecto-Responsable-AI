@@ -109,7 +109,7 @@ línea por noticia que dice por qué está ahí («De tu zona · Quetzaltenango�
 «Para que no te pierdas lo nacional»). En una pantalla ancha (la web, una
 tableta) la portada se arma como un diario en línea: la principal grande, cuatro
 destacadas en rejilla a su lado y el resto en columnas. Es la única portada: el
-portal es la redacción, no una segunda portada con otro orden.
+servidor de Next es el backend, no una segunda portada con otro orden.
 
 **Criterios de aceptación**
 - El orden, el tamaño y la posición dependen del usuario: su ubicación y sus
@@ -164,8 +164,19 @@ las cinco señales de validación.
 El formulario de publicar ya registra el alcance y la zona o el país, con la
 misma regla que impone la base.
 
-Existen `/publicar` y `/moderacion`, con Supabase Auth, y se entra con Google con
-la misma cuenta de la app. En `/administracion`, una cuenta con
+**La redacción vive en la app**, en una pestaña que aparece solo si el rol de la
+cuenta tiene algún permiso de la redacción (`noticias_publicar`,
+`noticias_moderar` o `usuarios_administrar`), con una sección por permiso:
+Publicar, Moderación y Cuentas. La app no escribe directo: llama a
+`/api/redaccion/*` con el token de la sesión, y el servidor vuelve a comprobar
+el permiso en cada petición (401 sin sesión, 403 sin permiso) antes de que lo
+compruebe la política de fila. Las páginas `/publicar`, `/moderacion` y
+`/administracion` del servidor siguen como respaldo, con la misma
+implementación (`src/modules/redaccion`): 22 pruebas en
+`tests/unit/redaccion/` confirman que un formulario del portal y un JSON de la
+app se rechazan igual.
+
+Se entra con Google con la misma cuenta en los dos lados. Una cuenta con
 `usuarios_administrar` hace publicador o moderador a quien entró como lector, con
 un motivo que queda en `auditoria` junto con quién lo hizo; abajo se ve el
 historial. El permiso se comprueba con la sesión y la escritura va por el
@@ -194,7 +205,7 @@ Hecho, salvo la prueba de punta a punta con sesión:
   fuente no entra. Seis aserciones en la sección 16 de la suite de RLS, que
   además encontraron un error de la primera versión: con el origen nulo, el
   CHECK daba NULL y dejaba pasar la foto.
-- **Al publicar, el portal ofrece tres caminos**: la ilustración tipográfica
+- **Al publicar, la app (y el portal) ofrecen tres caminos**: la ilustración tipográfica
   (por defecto: es la única que nunca pasa por foto), una foto de archivo de
   Wikimedia Commons, o la foto del medio. De Commons solo pasan CC0, dominio
   público, CC BY y CC BY-SA, y el crédito («autor · licencia · Wikimedia

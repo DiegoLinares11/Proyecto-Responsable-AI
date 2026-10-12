@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { FUENTES, Tipos, useColores } from '@/constants/tema';
+import { ProveedorDePermisos } from '@/lib/permisos';
 import { ProveedorDePreferencias } from '@/lib/preferencias';
 import { ProveedorDeSesion } from '@/lib/sesion';
 
@@ -28,25 +29,27 @@ export default function Raiz() {
 
   return (
     <ProveedorDeSesion>
-      <ProveedorDePreferencias>
-        <ThemeProvider value={esquema === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.papel } }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="noticia/[id]"
-              options={{
-                headerShown: true,
-                title: '',
-                headerBackTitle: 'Volver',
-                headerBackTitleStyle: { fontFamily: Tipos.textoMedio },
-                headerTintColor: c.tinta,
-                headerShadowVisible: false,
-                headerStyle: { backgroundColor: c.papel },
-              }}
-            />
-          </Stack>
-        </ThemeProvider>
-      </ProveedorDePreferencias>
+      <ProveedorDePermisos>
+        <ProveedorDePreferencias>
+          <ThemeProvider value={esquema === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.papel } }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="noticia/[id]"
+                options={{
+                  headerShown: true,
+                  title: '',
+                  headerBackTitle: 'Volver',
+                  headerBackTitleStyle: { fontFamily: Tipos.textoMedio },
+                  headerTintColor: c.tinta,
+                  headerShadowVisible: false,
+                  headerStyle: { backgroundColor: c.papel },
+                }}
+              />
+            </Stack>
+          </ThemeProvider>
+        </ProveedorDePreferencias>
+      </ProveedorDePermisos>
     </ProveedorDeSesion>
   );
 }
