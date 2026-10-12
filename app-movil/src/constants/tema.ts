@@ -28,7 +28,7 @@ import {
   PublicSans_600SemiBold,
   PublicSans_700Bold,
 } from '@expo-google-fonts/public-sans';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, useWindowDimensions } from 'react-native';
 
 const claro = {
   tinta: '#12161C',
@@ -121,8 +121,20 @@ export const FUENTES = {
 
 export const Espacio = { xs: 4, s: 8, m: 12, l: 16, xl: 24, xxl: 32 } as const;
 
-/** En una pantalla ancha, la app es una columna de este ancho: la de un diario. */
-export const ANCHO_DE_COLUMNA = 640;
+/**
+ * Los anchos de una pantalla grande (la web, una tableta). La portada usa el
+ * espacio como un diario —la principal y una rejilla de notas más chicas—; lo
+ * que se lee de corrido va en una columna de texto, como un artículo.
+ */
+export const ANCHOS = { portada: 1280, lectura: 720, conversacion: 760, modal: 640 } as const;
+
+/** Desde este ancho, la portada pasa de lista a rejilla de diario. */
+export const PUNTO_DE_QUIEBRE = 900;
+
+export function useDisposicion(): { ancha: boolean; anchoVentana: number } {
+  const { width } = useWindowDimensions();
+  return { ancha: width >= PUNTO_DE_QUIEBRE, anchoVentana: width };
+}
 
 /** Esquinas: rectas, de diario. */
 export const Radio = { chico: 3, medio: 4 } as const;

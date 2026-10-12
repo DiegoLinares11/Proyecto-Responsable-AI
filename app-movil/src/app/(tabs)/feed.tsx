@@ -20,6 +20,7 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -30,9 +31,10 @@ import { FotoDeNoticia } from '@/componentes/foto';
 import { Abajo, Pin } from '@/componentes/iconos';
 import { IlustracionTipografica } from '@/componentes/ilustracion';
 import { Logotipo } from '@/componentes/marca';
+import { PortadaAncha } from '@/componentes/portada-ancha';
 import { Sello } from '@/componentes/sello';
 import { SelectorDeUbicacion } from '@/componentes/selector-de-ubicacion';
-import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { Espacio, Radio, ROTULO, Tipos, useColores, useDisposicion, type Paleta } from '@/constants/tema';
 import { haceCuanto, leerFeed, type NoticiaDelFeed } from '@/lib/noticias';
 import { personalizar } from '@/lib/personalizacion';
 import { porQue, type Razon } from '@/lib/porque';
@@ -50,6 +52,7 @@ export default function Portada() {
   const [refrescando, setRefrescando] = useState(false);
   const [eligiendo, setEligiendo] = useState(false);
   const { ubicacion, lecturas } = usePreferencias();
+  const { ancha, anchoVentana } = useDisposicion();
 
   // Se recalcula en el teléfono cada vez que cambia la ubicación o una lectura:
   // es aritmética sobre unas decenas de noticias, no una llamada.
@@ -95,6 +98,37 @@ export default function Portada() {
   // Solo la primera letra en mayúscula: «Sábado, 3 de octubre», no «3 De Octubre».
   const fecha = new Date().toLocaleDateString('es-GT', { weekday: 'long', day: 'numeric', month: 'long' });
   const hoy = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  const orden = lecturas.length > 0 ? 'Para tu zona y lo que leés' : 'Ordenada para tu zona';
+
+  // En una pantalla ancha, la disposición de un diario en línea; el orden y las
+  // razones son los mismos (src/componentes/portada-ancha.tsx).
+  if (ancha) {
+    return (
+      <SafeAreaView style={e.pantalla} edges={['top']}>
+        <ScrollView
+          refreshControl={<RefreshControl refreshing={refrescando} onRefresh={refrescar} tintColor={c.acento} />}>
+          {error ? (
+            <Text style={e.error}>{error}</Text>
+          ) : lista === null ? (
+            <ActivityIndicator style={{ marginTop: 48 }} color={c.acento} />
+          ) : lista.length === 0 ? (
+            <Text style={e.vacio}>Todavía no hay noticias verificadas.</Text>
+          ) : (
+            <PortadaAncha
+              lista={lista}
+              anchoVentana={anchoVentana}
+              hoy={hoy}
+              orden={orden}
+              ubicacion={ubicacion.nombre}
+              cambiarUbicacion={() => setEligiendo(true)}
+              abrir={abrir}
+            />
+          )}
+        </ScrollView>
+        <SelectorDeUbicacion visible={eligiendo} cerrar={() => setEligiendo(false)} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={e.pantalla} edges={['top']}>
@@ -120,7 +154,7 @@ export default function Portada() {
             </View>
             <View style={e.filaFecha}>
               <Text style={e.fecha}>{hoy}</Text>
-              <Text style={e.fecha}>{lecturas.length > 0 ? 'Para tu zona y lo que leés' : 'Ordenada para tu zona'}</Text>
+              <Text style={e.fecha}>{orden}</Text>
             </View>
             {/* La doble raya de la cabecera de un diario. */}
             <View style={e.rayaGruesa} />

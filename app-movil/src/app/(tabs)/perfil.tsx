@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotonGoogle } from '@/componentes/boton-google';
 import { Pin } from '@/componentes/iconos';
 import { SelectorDeUbicacion } from '@/componentes/selector-de-ubicacion';
-import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { ANCHOS, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { FACTORES_GEOGRAFICOS, factorDeInteres, INTERES } from '@/lib/personalizacion';
 import { usePreferencias } from '@/lib/preferencias';
 import { SECCIONES } from '@/lib/secciones';
@@ -165,7 +165,14 @@ export default function Perfil() {
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
-    contenido: { padding: Espacio.l, gap: Espacio.m, paddingBottom: 48 },
+    contenido: {
+      padding: Espacio.l,
+      gap: Espacio.m,
+      paddingBottom: 48,
+      width: '100%',
+      maxWidth: ANCHOS.conversacion,
+      alignSelf: 'center',
+    },
     titulo: {
       fontFamily: Tipos.titular,
       fontSize: 32,

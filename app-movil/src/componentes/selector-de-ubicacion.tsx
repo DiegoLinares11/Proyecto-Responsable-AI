@@ -13,7 +13,7 @@ import { ActivityIndicator, Modal, Pressable, SectionList, StyleSheet, Text, Vie
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Pin } from '@/componentes/iconos';
-import { ANCHO_DE_COLUMNA, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { ANCHOS, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { departamentoMasCercano } from '@/lib/cercania';
 import { usePreferencias } from '@/lib/preferencias';
 
@@ -122,9 +122,9 @@ export function SelectorDeUbicacion({ visible, cerrar }: { visible: boolean; cer
 
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
-    fondo: { flex: 1, backgroundColor: c.papelHundido },
+    fondo: { flex: 1, backgroundColor: c.papel },
     // En la web el modal ocupa toda la ventana: la lista queda en la columna de la app.
-    pantalla: { flex: 1, width: '100%', maxWidth: ANCHO_DE_COLUMNA, alignSelf: 'center', backgroundColor: c.papel },
+    pantalla: { flex: 1, width: '100%', maxWidth: ANCHOS.modal, alignSelf: 'center', backgroundColor: c.papel },
     cabecera: {
       flexDirection: 'row',
       alignItems: 'flex-start',

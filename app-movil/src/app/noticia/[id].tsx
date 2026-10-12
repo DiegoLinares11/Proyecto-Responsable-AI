@@ -19,7 +19,7 @@ import { FotoDeNoticia } from '@/componentes/foto';
 import { Afuera } from '@/componentes/iconos';
 import { IlustracionTipografica } from '@/componentes/ilustracion';
 import { Sello } from '@/componentes/sello';
-import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { ANCHOS, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { leerNoticia, type NoticiaCompleta, type Senal } from '@/lib/noticias';
 import { usePreferencias } from '@/lib/preferencias';
 import { nombreDeSeccion } from '@/lib/secciones';
@@ -196,7 +196,7 @@ function FilaDeSenal({ senal, e }: { senal: Senal; e: ReturnType<typeof crearEst
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
-    contenido: { padding: Espacio.l, paddingBottom: 64 },
+    contenido: { padding: Espacio.l, paddingBottom: 64, width: '100%', maxWidth: ANCHOS.lectura, alignSelf: 'center' },
     antetitulo: { ...ROTULO, color: c.acento, marginBottom: Espacio.s },
     titulo: { fontFamily: Tipos.titular, fontSize: 27, lineHeight: 32, color: c.tinta, marginBottom: Espacio.m },
     firma: {

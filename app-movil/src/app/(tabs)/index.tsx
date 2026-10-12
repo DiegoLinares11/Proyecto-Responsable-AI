@@ -26,7 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotonGoogle } from '@/componentes/boton-google';
 import { Enviar, Pin } from '@/componentes/iconos';
 import { Logotipo, SelloMarca } from '@/componentes/marca';
-import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { ANCHOS, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { preguntar } from '@/lib/chat';
 import { titulosDe } from '@/lib/noticias';
 import { usePreferencias } from '@/lib/preferencias';
@@ -111,94 +111,97 @@ export default function Chat() {
 
   return (
     <SafeAreaView style={e.pantalla} edges={['top']}>
-      <View style={e.cabecera}>
-        <SelloMarca tamano={30} />
-        <View style={{ flex: 1 }}>
-          <Text style={e.titulo} accessibilityRole="header">
-            Asistente
-          </Text>
-          <Text style={e.lema}>Responde solo con noticias verificadas</Text>
-        </View>
-        <View style={e.zona}>
-          <Pin color={c.acento} tamano={12} />
-          <Text style={e.zonaTexto} numberOfLines={1}>
-            {ubicacion.nombre}
-          </Text>
-        </View>
-      </View>
-
-      {sesion === null ? (
-        <View style={[e.centro, e.bienvenida]}>
-          <Logotipo grande />
-          <Text style={e.tituloBienvenida}>Un asistente que solo habla de lo que está verificado</Text>
-          <Text style={e.textoBienvenida}>
-            Responde con las noticias de la plataforma y te dice de qué medio sale cada cosa. Si algo no
-            está confirmado, te lo dice.
-          </Text>
-          <View style={{ alignSelf: 'stretch' }}>
-            <BotonGoogle />
+      {/* En una pantalla ancha, la conversación va en una columna, como un artículo. */}
+      <View style={e.columna}>
+        <View style={e.cabecera}>
+          <SelloMarca tamano={30} />
+          <View style={{ flex: 1 }}>
+            <Text style={e.titulo} accessibilityRole="header">
+              Asistente
+            </Text>
+            <Text style={e.lema}>Responde solo con noticias verificadas</Text>
           </View>
-          <Pressable onPress={() => router.push('/feed')} style={e.enlaceToque} accessibilityRole="link">
-            <Text style={e.enlace}>La portada se puede leer sin cuenta →</Text>
-          </Pressable>
+          <View style={e.zona}>
+            <Pin color={c.acento} tamano={12} />
+            <Text style={e.zonaTexto} numberOfLines={1}>
+              {ubicacion.nombre}
+            </Text>
+          </View>
         </View>
-      ) : (
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-          <FlatList
-            ref={lista}
-            data={turnos}
-            keyExtractor={(t) => t.id}
-            contentContainerStyle={e.conversacion}
-            onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
-            ListEmptyComponent={
-              <View style={e.vacio}>
-                <Text style={e.vacioTitulo}>¿Qué querés saber?</Text>
-                <View style={e.sugerencias}>
-                  {sugerencias(ubicacion.nombre).map((s) => (
-                    <Pressable key={s} onPress={() => enviar(s)} style={e.sugerencia} accessibilityRole="button">
-                      <Text style={e.sugerenciaTexto}>{s}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-            }
-            ListFooterComponent={
-              pensando ? (
-                <View style={e.pensando}>
-                  <ActivityIndicator size="small" color={c.tintaSuave} />
-                  <Text style={e.pie}>Buscando en las noticias publicadas…</Text>
-                </View>
-              ) : null
-            }
-            renderItem={({ item }) => <Mensaje turno={item} e={e} />}
-          />
 
-          <View style={e.barraDeEntrada}>
-            <TextInput
-              value={borrador}
-              onChangeText={setBorrador}
-              placeholder="Preguntá sobre las noticias…"
-              placeholderTextColor={c.tintaTenue}
-              accessibilityLabel="Tu pregunta"
-              style={e.entrada}
-              multiline
-              maxLength={2000}
-              onSubmitEditing={() => enviar(borrador)}
-            />
-            <Pressable
-              onPress={() => enviar(borrador)}
-              disabled={pensando || borrador.trim() === ''}
-              accessibilityRole="button"
-              accessibilityLabel="Enviar pregunta"
-              style={[e.enviar, { opacity: pensando || borrador.trim() === '' ? 0.35 : 1 }]}>
-              <Enviar color={c.sobrePrimario} />
+        {sesion === null ? (
+          <View style={[e.centro, e.bienvenida]}>
+            <Logotipo grande />
+            <Text style={e.tituloBienvenida}>Un asistente que solo habla de lo que está verificado</Text>
+            <Text style={e.textoBienvenida}>
+              Responde con las noticias de la plataforma y te dice de qué medio sale cada cosa. Si algo no
+              está confirmado, te lo dice.
+            </Text>
+            <View style={{ alignSelf: 'stretch' }}>
+              <BotonGoogle />
+            </View>
+            <Pressable onPress={() => router.push('/feed')} style={e.enlaceToque} accessibilityRole="link">
+              <Text style={e.enlace}>La portada se puede leer sin cuenta →</Text>
             </Pressable>
           </View>
-        </KeyboardAvoidingView>
-      )}
+        ) : (
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+            <FlatList
+              ref={lista}
+              data={turnos}
+              keyExtractor={(t) => t.id}
+              contentContainerStyle={e.conversacion}
+              onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
+              ListEmptyComponent={
+                <View style={e.vacio}>
+                  <Text style={e.vacioTitulo}>¿Qué querés saber?</Text>
+                  <View style={e.sugerencias}>
+                    {sugerencias(ubicacion.nombre).map((s) => (
+                      <Pressable key={s} onPress={() => enviar(s)} style={e.sugerencia} accessibilityRole="button">
+                        <Text style={e.sugerenciaTexto}>{s}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              }
+              ListFooterComponent={
+                pensando ? (
+                  <View style={e.pensando}>
+                    <ActivityIndicator size="small" color={c.tintaSuave} />
+                    <Text style={e.pie}>Buscando en las noticias publicadas…</Text>
+                  </View>
+                ) : null
+              }
+              renderItem={({ item }) => <Mensaje turno={item} e={e} />}
+            />
+
+            <View style={e.barraDeEntrada}>
+              <TextInput
+                value={borrador}
+                onChangeText={setBorrador}
+                placeholder="Preguntá sobre las noticias…"
+                placeholderTextColor={c.tintaTenue}
+                accessibilityLabel="Tu pregunta"
+                style={e.entrada}
+                multiline
+                maxLength={2000}
+                onSubmitEditing={() => enviar(borrador)}
+              />
+              <Pressable
+                onPress={() => enviar(borrador)}
+                disabled={pensando || borrador.trim() === ''}
+                accessibilityRole="button"
+                accessibilityLabel="Enviar pregunta"
+                style={[e.enviar, { opacity: pensando || borrador.trim() === '' ? 0.35 : 1 }]}>
+                <Enviar color={c.sobrePrimario} />
+              </Pressable>
+            </View>
+          </KeyboardAvoidingView>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -257,6 +260,7 @@ function Mensaje({ turno, e }: { turno: Turno; e: ReturnType<typeof crearEstilos
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
+    columna: { flex: 1, width: '100%', maxWidth: ANCHOS.conversacion, alignSelf: 'center' },
     centro: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     cabecera: {
       flexDirection: 'row',
