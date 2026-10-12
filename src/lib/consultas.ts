@@ -16,6 +16,8 @@
 // filas que después se descartan. Ya no son la frontera.
 // ===========================================================================
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { clienteDelServidor } from "./supabase-servidor.ts";
 import { agruparAlertas, type AlertaDeContenido, type FilaDeAlerta } from "./alertas.ts";
 
@@ -228,8 +230,9 @@ export type NoticiaEnRevision = {
  * la lista sale vacía, que es el comportamiento correcto — no hay una ruta por
  * la que un error de este código exponga la cola.
  */
-export async function leerColaDeModeracion(): Promise<NoticiaEnRevision[]> {
-  const cliente = await clienteDelServidor();
+export async function leerColaDeModeracion(sesion?: SupabaseClient): Promise<NoticiaEnRevision[]> {
+  // Con el token de la app llega su cliente; desde el portal, el de la cookie.
+  const cliente = sesion ?? (await clienteDelServidor());
 
   const { data, error } = await cliente
     .from("noticias")
@@ -300,8 +303,8 @@ export async function leerMisBorradores(): Promise<NoticiaEnRevision[]> {
  * decide qué vuelve: para cualquier rol sin `noticias_moderar`, la lista llega
  * vacía.
  */
-export async function leerAlertasDeContenido(): Promise<AlertaDeContenido[]> {
-  const cliente = await clienteDelServidor();
+export async function leerAlertasDeContenido(sesion?: SupabaseClient): Promise<AlertaDeContenido[]> {
+  const cliente = sesion ?? (await clienteDelServidor());
 
   const { data, error } = await cliente
     .from("alertas_de_contenido")
