@@ -48,30 +48,30 @@ insert into public.noticias
    puntaje_veracidad, publicada_en, seccion, alcance, pais, id_ubicacion)
 values
   ('dddddddd-aaaa-0000-0000-000000000021',
-   'Quetzaltenango amplia el horario de atencion en los centros de salud del area urbana',
-   'La medida rige desde esta semana y busca reducir las filas de la manana, segun la direccion de area de salud.',
-   'La direccion de area de salud anuncio la ampliacion del horario en los centros del area urbana.' || chr(10) || chr(10) ||
-   'Este es texto de demostracion para comparar ubicaciones en la app: una noticia local de Quetzaltenango.',
+   'Quetzaltenango amplía el horario de atención en los centros de salud del área urbana',
+   'La medida rige desde esta semana y busca reducir las filas de la mañana, según la dirección de área de salud.',
+   'La dirección de área de salud anunció la ampliación del horario en los centros del área urbana.' || chr(10) || chr(10) ||
+   'Este es texto de demostración para comparar ubicaciones en la app: una noticia local de Quetzaltenango.',
    'https://lahora.gt/demo/quetzaltenango-salud/',
    (select id from public.fuentes where dominio = 'lahora.gt'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 84, now() - interval '3 hours',
    'guatemala', 'local', 'GT', 'GT-QZ'),
 
   ('dddddddd-aaaa-0000-0000-000000000022',
-   'Peten reporta avances en la temporada de control de incendios forestales',
-   'Las brigadas reportan menos focos activos que el ano anterior y mantienen la vigilancia en las areas protegidas.',
+   'Petén reporta avances en la temporada de control de incendios forestales',
+   'Las brigadas reportan menos focos activos que el año anterior y mantienen la vigilancia en las áreas protegidas.',
    'Las brigadas de control de incendios reportaron avances en la temporada.' || chr(10) || chr(10) ||
-   'Este es texto de demostracion para comparar ubicaciones en la app: una noticia local de Peten.',
+   'Este es texto de demostración para comparar ubicaciones en la app: una noticia local de Petén.',
    'https://www.prensalibre.com/demo/peten-incendios/',
    (select id from public.fuentes where dominio = 'prensalibre.com'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 86, now() - interval '5 hours',
    'guatemala', 'local', 'GT', 'GT-PE'),
 
   ('dddddddd-aaaa-0000-0000-000000000023',
-   'Escuintla anuncia cierres temporales en un tramo de la ruta al Pacifico por reparaciones',
-   'Los trabajos se haran por la noche durante dos semanas y habra un paso alterno senalizado.',
+   'Escuintla anuncia cierres temporales en un tramo de la ruta al Pacífico por reparaciones',
+   'Los trabajos se harán por la noche durante dos semanas y habrá un paso alterno señalizado.',
    'Las autoridades anunciaron cierres temporales nocturnos por reparaciones.' || chr(10) || chr(10) ||
-   'Este es texto de demostracion para comparar ubicaciones en la app: una noticia local de Escuintla.',
+   'Este es texto de demostración para comparar ubicaciones en la app: una noticia local de Escuintla.',
    'https://lahora.gt/demo/escuintla-ruta/',
    (select id from public.fuentes where dominio = 'lahora.gt'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 82, now() - interval '4 hours',
@@ -79,11 +79,12 @@ values
 
   ('dddddddd-aaaa-0000-0000-000000000024',
    'Alta Verapaz habilita albergues temporales tras las lluvias de la semana',
-   'Los albergues funcionan en escuelas de tres municipios y las autoridades piden atender los avisos de evacuacion.',
+   'Los albergues funcionan en escuelas de tres municipios y las autoridades piden atender los avisos de evacuación.',
    'Las autoridades habilitaron albergues temporales tras las lluvias.' || chr(10) || chr(10) ||
-   'Este es texto de demostracion para comparar ubicaciones en la app: una noticia local de Alta Verapaz.',
+   'Este es texto de demostración para comparar ubicaciones en la app: una noticia local de Alta Verapaz.',
    'https://www.prensalibre.com/demo/alta-verapaz-albergues/',
    (select id from public.fuentes where dominio = 'prensalibre.com'),
    'dddddddd-0000-0000-0000-000000000001', 'verificada', 88, now() - interval '6 hours',
    'guatemala', 'local', 'GT', 'GT-AV')
-on conflict (id) do nothing;
+-- Si ya existen, se corrige solo el texto: el resto (estado, fechas, puntaje) no se toca.
+on conflict (id) do update set titulo = excluded.titulo, resumen = excluded.resumen, cuerpo = excluded.cuerpo;
