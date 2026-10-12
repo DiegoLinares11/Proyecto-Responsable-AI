@@ -38,17 +38,23 @@ import { registrar } from "../auditoria/index.ts";
 import { crearDependenciasDeValidacion, type OpcionesDeValidacion } from "./puertos.ts";
 
 /**
- * La imagen viaja entera o no viaja.
+ * La imagen viaja entera o no viaja, y siempre con su origen (R-10).
  *
- * La base ya lo exige con un CHECK; repetirlo en el tipo hace que no se pueda
- * ni construir la llamada incompleta, en vez de descubrirlo con un error de
- * Postgres después de haberle pedido todo el texto a quien publica.
+ * La base ya lo exige con CHECK; repetirlo en el tipo hace que no se pueda ni
+ * construir la llamada incompleta, en vez de descubrirlo con un error de
+ * Postgres después de haberle pedido todo el texto a quien publica. La
+ * ilustración tipográfica no tiene archivo: se compone al mostrarla.
  */
-export type ImagenDeBorrador = {
-  url: string;
-  credito: string;
-  alterno: string;
-};
+export type ImagenDeBorrador =
+  | {
+      origen: "medio" | "licencia_libre" | "generada_ia";
+      url: string;
+      credito: string;
+      alterno: string;
+      /** La página con la licencia (Commons) o la nota del medio. */
+      urlFuente: string | null;
+    }
+  | { origen: "ilustracion" };
 
 export type DatosDeBorrador = {
   titulo: string;
@@ -76,6 +82,29 @@ export class ErrorDeNoticia extends Error {
   }
 }
 
+/** Las cinco columnas de la imagen, a partir de lo que eligió quien publica. */
+export function columnasDeImagen(imagen: ImagenDeBorrador | null) {
+  if (imagen === null) {
+    return { url_imagen: null, credito_imagen: null, texto_alterno_imagen: null, origen_imagen: null, url_fuente_imagen: null };
+  }
+  if (imagen.origen === "ilustracion") {
+    return {
+      url_imagen: null,
+      credito_imagen: null,
+      texto_alterno_imagen: null,
+      origen_imagen: "ilustracion" as const,
+      url_fuente_imagen: null,
+    };
+  }
+  return {
+    url_imagen: imagen.url,
+    credito_imagen: imagen.credito,
+    texto_alterno_imagen: imagen.alterno,
+    origen_imagen: imagen.origen,
+    url_fuente_imagen: imagen.urlFuente,
+  };
+}
+
 /**
  * Crea un borrador en nombre del publicador.
  *
@@ -97,9 +126,7 @@ export async function crearBorrador(
       cuerpo: datos.cuerpo,
       url_original: datos.urlOriginal,
       seccion: datos.seccion,
-      url_imagen: datos.imagen?.url ?? null,
-      credito_imagen: datos.imagen?.credito ?? null,
-      texto_alterno_imagen: datos.imagen?.alterno ?? null,
+      ...columnasDeImagen(datos.imagen),
       alcance: datos.alcance,
       pais: datos.pais,
       id_ubicacion: datos.idUbicacion,

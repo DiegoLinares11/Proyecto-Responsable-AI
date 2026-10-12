@@ -32,6 +32,14 @@ export type ImagenDeNoticia = {
   url: string;
   credito: string;
   alterno: string;
+  /**
+   * De dónde sale (R-10). La interfaz lo muestra siempre: una foto de archivo o
+   * una imagen de IA no pueden pasar por foto del hecho. Nulo solo en filas
+   * anteriores a la columna.
+   */
+  origen: "medio" | "licencia_libre" | "generada_ia" | null;
+  /** La página con la licencia (Commons) o la nota del medio. */
+  urlFuente: string | null;
 };
 
 export type NoticiaDelFeed = {
@@ -56,7 +64,7 @@ export type NoticiaDelFeed = {
 
 const CAMPOS_DEL_FEED =
   "id,titulo,resumen,publicada_en,puntaje_veracidad,relevancia," +
-  "seccion,url_imagen,credito_imagen,texto_alterno_imagen," +
+  "seccion,url_imagen,credito_imagen,texto_alterno_imagen,origen_imagen,url_fuente_imagen," +
   "componente_interacciones,componente_verificadas,componente_fuente,componente_veracidad," +
   "rafaga_sospechosa,fuentes(nombre,puntaje_credibilidad)";
 
@@ -69,6 +77,8 @@ type FilaDelFeed = {
   url_imagen: string | null;
   credito_imagen: string | null;
   texto_alterno_imagen: string | null;
+  origen_imagen: "medio" | "licencia_libre" | "ilustracion" | "generada_ia" | null;
+  url_fuente_imagen: string | null;
   puntaje_veracidad: number | null;
   relevancia: number | string;
   componente_interacciones: number | string;
@@ -94,6 +104,8 @@ function aNoticia(fila: FilaDelFeed): NoticiaDelFeed {
             url: fila.url_imagen,
             credito: fila.credito_imagen,
             alterno: fila.texto_alterno_imagen,
+            origen: fila.origen_imagen === "ilustracion" ? null : fila.origen_imagen,
+            urlFuente: fila.url_fuente_imagen,
           }
         : null,
     fuente: fila.fuentes?.nombre ?? null,

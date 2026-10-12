@@ -14,6 +14,7 @@
 
 import { Fragment } from "react";
 
+import { ImagenDeNoticia } from "./imagen-de-noticia.tsx";
 import { leerFeed, type NoticiaDelFeed } from "../lib/consultas.ts";
 import { interpretarSeccion, NOMBRE_DE_SECCION } from "../lib/secciones.ts";
 
@@ -36,29 +37,6 @@ function SelloDeVeracidad({ puntaje }: { puntaje: number | null }) {
     return <span className="sello">verificada · {puntaje}/100</span>;
   }
   return <span className="sello aviso">veracidad {puntaje}/100</span>;
-}
-
-/**
- * La foto.
- *
- * `referrerPolicy="no-referrer"` no es un detalle: una imagen remota la pide el
- * navegador del lector, así que el servidor del medio ve su IP y, si no se lo
- * impide, también QUÉ nota está leyendo. Lo primero no se puede evitar sin un
- * proxy propio; lo segundo sí, y cuesta un atributo.
- */
-function Foto({ imagen }: { imagen: NonNullable<NoticiaDelFeed["imagen"]> }) {
-  return (
-    <figure className="foto">
-      <img
-        src={imagen.url}
-        alt={imagen.alterno}
-        loading="lazy"
-        decoding="async"
-        referrerPolicy="no-referrer"
-      />
-      <figcaption>{imagen.credito}</figcaption>
-    </figure>
-  );
 }
 
 function PorQueEstaAqui({ noticia }: { noticia: NoticiaDelFeed }) {
@@ -118,7 +96,7 @@ function PorQueEstaAqui({ noticia }: { noticia: NoticiaDelFeed }) {
 function Nota({ noticia, principal = false }: { noticia: NoticiaDelFeed; principal?: boolean }) {
   return (
     <article className={principal ? "nota principal" : "nota"}>
-      {noticia.imagen !== null ? <Foto imagen={noticia.imagen} /> : null}
+      <ImagenDeNoticia noticia={noticia} />
       <div className="texto">
         <span className="antetitulo">{NOMBRE_DE_SECCION[noticia.seccion]}</span>
         <h2>

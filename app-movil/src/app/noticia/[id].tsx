@@ -10,13 +10,14 @@
 // el canal: una ficha que solo muestra lo que salió bien sería publicidad.
 // ===========================================================================
 
-import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { FotoDeNoticia } from '@/componentes/foto';
 import { Afuera } from '@/componentes/iconos';
+import { IlustracionTipografica } from '@/componentes/ilustracion';
 import { Sello } from '@/componentes/sello';
 import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { leerNoticia, type NoticiaCompleta, type Senal } from '@/lib/noticias';
@@ -61,7 +62,11 @@ export default function Lectura() {
   if (noticia === undefined) return <ActivityIndicator style={{ marginTop: 48 }} color={c.acento} />;
   if (noticia === null) return <Text style={e.error}>Esta noticia no existe o no está publicada.</Text>;
 
-  const parrafos = noticia.cuerpo.split(/\n{2,}/).filter((p) => p.trim() !== '');
+  // Muchos cuerpos empiezan repitiendo el resumen, que ya va arriba como
+  // entradilla: no se muestra dos veces.
+  const parrafos = noticia.cuerpo
+    .split(/\n{2,}/)
+    .filter((p) => p.trim() !== '' && p.trim() !== noticia.resumen.trim());
   const fecha = new Date(noticia.publicadaEn).toLocaleString('es-GT', {
     dateStyle: 'long',
     timeStyle: 'short',
@@ -82,17 +87,13 @@ export default function Lectura() {
         <Text style={e.fecha}>{fecha}</Text>
       </View>
 
-      {noticia.imagen ? (
-        <View style={{ marginBottom: Espacio.l }}>
-          <Image
-            source={noticia.imagen.url}
-            accessibilityLabel={noticia.imagen.alterno}
-            style={e.imagen}
-            contentFit="cover"
-          />
-          <Text style={e.credito}>{noticia.imagen.credito}</Text>
-        </View>
-      ) : null}
+      <View style={{ marginBottom: Espacio.l }}>
+        {noticia.imagen ? (
+          <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagen} />
+        ) : (
+          <IlustracionTipografica seccion={seccion} titulo={noticia.titulo} />
+        )}
+      </View>
 
       <Text style={e.rotulo}>LO QUE DICE EL MEDIO</Text>
       <Text style={e.entradilla}>{noticia.resumen}</Text>
@@ -212,7 +213,6 @@ function crearEstilos(c: Paleta) {
     fuente: { fontFamily: Tipos.textoMedio, fontSize: 13, color: c.tinta },
     fecha: { fontFamily: Tipos.texto, fontSize: 12, color: c.tintaTenue },
     imagen: { width: '100%', aspectRatio: 3 / 2, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
-    credito: { fontFamily: Tipos.texto, fontSize: 11, color: c.tintaTenue, marginTop: 6, letterSpacing: 0.3 },
 
     rotulo: { ...ROTULO, fontSize: 10, color: c.tintaSuave, marginBottom: Espacio.s },
     entradilla: { fontFamily: Tipos.lectura, fontSize: 19, lineHeight: 27, color: c.tinta, marginBottom: Espacio.l },

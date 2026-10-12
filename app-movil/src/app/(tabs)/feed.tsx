@@ -13,7 +13,6 @@
 // lo que este curso enseña a no construir.
 // ===========================================================================
 
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -27,6 +26,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FotoDeNoticia } from '@/componentes/foto';
 import { Abajo, Pin } from '@/componentes/iconos';
 import { IlustracionTipografica } from '@/componentes/ilustracion';
 import { Logotipo } from '@/componentes/marca';
@@ -198,19 +198,13 @@ function Meta({ noticia, e, compacta = false }: Pick<PropsDeTarjeta, 'noticia' |
 function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
     <Pressable onPress={onPress} style={e.principal} accessibilityRole="link">
-      {noticia.imagen ? (
-        <Image
-          source={noticia.imagen.url}
-          accessibilityLabel={noticia.imagen.alterno}
-          style={e.imagenPrincipal}
-          contentFit="cover"
-          transition={200}
-        />
-      ) : (
-        <View style={{ marginBottom: Espacio.m }}>
+      <View style={{ marginBottom: Espacio.m }}>
+        {noticia.imagen ? (
+          <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenPrincipal} />
+        ) : (
           <IlustracionTipografica seccion={nombreDeSeccion(noticia.seccion)} titulo={noticia.titulo} />
-        </View>
-      )}
+        )}
+      </View>
       <View style={e.cuerpoPrincipal}>
         <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
         <Text style={e.tituloPrincipal}>{noticia.titulo}</Text>
@@ -236,12 +230,7 @@ function Destacada({ noticia, razon, e, onPress }: PropsDeTarjeta) {
         <PorQue razon={razon} e={e} />
       </View>
       {noticia.imagen ? (
-        <Image
-          source={noticia.imagen.url}
-          accessibilityLabel={noticia.imagen.alterno}
-          style={e.imagenDestacada}
-          contentFit="cover"
-        />
+        <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenDestacada} miniatura />
       ) : (
         <IlustracionTipografica seccion={nombreDeSeccion(noticia.seccion)} titulo={noticia.titulo} chica />
       )}
@@ -324,7 +313,6 @@ function crearEstilos(c: Paleta) {
       aspectRatio: 16 / 10,
       borderRadius: Radio.chico,
       backgroundColor: c.fotoVacia,
-      marginBottom: Espacio.m,
     },
     cuerpoPrincipal: { gap: Espacio.s },
     tituloPrincipal: { fontFamily: Tipos.titular, fontSize: 26, lineHeight: 30, color: c.tinta },

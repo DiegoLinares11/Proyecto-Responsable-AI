@@ -81,10 +81,10 @@ if (ES_UUID.test(argumento)) {
         `${resumen}
 
 ` +
-        `Esta nota se cargo a la plataforma desde su enlace original para ejercitar el canal ` +
-        `de validacion. El texto completo es de ${new URL(argumento).hostname} y esta en el enlace ` +
-        `al articulo original; aca se guardan el titular y la entradilla que el propio medio ` +
-        `publica para ser citado, mas el desglose de las cinco senales que decidieron su estado.`,
+        `Esta nota se cargó a la plataforma desde su enlace original para ejercitar el canal ` +
+        `de validación. El texto completo es de ${new URL(argumento).hostname} y está en el enlace ` +
+        `al artículo original; acá se guardan el titular y la entradilla que el propio medio ` +
+        `publica para ser citado, más el desglose de las cinco señales que decidieron su estado.`,
       url_original: argumento,
       seccion,
       // La imagen que el propio medio publica para que la muestren al enlazarlo,
@@ -94,7 +94,10 @@ if (ES_UUID.test(argumento)) {
       url_imagen: metadatos.imagen,
       credito_imagen: metadatos.imagen === null ? null : `Imagen publicada por ${new URL(argumento).hostname}`,
       texto_alterno_imagen:
-        metadatos.imagen === null ? null : `Imagen que acompana la nota: ${metadatos.titulo}`.slice(0, 300),
+        metadatos.imagen === null ? null : `Imagen que acompaña la nota: ${metadatos.titulo}`.slice(0, 300),
+      // De dónde sale (R-10): la publicó el medio con la nota.
+      origen_imagen: metadatos.imagen === null ? null : "medio",
+      url_fuente_imagen: metadatos.imagen === null || !argumento.startsWith("https://") ? null : argumento,
       id_autor: "dddddddd-0000-0000-0000-000000000001",
       estado: "borrador",
     })

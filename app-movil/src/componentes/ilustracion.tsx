@@ -46,7 +46,7 @@ export function IlustracionTipografica({
       accessibilityLabel={`Ilustración de ${seccion}, no es una fotografía`}>
       <View style={estilos.cabecera}>
         <Text style={[ROTULO, { color: c.ilustracionAntetitulo }]}>{seccion.toUpperCase()}</Text>
-        <SelloMarca tamano={28} />
+        <SelloMarca tamano={28} tinta={c.ilustracionTexto} />
       </View>
       <Text style={[estilos.titulo, { color: c.ilustracionTexto }]} numberOfLines={3}>
         {titulo}

@@ -635,9 +635,10 @@ select pg_temp.debe_pasar($q$
   update public.noticias
      set url_imagen = 'https://ejemplo.org/foto.jpg',
          credito_imagen = 'Fotografia: alguien',
-         texto_alterno_imagen = 'Lo que se ve en la foto'
+         texto_alterno_imagen = 'Lo que se ve en la foto',
+         origen_imagen = 'medio'
    where id = 'aaaaaaaa-0000-0000-0000-000000000001'
-$q$, 'con https, credito y texto alterno SI entra');
+$q$, 'con https, credito, texto alterno y origen SI entra');
 
 select pg_temp.debe_contar(
   $q$select count(*) from public.noticias where seccion = 'general' and id = 'aaaaaaaa-0000-0000-0000-000000000009'$q$,
@@ -820,6 +821,61 @@ select pg_temp.debe_contar('select count(*) from public.preferencias_usuario',
   0, 'un moderador tampoco ve ubicaciones ajenas');
 
 reset role;
+
+-- ===========================================================================
+-- 16. De dónde sale cada imagen
+--
+-- Una foto de archivo o una imagen de IA no pueden pasar por foto del hecho:
+-- para eso la base guarda el origen, y las reglas viven acá y no en el
+-- formulario (R-10).
+-- ===========================================================================
+
+\echo ''
+\echo '# 16. origen de la imagen'
+
+select pg_temp.debe_fallar($q$
+  update public.noticias
+     set url_imagen = 'https://ejemplo.org/foto.jpg', credito_imagen = 'Alguien',
+         texto_alterno_imagen = 'Una foto de prueba', origen_imagen = null
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una foto sin origen NO entra');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias
+     set url_imagen = 'https://ejemplo.org/foto.jpg', credito_imagen = 'Alguien',
+         texto_alterno_imagen = 'Una foto de prueba', origen_imagen = 'ilustracion'
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una ilustracion con archivo NO entra: la ilustracion se compone al mostrarla');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias
+     set url_imagen = 'https://upload.wikimedia.org/foto.jpg', credito_imagen = 'Autora · CC BY 4.0',
+         texto_alterno_imagen = 'Una foto de archivo', origen_imagen = 'licencia_libre',
+         url_fuente_imagen = null
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una licencia libre sin enlace a su fuente NO entra');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias
+     set url_imagen = 'https://upload.wikimedia.org/foto.jpg', credito_imagen = 'Autora · CC BY 4.0',
+         texto_alterno_imagen = 'Una foto de archivo', origen_imagen = 'licencia_libre',
+         url_fuente_imagen = 'https://commons.wikimedia.org/wiki/File:Foto.jpg'
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una licencia libre con su fuente SI entra');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias
+     set url_imagen = null, credito_imagen = null, texto_alterno_imagen = null,
+         origen_imagen = 'ilustracion', url_fuente_imagen = null
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'la ilustracion tipografica, sin archivo, SI entra');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias
+     set url_imagen = 'https://ejemplo.org/ia.png', credito_imagen = 'Generada con un modelo',
+         texto_alterno_imagen = 'Una imagen generada', origen_imagen = 'generada_ia'
+   where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+$q$, 'una imagen de IA SI entra, rotulada como tal');
 
 \echo ''
 \echo '=== todas las pruebas pasaron ==='
