@@ -13,7 +13,7 @@ import { ActivityIndicator, Modal, Pressable, SectionList, StyleSheet, Text, Vie
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Pin } from '@/componentes/iconos';
-import { Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
+import { ANCHO_DE_COLUMNA, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { departamentoMasCercano } from '@/lib/cercania';
 import { usePreferencias } from '@/lib/preferencias';
 
@@ -57,70 +57,74 @@ export function SelectorDeUbicacion({ visible, cerrar }: { visible: boolean; cer
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={cerrar}>
-      <SafeAreaView style={e.pantalla}>
-        <View style={e.cabecera}>
-          <View style={{ flex: 1 }}>
-            <Text style={e.titulo}>Tu ubicación</Text>
-            <Text style={e.nota}>Simulada: la elegís vos. Cambia lo que ves en la portada y en el chat.</Text>
+      <View style={e.fondo}>
+        <SafeAreaView style={e.pantalla}>
+          <View style={e.cabecera}>
+            <View style={{ flex: 1 }}>
+              <Text style={e.titulo}>Tu ubicación</Text>
+              <Text style={e.nota}>Simulada: la elegís vos. Cambia lo que ves en la portada y en el chat.</Text>
+            </View>
+            <Pressable onPress={cerrar} accessibilityRole="button" hitSlop={12}>
+              <Text style={e.listo}>Listo</Text>
+            </Pressable>
           </View>
-          <Pressable onPress={cerrar} accessibilityRole="button" hitSlop={12}>
-            <Text style={e.listo}>Listo</Text>
-          </Pressable>
-        </View>
 
-        <View style={e.gps}>
-          <Pressable
-            onPress={usarUbicacionReal}
-            disabled={buscando}
-            style={e.botonGps}
-            accessibilityRole="button">
-            {buscando ? (
-              <ActivityIndicator color={c.acento} />
-            ) : (
-              <View style={e.filaGps}>
-                <Pin color={c.tinta} tamano={16} />
-                <Text style={e.botonGpsTexto}>Usar mi ubicación real (aproximada)</Text>
-              </View>
-            )}
-          </Pressable>
-          <Text style={e.nota}>
-            Se calcula en tu teléfono contra las cabeceras departamentales: las coordenadas no se
-            mandan a ningún servidor ni se guardan.
-          </Text>
-          {aviso ? <Text style={e.aviso}>{aviso}</Text> : null}
-        </View>
+          <View style={e.gps}>
+            <Pressable
+              onPress={usarUbicacionReal}
+              disabled={buscando}
+              style={e.botonGps}
+              accessibilityRole="button">
+              {buscando ? (
+                <ActivityIndicator color={c.acento} />
+              ) : (
+                <View style={e.filaGps}>
+                  <Pin color={c.tinta} tamano={16} />
+                  <Text style={e.botonGpsTexto}>Usar mi ubicación real (aproximada)</Text>
+                </View>
+              )}
+            </Pressable>
+            <Text style={e.nota}>
+              Se calcula en tu teléfono contra las cabeceras departamentales: las coordenadas no se
+              mandan a ningún servidor ni se guardan.
+            </Text>
+            {aviso ? <Text style={e.aviso}>{aviso}</Text> : null}
+          </View>
 
-        <SectionList
-          sections={secciones}
-          keyExtractor={(u) => u.id}
-          renderSectionHeader={({ section }) => <Text style={e.grupo}>{section.titulo}</Text>}
-          renderItem={({ item }) => {
-            const elegida = item.id === ubicacion.id;
-            return (
-              <Pressable
-                onPress={async () => {
-                  await cambiarUbicacion(item.id);
-                  cerrar();
-                }}
-                style={[e.opcion, elegida ? e.opcionElegida : null]}
-                accessibilityRole="button"
-                accessibilityState={{ selected: elegida }}>
-                <Text style={[e.opcionTexto, elegida ? { color: c.acento, fontFamily: Tipos.textoFuerte } : null]}>
-                  {item.nombre}
-                </Text>
-                {elegida ? <Text style={e.marca}>✓</Text> : null}
-              </Pressable>
-            );
-          }}
-        />
-      </SafeAreaView>
+          <SectionList
+            sections={secciones}
+            keyExtractor={(u) => u.id}
+            renderSectionHeader={({ section }) => <Text style={e.grupo}>{section.titulo}</Text>}
+            renderItem={({ item }) => {
+              const elegida = item.id === ubicacion.id;
+              return (
+                <Pressable
+                  onPress={async () => {
+                    await cambiarUbicacion(item.id);
+                    cerrar();
+                  }}
+                  style={[e.opcion, elegida ? e.opcionElegida : null]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: elegida }}>
+                  <Text style={[e.opcionTexto, elegida ? { color: c.acento, fontFamily: Tipos.textoFuerte } : null]}>
+                    {item.nombre}
+                  </Text>
+                  {elegida ? <Text style={e.marca}>✓</Text> : null}
+                </Pressable>
+              );
+            }}
+          />
+        </SafeAreaView>
+      </View>
     </Modal>
   );
 }
 
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
-    pantalla: { flex: 1, backgroundColor: c.papel },
+    fondo: { flex: 1, backgroundColor: c.papelHundido },
+    // En la web el modal ocupa toda la ventana: la lista queda en la columna de la app.
+    pantalla: { flex: 1, width: '100%', maxWidth: ANCHO_DE_COLUMNA, alignSelf: 'center', backgroundColor: c.papel },
     cabecera: {
       flexDirection: 'row',
       alignItems: 'flex-start',
