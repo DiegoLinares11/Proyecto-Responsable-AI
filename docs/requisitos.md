@@ -51,9 +51,11 @@ un iPhone y un Android de verdad.**
 
 El código de la app está listo (`app-movil/src/lib/sesion.tsx`); el servidor
 del chat ya acepta el token de la app y lo valida contra Supabase (probado:
-sin token 401, token inventado 401, token válido 200). **Falta: habilitar el
-proveedor Google en Supabase** (pasos en `app-movil/README.md`) y el botón de
-Google en el portal.
+sin token 401, token inventado 401, token válido 200). Google ya está habilitado
+en Supabase y el login de la app se probó con una cuenta real. El portal tiene
+«Entrar con Google» con la misma cuenta (`src/app/entrar`, `src/app/auth/callback`),
+probado hasta la pantalla de Google. **Falta: probar el portal de punta a punta**,
+que necesita `http://localhost:3000/**` en las Redirect URLs de Supabase.
 
 **Criterios de aceptación**
 - La app y el portal inician sesión con Google.
@@ -159,7 +161,10 @@ las cinco señales de validación.
 El formulario de publicar ya registra el alcance y la zona o el país, con la
 misma regla que impone la base.
 
-Existen `/publicar` y `/moderacion`, con Supabase Auth.
+Existen `/publicar` y `/moderacion`, con Supabase Auth, y se entra con Google con
+la misma cuenta de la app. Los roles los cambia un administrador desde el servidor
+con `scripts/asignar_rol.mjs`, que deja el rol anterior, el nuevo y el motivo en
+`auditoria`; desde una sesión, el trigger `impedir_autoascenso` lo rechaza.
 
 **Criterios de aceptación**
 - Entrada con Firebase (R-02).
