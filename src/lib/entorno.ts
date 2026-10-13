@@ -71,6 +71,7 @@ export function entornoDelModelo() {
   return {
     modo: opcional("LLM_MODO"),
     llaveAnthropic: opcional("ANTHROPIC_API_KEY"),
+    llaveOpenAI: opcional("OPENAI_API_KEY"),
     llaveFactCheck: opcional("GOOGLE_FACT_CHECK_API_KEY"),
     topeMensajesPorUsuarioDia: numero("TOPE_MENSAJES_POR_USUARIO_DIA", 40),
     topeGastoUsd: numero("TOPE_GASTO_USD_ACUMULADO", 18),

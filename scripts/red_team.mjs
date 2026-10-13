@@ -7,7 +7,7 @@
 //   node scripts/red_team.mjs --caso esc-01
 //
 // El modo lo decide LLM_MODO. Las mediciones que van al informe tienen que
-// correr en modo `api`, que es el único que devuelve consumo real de tokens
+// correr en modo `api` u `openai`, los que devuelven consumo real de tokens
 // (ADR 0005).
 //
 // Los casos de inyección indirecta funcionan distinto a todos los demás: el
@@ -71,6 +71,7 @@ const proveedor = crearProveedor({
   modo: process.env.LLM_MODO,
   esProduccion: false,
   api: { llave: process.env.ANTHROPIC_API_KEY || undefined },
+  openai: { llave: process.env.OPENAI_API_KEY || undefined },
 });
 
 const AUTOR = "dddddddd-0000-0000-0000-000000000001";
@@ -86,7 +87,8 @@ const AUTOR = "dddddddd-0000-0000-0000-000000000001";
 // Es la misma regla que aplica la vista `vista_gasto_api`.
 
 const TOPE_GASTO_USD = Number(process.env.TOPE_GASTO_USD_ACUMULADO || 18);
-const ES_API = (process.env.LLM_MODO ?? "").trim().toLowerCase() === "api";
+// Los dos modos con llave cobran dinero de verdad; solo la suscripción no.
+const ES_API = ["api", "openai"].includes((process.env.LLM_MODO ?? "").trim().toLowerCase());
 
 async function gastoApiDeLaBase() {
   const { data, error } = await cliente.from("vista_gasto_api").select("gasto_usd").single();

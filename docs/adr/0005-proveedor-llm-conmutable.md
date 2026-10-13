@@ -62,3 +62,26 @@ lo que se evalúa; no pueden depender de por dónde entra el modelo.
 - El informe explica esta separación. Respetar las condiciones de uso de la
   herramienta es parte del trabajo en un curso de IA responsable, no un
   tecnicismo aparte.
+
+## Adenda (12 de octubre de 2026): un tercer modo, `openai`
+
+Para el despliegue, el proyecto tenía a mano una llave de la API de OpenAI y no
+crédito de Anthropic. El puerto existía justamente para esto, así que se agregó
+`LLM_MODO=openai` (`proveedor-openai.ts`) sin tocar las cinco capas:
+
+- **Misma interfaz, mismos esquemas, misma validación.** Clasificar y responder
+  con los esquemas de `prompt.ts` en modo estricto, y lo que vuelve pasa por
+  `validacion.ts`, igual que en el modo `api`.
+- **`store: false`.** La API de respuestas de OpenAI guarda cada respuesta 30
+  días por omisión; las preguntas de los usuarios no se quedan allá.
+- **Una negativa del clasificador se trata como `contenido_dañino`**: negativa
+  amable para el usuario, nunca vía libre ni un error 500.
+- **Los precios van en `PRECIOS_POR_MILLON`.** Un modelo que no está en la tabla
+  cuesta cero y el tope de gasto deja de verlo; una prueba exige que los modelos
+  por omisión (`gpt-6-luna` de guardia, `gpt-6.1-sol` respondiendo) tengan
+  precio. Los scripts del red team y de prueba aplican el tope en los dos modos
+  con llave, no solo en `api`.
+
+**Consecuencia para el informe:** los números del red team valen para el modelo
+con el que se midieron. Con el despliegue en `openai`, el red team se vuelve a
+correr en ese modo y se reportan esos resultados, no los de Claude.

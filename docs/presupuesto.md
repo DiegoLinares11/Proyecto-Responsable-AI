@@ -32,6 +32,8 @@ Precios de referencia por millón de tokens:
 | Claude Haiku 4.5 | $1.00 | $5.00 |
 | Claude Sonnet 5 | $2.00 | $10.00 |
 | Claude Opus 5 | $5.00 | $25.00 |
+| OpenAI gpt-6-luna (guardia con `LLM_MODO=openai`) | $0.10 | $0.50 |
+| OpenAI gpt-6.1-sol (respuesta con `LLM_MODO=openai`) | $2.00 | $10.00 |
 
 Lo leído desde caché cuesta una fracción de la entrada normal, y el prompt del
 sistema del chatbot es estable por diseño, así que casi siempre pega en caché.
