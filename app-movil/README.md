@@ -78,9 +78,14 @@ En el teléfono: instalar **Expo Go** (App Store / Play Store) y escanear el QR.
 En iPhone, sin esa cuenta, el camino es Expo Go. Lo que hace falta en los dos
 casos, antes de compartir un link:
 
-- **El portal desplegado** y su dirección en `EXPO_PUBLIC_API_URL`. Con
-  `npx expo start` la app busca el chat en la computadora; una app instalada no
-  tiene computadora a la que preguntarle.
+- **El servidor desplegado** y su dirección en `EXPO_PUBLIC_API_URL`:
+  `https://noticias-verificadas.vercel.app`. Con `npx expo start` la app busca
+  el chat en la computadora; una app instalada no tiene computadora a la que
+  preguntarle.
+
+La versión web está publicada en https://noticias-verificadas-app.vercel.app.
+Vercel la compila con `expo export -p web` (`vercel.json` de esta carpeta), y
+una regla manda cada `/noticia/<id>` a la plantilla `noticia/[id]`.
 - En Supabase → URL Configuration → Redirect URLs, `noticiasverificadas://**`.
 
 El APK de Android, con una cuenta gratuita de Expo:

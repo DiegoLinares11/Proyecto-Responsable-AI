@@ -1,0 +1,13 @@
+# La versión web de la app. Vercel la compila con `expo export -p web`.
+
+# La URL de Supabase y la llave publicable van en las variables del proyecto en
+# Vercel, no como archivo.
+.env
+.env.local
+.env.*.local
+
+.claude
+.expo
+.vscode
+dist
+web-build
