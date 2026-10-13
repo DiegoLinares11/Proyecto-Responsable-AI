@@ -3,7 +3,9 @@
 //
 // El decaimiento por antigüedad cambia con cada hora que pasa, así que esto no
 // es algo que se dispare «cuando algo cambia»: hay que correrlo periódicamente.
-// En Vercel se configura en vercel.json apuntando acá.
+// En Vercel se configura en vercel.json apuntando acá. Corre una vez al día
+// (12:00 UTC, las 6 de la mañana en Guatemala) porque el plan gratuito no
+// acepta crons más frecuentes: un despliegue con uno cada hora falla.
 //
 // Va protegido con un secreto compartido. Sin eso, cualquiera podría hacer
 // trabajar al servidor desde internet — no es que pueda cambiar el orden a su

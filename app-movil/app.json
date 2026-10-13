@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "gt.edu.uvg.noticiasverificadas"
+      "bundleIdentifier": "gt.edu.uvg.noticiasverificadas",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "gt.edu.uvg.noticiasverificadas",

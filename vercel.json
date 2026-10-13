@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/ranking/recalcular",
-      "schedule": "0 * * * *"
+      "schedule": "0 12 * * *"
     }
   ]
 }
