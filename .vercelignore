@@ -1,0 +1,18 @@
+# Lo que no sube a Vercel. El servidor se arma solo con src/ y la configuración.
+
+# Las llaves van en las variables de entorno del proyecto en Vercel, nunca
+# como archivo dentro de la subida.
+.env
+.env.local
+.env.*.local
+.secret.local
+
+# La app se compila aparte, con EAS. Y las pruebas no van a producción: algunas
+# importan código de la app, que tampoco sube.
+app-movil
+tests
+
+.claude
+.next
+supabase/.temp
+tsconfig.tsbuildinfo

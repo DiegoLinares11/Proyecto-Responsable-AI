@@ -10,7 +10,7 @@ chatbot responde preguntas sobre el acervo sin salirse de ese dominio.
 | | Qué es | Para quién |
 |---|---|---|
 | **La app** (`app-movil/`, Expo) | Todo lo que se ve: portada, lectura, chat, perfil y, para quien tiene permiso, la pestaña **Redacción** (publicar, moderar, administrar cuentas). En el teléfono (iOS y Android) y en la web | Lectores, y quien publica, modera o administra |
-| **El servidor** (este repositorio, Next.js) | El backend: el chat (`/api/chat`) y la redacción (`/api/redaccion/*`), con las llaves que no pueden viajar en la app. Sus páginas `/publicar`, `/moderacion` y `/administracion` siguen como respaldo | Nadie lo abre a diario |
+| **El servidor** (este repositorio, Next.js) | El backend: el chat (`/api/chat`) y la redacción (`/api/redaccion/*`), con las llaves que no pueden viajar en la app. Sus páginas `/publicar`, `/moderacion` y `/administracion` siguen como respaldo. Publicado en https://noticias-verificadas.vercel.app | Nadie lo abre a diario |
 
 La pestaña **Redacción** aparece solo si el rol de la cuenta tiene algún permiso
 de la redacción, y adentro cada sección solo si tiene la suya. Eso decide qué se
