@@ -8,6 +8,7 @@
 
 import { ConfiguracionInvalida, type ModoLlm, type ProveedorLlm } from "./tipos.ts";
 import { crearProveedorApi, type OpcionesProveedorApi } from "./proveedor-api.ts";
+import { crearProveedorOpenAI, type OpcionesProveedorOpenAI } from "./proveedor-openai.ts";
 import {
   crearProveedorSuscripcion,
   MODELO_DE_SUSCRIPCION,
@@ -19,10 +20,11 @@ export type OpcionesDeSeleccion = {
   /** Para la guarda de producción. Por omisión sale de NODE_ENV y VERCEL_ENV. */
   esProduccion?: boolean;
   api?: OpcionesProveedorApi;
+  openai?: OpcionesProveedorOpenAI;
   suscripcion?: OpcionesProveedorSuscripcion;
 };
 
-const MODOS: readonly ModoLlm[] = ["suscripcion", "api"];
+const MODOS: readonly ModoLlm[] = ["suscripcion", "api", "openai"];
 
 function detectarProduccion(): boolean {
   return (
@@ -37,7 +39,7 @@ export function interpretarModo(valor: string | undefined): ModoLlm {
 
   if (modo === "") {
     throw new ConfiguracionInvalida(
-      "Falta LLM_MODO. Poné `suscripcion` para desarrollar o `api` para desplegar y medir. " +
+      "Falta LLM_MODO. Poné `suscripcion` para desarrollar, o `api` u `openai` para desplegar y medir. " +
         "No hay valor por omisión a propósito: el modo decide de dónde sale el dinero.",
     );
   }
@@ -68,7 +70,7 @@ export function crearProveedor(opciones: OpcionesDeSeleccion = {}): ProveedorLlm
     throw new ConfiguracionInvalida(
       "LLM_MODO=suscripcion no se puede usar en un entorno desplegado. La suscripción personal " +
         "sirve para desarrollar y probar en local; una aplicación que atiende usuarios necesita " +
-        "crédito de API. Poné LLM_MODO=api y ANTHROPIC_API_KEY. " +
+        "crédito de API. Poné LLM_MODO=api y ANTHROPIC_API_KEY, o LLM_MODO=openai y OPENAI_API_KEY. " +
         "Ver docs/adr/0005-proveedor-llm-conmutable.md.",
     );
   }
@@ -76,7 +78,9 @@ export function crearProveedor(opciones: OpcionesDeSeleccion = {}): ProveedorLlm
   const proveedor =
     modo === "api"
       ? crearProveedorApi(opciones.api ?? {})
-      : crearProveedorSuscripcion(opciones.suscripcion ?? {});
+      : modo === "openai"
+        ? crearProveedorOpenAI(opciones.openai ?? {})
+        : crearProveedorSuscripcion(opciones.suscripcion ?? {});
 
   // Cinturón y tirantes: si alguna vez se agrega un proveedor nuevo y se olvida
   // marcarlo, la guarda de arriba no lo cubriría pero esta sí.
@@ -89,7 +93,8 @@ export function crearProveedor(opciones: OpcionesDeSeleccion = {}): ProveedorLlm
   return proveedor;
 }
 
-export { crearProveedorApi, crearProveedorSuscripcion, MODELO_DE_SUSCRIPCION };
+export { crearProveedorApi, crearProveedorOpenAI, crearProveedorSuscripcion, MODELO_DE_SUSCRIPCION };
+export { MODELOS_OPENAI_POR_OMISION, medirCostoOpenAI } from "./proveedor-openai.ts";
 export { validarClasificacion, validarRespuesta } from "./validacion.ts";
 export {
   calcularCosto,

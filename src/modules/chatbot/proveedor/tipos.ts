@@ -1,12 +1,14 @@
 // ===========================================================================
 // El puerto del modelo (ADR 0005)
 //
-// Dos implementaciones y una variable de entorno que elige:
+// Tres implementaciones y una variable de entorno que elige:
 //
 //   LLM_MODO=suscripcion  ->  Claude Agent SDK contra la sesión local. Para
 //                             desarrollar sin consumir crédito.
 //   LLM_MODO=api          ->  SDK de Anthropic con llave. Para las mediciones
 //                             que van al informe y para el despliegue.
+//   LLM_MODO=openai       ->  SDK de OpenAI con llave. Lo mismo que `api`, con
+//                             otro proveedor detrás.
 //
 // La interfaz expone lo mínimo que el chatbot necesita: clasificar una intención
 // y generar una respuesta con esquema. Nada más — cuanto más chica la superficie,
@@ -69,7 +71,7 @@ export type ProveedorLlm = {
   responder(peticion: PeticionDeRespuesta): Promise<Respondido<RespuestaDelModelo>>;
 };
 
-export type ModoLlm = "suscripcion" | "api";
+export type ModoLlm = "suscripcion" | "api" | "openai";
 
 export class ConfiguracionInvalida extends Error {
   constructor(motivo: string) {
@@ -84,6 +86,10 @@ export class ConfiguracionInvalida extends Error {
  * Están aquí y no en el proveedor porque el informe necesita el costo real
  * medido, y medirlo requiere multiplicar los tokens que devuelve la API por un
  * precio que no cambia entre modos.
+ *
+ * Un modelo que no está acá cuesta CERO, y el tope de gasto suma estos costos:
+ * usar un modelo nuevo sin agregarlo deja el tope sin efecto. Los de OpenAI son
+ * los de su página de precios (nivel Standard) al 12 de octubre de 2026.
  */
 export const PRECIOS_POR_MILLON: Readonly<
   Record<string, { entrada: number; salida: number; cache: number }>
@@ -91,6 +97,12 @@ export const PRECIOS_POR_MILLON: Readonly<
   "claude-haiku-4-5": { entrada: 1.0, salida: 5.0, cache: 0.1 },
   "claude-sonnet-5": { entrada: 2.0, salida: 10.0, cache: 0.2 },
   "claude-opus-5": { entrada: 5.0, salida: 25.0, cache: 0.5 },
+  "gpt-6-luna": { entrada: 0.1, salida: 0.5, cache: 0.01 },
+  "gpt-6-sol": { entrada: 2.0, salida: 10.0, cache: 0.2 },
+  "gpt-6.1-sol": { entrada: 2.0, salida: 10.0, cache: 0.1 },
+  "gpt-5.6-luna": { entrada: 0.2, salida: 1.2, cache: 0.02 },
+  "gpt-5.4-mini": { entrada: 0.75, salida: 4.5, cache: 0.075 },
+  "gpt-5.4-nano": { entrada: 0.2, salida: 1.25, cache: 0.02 },
 };
 
 export function calcularCosto(

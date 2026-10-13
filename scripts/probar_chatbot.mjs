@@ -10,6 +10,7 @@
 //   api          ->  SDK de Anthropic con llave. Devuelve consumo real de tokens,
 //                    y es el modo en el que tienen que correr las mediciones que
 //                    van al informe (ADR 0005).
+//   openai       ->  SDK de OpenAI con llave. Igual que `api`, con otro proveedor.
 //
 // Esto NO es el red team. El corpus adversarial y su corredor son la Fase 5; este
 // script es para ver las cinco capas funcionando y para tener a mano el costo por
@@ -154,10 +155,10 @@ const guardarTurno = async (turno) => {
 const contarMensajesDeHoy = async () => 0;
 
 // El tope rige igual que en la aplicación: este script escribe sus turnos en la
-// base y en modo api gasta crédito de verdad. En modo suscripción no hay dinero
-// de por medio, y la vista tampoco cuenta esos turnos.
+// base y en los modos con llave (api, openai) gasta crédito de verdad. En modo
+// suscripción no hay dinero de por medio, y la vista tampoco cuenta esos turnos.
 const TOPE_GASTO_USD = Number(entorno.get("TOPE_GASTO_USD_ACUMULADO") || 18);
-const ES_API = (entorno.get("LLM_MODO") ?? "").trim().toLowerCase() === "api";
+const ES_API = ["api", "openai"].includes((entorno.get("LLM_MODO") ?? "").trim().toLowerCase());
 
 const gastoAcumuladoUsd = async () => {
   if (!ES_API) return 0;
@@ -196,6 +197,7 @@ const proveedor = crearProveedor({
   modo,
   esProduccion: false,
   api: { llave: entorno.get("ANTHROPIC_API_KEY") || undefined },
+  openai: { llave: entorno.get("OPENAI_API_KEY") || undefined },
 });
 
 console.log(`modo: ${modo}   proveedor: ${proveedor.nombre}\n`);

@@ -82,6 +82,7 @@ async function atender(peticion: Request): Promise<NextResponse> {
     proveedor = crearProveedor({
       modo: configuracion.modo,
       api: { llave: configuracion.llaveAnthropic },
+      openai: { llave: configuracion.llaveOpenAI },
     });
   } catch (error) {
     // Un error de configuración no es culpa de quien pregunta, y el mensaje de
