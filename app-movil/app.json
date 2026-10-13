@@ -11,7 +11,8 @@
       "icon": "./assets/images/icon.png",
       "bundleIdentifier": "gt.edu.uvg.noticiasverificadas",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationDefaultAccuracyReduced": true
       }
     },
     "android": {
@@ -22,7 +23,13 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ],
+      "blockedPermissions": [
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -53,6 +60,13 @@
     "experiments": {
       "typedRoutes": false,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "eac3579d-f092-446d-b130-b25148781672"
+      }
+    },
+    "owner": "diegolinares11"
   }
 }
