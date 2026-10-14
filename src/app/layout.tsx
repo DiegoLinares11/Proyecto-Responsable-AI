@@ -81,6 +81,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <a className="interno" href="/como-funciona">
                 ¿Cómo funciona?
               </a>
+              <a className="interno" href="/privacidad">
+                Privacidad
+              </a>
               <a className="interno a-la-app" href={URL_DE_LA_APP}>
                 Leer en la app ↗
               </a>
