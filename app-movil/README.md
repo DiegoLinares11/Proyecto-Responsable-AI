@@ -26,9 +26,38 @@ permiso, **Redacción**: publicar, moderar y administrar cuentas.
   mano ve que no tiene acceso; uno que llama a la API, un 403.
 - **La identidad separa voces.** Lo que dice el medio en Newsreader, lo que
   explica la plataforma en Public Sans, los números de la verificación en IBM
-  Plex Mono y lo que escribe la IA en cursiva con la etiqueta «IA». El celeste
-  de la bandera marca lo verificado; el naranja, lo no confirmado
-  (`src/constants/tema.ts`). La propuesta de diseño está en un lienzo aparte.
+  Plex Mono y lo que escribe la IA con un icono y la etiqueta «Generado por IA».
+  Papel cálido y naranja dan identidad; el verde lima acompaña la verificación,
+  el cian identifica al asistente y el ámbar se reserva para advertencias
+  (`src/constants/tema.ts`). Los metadatos usan icono y texto sin separadores
+  por puntos. En lectura, las comprobaciones y el ranking se pueden desplegar.
+- **La apariencia se elige en Perfil**: claro, oscuro o sistema. En la portada
+  de escritorio también está el selector. Se conserva en el dispositivo, sin
+  necesitar sesión. Las noticias sin foto se componen como piezas tipográficas
+  en la portada, sin repetir el titular en una imagen de relleno.
+- **El índice de lectura** filtra las noticias de la portada por sección sin
+  modificar los intereses del usuario; en móvil se despliega bajo demanda.
+  La apertura sin foto usa `componentes/apertura-tipografica.tsx`, y la
+  **Mesa de contexto** conecta la lectura con el asistente mediante un acceso
+  explícito, sin generar consultas automáticamente.
+- **La lectura tiene notas al margen**: medio original, acceso a las
+  comprobaciones y una consulta preparada sobre la noticia. En móvil son un
+  bloque compacto; en escritorio, una columna lateral. La ficha de evidencia
+  separa el estado, las señales numeradas y el puntaje técnico desplegable.
+- **El chat es un cuaderno de contexto**: índice de preguntas, respuestas en
+  párrafos y referencias numeradas que abren las noticias citadas. Las consultas
+  preparadas siempre se revisan y envían manualmente. Cambiar de cuenta limpia
+  el cuaderno visible.
+- **La portada tiene un cierre de edición** con hora de consulta y actualización
+  manual. Los gestos gráficos de las secciones se dibujan en SVG; el atlas de
+  ubicación usa un contorno simplificado de Natural Earth y las cabeceras de la
+  tabla local, sin servicios de mapas externos.
+- **El menú editorial** abre una hoja a pantalla completa con un icono de dos
+  líneas que se transforma en cruz. En la web está en la cabecera o barra
+  inferior; en la app nativa, en la portada. Se puede cerrar con Escape en web
+  y devuelve el foco al botón de apertura. Las noticias responden a hover,
+  foco y pulsación; los detalles tienen fundido y giro de su indicador. El
+  ritmo se define en `constants/movimiento.ts` y respeta movimiento reducido.
 - **La ubicación es simulada.** El usuario la elige de una lista; el botón «Usar
   mi ubicación real» solo sugiere la cabecera departamental más cercana,
   calculada en el teléfono (`src/lib/cercania.ts`): las coordenadas no salen de
@@ -112,6 +141,17 @@ proyecto (`npx expo install expo@^58 --fix`) y volver a probar. Conviene
 revisarlo una semana antes.
 
 ## Comprobaciones
+
+La revisión de notch, islas y barras de gestos, los escenarios automatizados y
+la pasada pendiente en teléfonos reales están en
+[`docs/verificacion-dispositivos.md`](../docs/verificacion-dispositivos.md).
+La prueba reutilizable es `scripts/verificar_areas_seguras.mjs`, desde la raíz
+del repositorio.
+
+También hay una pasada **nativa Android** con teclado, barras del sistema,
+recortes y texto ampliado: [resultados e instrucciones](../docs/pruebas-nativas-android.md).
+El runner es `scripts/verificar_android.py` y usa el backend local
+`scripts/fixture_ui_nativa.mjs` para las pruebas de interfaz.
 
 ```bash
 npx tsc --noEmit     # tipos
