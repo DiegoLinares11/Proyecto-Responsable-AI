@@ -61,7 +61,7 @@ export function Cuentas() {
 
   return (
     <View style={{ gap: Espacio.xl }}>
-      <Seccion titulo={`CUENTAS · ${datos.cuentas.length}`}>
+      <Seccion titulo={`CUENTAS (${datos.cuentas.length})`}>
         <Text style={[estilos.nota, { color: c.tintaSuave }]}>
           Toda cuenta nueva entra como lector. Publicador: manda noticias al canal de validación. Moderador:
           además decide las que quedan en revisión. Cada cambio pide un motivo y queda en la auditoría.
@@ -92,7 +92,7 @@ export function Cuentas() {
                 {NOMBRE[cambio.a] ?? cambio.a}
               </Text>
               <Text style={[estilos.nota, { color: c.tintaSuave }]}>
-                {new Date(cambio.cuando).toLocaleString('es-GT', { dateStyle: 'medium', timeStyle: 'short' })} · «
+                {new Date(cambio.cuando).toLocaleString('es-GT', { dateStyle: 'medium', timeStyle: 'short' })}{'\n'}«
                 {cambio.motivo}»
               </Text>
             </View>

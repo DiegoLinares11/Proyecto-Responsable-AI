@@ -4,13 +4,12 @@
 // Tres voces, tres letras, para que se distinga a la vista de quién es cada
 // cosa (el enunciado lo pide: lo del medio, lo del sistema y lo de la IA):
 //   - Newsreader: lo que dice el medio (titulares, resúmenes, texto de la nota).
-//   - Public Sans: lo que ordena y explica la plataforma. En cursiva y con la
-//     etiqueta «IA», lo que escribe el asistente.
+//   - Public Sans: lo que ordena y explica la plataforma. Con un icono y una
+//     etiqueta explícita se identifica lo que escribe el asistente.
 //   - IBM Plex Mono: los números de la verificación.
 //
-// El celeste viene de la bandera de Guatemala y marca lo verificado. Lo no
-// confirmado va en naranja y lo desmentido en rojo oscuro: se distinguen por
-// tono y también por claridad, para quien no distingue colores.
+// Papel cálido y naranja para la marca. La verificación tiene su propio verde;
+// las advertencias usan ámbar para no confundirse con una acción de la app.
 //
 // Cada peso es su propia familia (Newsreader_600SemiBold…), sin fontWeight: con
 // fuentes cargadas, Android ignora el peso o cae a la fuente del sistema.
@@ -28,65 +27,72 @@ import {
   PublicSans_600SemiBold,
   PublicSans_700Bold,
 } from '@expo-google-fonts/public-sans';
-import { useColorScheme, useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
+import { useApariencia } from '@/lib/apariencia';
+import { useHidratado } from '@/lib/hidratacion';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const claro = {
-  tinta: '#12161C',
-  tintaSuave: '#4A5260',
-  tintaTenue: '#6B7380',
-  papel: '#FFFFFF',
-  papelHundido: '#F1F3F5',
-  borde: '#E1E5EA',
-  bordeFuerte: '#C3CAD3',
-  /** Celeste tinta: enlaces, antetítulos y todo lo verificado. */
-  acento: '#1A62A6',
-  /** Celeste sello: el logo y la pestaña activa. Decorativo, nunca texto. */
-  marca: '#3B8FD0',
+  tinta: '#20211E',
+  tintaSuave: '#55574F',
+  tintaTenue: '#696B62',
+  papel: '#FAF8F3',
+  papelHundido: '#F0EDE5',
+  borde: '#E1DED5',
+  bordeFuerte: '#BDB9AE',
+  /** Naranja oscuro para texto y enlaces sobre papel. */
+  acento: '#AD3B08',
+  /** Naranja vivo para detalles de identidad, nunca texto sobre papel. */
+  marca: '#FF6113',
   sobreAcento: '#FFFFFF',
   /** Los botones principales van en tinta, no en color. */
-  primario: '#12161C',
+  primario: '#20211E',
   sobrePrimario: '#FFFFFF',
-  verificado: '#1A62A6',
-  verificadoFondo: '#E4F0FA',
-  alerta: '#B84E08',
-  alertaFondo: '#FBEBDD',
-  alertaTexto: '#6B2E05',
+  verificado: '#3F591B',
+  verificadoFondo: '#E5FF8B',
+  asistente: '#075B69',
+  asistenteFondo: '#D9F8FC',
+  alerta: '#805600',
+  alertaFondo: '#F8EDCD',
+  alertaTexto: '#654500',
   peligro: '#8F1D14',
-  fotoVacia: '#DCE3EA',
-  ilustracion: '#12161C',
-  ilustracionTexto: '#FFFFFF',
-  ilustracionAntetitulo: '#7DB9EA',
+  fotoVacia: '#E4E4DA',
+  ilustracion: '#292C25',
+  ilustracionTexto: '#F7F6F2',
+  ilustracionAntetitulo: '#E5FF8B',
 };
 
 const oscuro: typeof claro = {
-  tinta: '#E8ECF1',
-  tintaSuave: '#A1AAB6',
-  tintaTenue: '#8A93A0',
-  papel: '#0D1116',
-  papelHundido: '#171C23',
-  borde: '#262D37',
-  bordeFuerte: '#3A4350',
-  acento: '#7DB9EA',
-  marca: '#3B8FD0',
-  sobreAcento: '#0D1116',
-  primario: '#E8ECF1',
-  sobrePrimario: '#0D1116',
-  verificado: '#9BCBF2',
-  verificadoFondo: '#12304A',
-  alerta: '#F2A65A',
-  alertaFondo: '#3A2410',
-  alertaTexto: '#F6C995',
+  tinta: '#F0F0E7',
+  tintaSuave: '#B8BAAE',
+  tintaTenue: '#A0A395',
+  papel: '#191A18',
+  papelHundido: '#242522',
+  borde: '#353732',
+  bordeFuerte: '#65685F',
+  acento: '#FFAC80',
+  marca: '#FF6113',
+  sobreAcento: '#191A18',
+  primario: '#F0F0E7',
+  sobrePrimario: '#191A18',
+  verificado: '#E5FF8B',
+  verificadoFondo: '#303729',
+  asistente: '#8AEAF8',
+  asistenteFondo: '#15363B',
+  alerta: '#EBC76D',
+  alertaFondo: '#382E16',
+  alertaTexto: '#F0D798',
   peligro: '#F08A80',
-  fotoVacia: '#2A323D',
-  ilustracion: '#1B2530',
-  ilustracionTexto: '#FFFFFF',
-  ilustracionAntetitulo: '#7DB9EA',
+  fotoVacia: '#30352B',
+  ilustracion: '#292F22',
+  ilustracionTexto: '#F0F0E7',
+  ilustracionAntetitulo: '#E5FF8B',
 };
 
 export type Paleta = typeof claro;
 
 export function useColores(): Paleta {
-  return useColorScheme() === 'dark' ? oscuro : claro;
+  return useApariencia().esquema === 'dark' ? oscuro : claro;
 }
 
 /** Las familias, una por peso. Los nombres son las llaves de FUENTES. */
@@ -99,7 +105,7 @@ export const Tipos = {
   lecturaCursiva: 'Newsreader_400Regular_Italic',
   /** La interfaz. */
   texto: 'PublicSans_400Regular',
-  /** Lo que escribe la IA. */
+  /** Cursiva auxiliar; la IA se identifica por icono y etiqueta, no por cursiva. */
   textoCursiva: 'PublicSans_400Regular_Italic',
   textoMedio: 'PublicSans_600SemiBold',
   textoFuerte: 'PublicSans_700Bold',
@@ -133,7 +139,10 @@ export const PUNTO_DE_QUIEBRE = 900;
 
 export function useDisposicion(): { ancha: boolean; anchoVentana: number } {
   const { width } = useWindowDimensions();
-  return { ancha: width >= PUNTO_DE_QUIEBRE, anchoVentana: width };
+  const { left, right } = useSafeAreaInsets();
+  const hidratado = useHidratado();
+  const anchoUtil = Math.max(0, width - left - right);
+  return { ancha: hidratado && anchoUtil >= PUNTO_DE_QUIEBRE, anchoVentana: hidratado ? anchoUtil : 0 };
 }
 
 /** Esquinas: rectas, de diario. */

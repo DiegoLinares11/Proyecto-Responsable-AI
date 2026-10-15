@@ -19,17 +19,25 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { AreaDePestana } from '@/componentes/area-de-pestana';
 
 import { FotoDeNoticia } from '@/componentes/foto';
+import { DatoEditorial } from '@/componentes/dato-editorial';
+import { AperturaTipografica } from '@/componentes/apertura-tipografica';
+import { IndiceDeSecciones } from '@/componentes/indice-de-secciones';
+import { MesaDeContexto } from '@/componentes/mesa-de-contexto';
+import { CierreDeEdicion } from '@/componentes/cierre-de-edicion';
+import { GestoDeSeccion } from '@/componentes/gesto-de-seccion';
+import { MenuEditorial } from '@/componentes/menu-editorial';
+import { EnlaceDeNoticia } from '@/componentes/enlace-de-noticia';
 import { Abajo, Pin } from '@/componentes/iconos';
-import { IlustracionTipografica } from '@/componentes/ilustracion';
 import { Logotipo } from '@/componentes/marca';
 import { PortadaAncha } from '@/componentes/portada-ancha';
 import { Sello } from '@/componentes/sello';
@@ -51,6 +59,8 @@ export default function Portada() {
   const [error, setError] = useState<string | null>(null);
   const [refrescando, setRefrescando] = useState(false);
   const [eligiendo, setEligiendo] = useState(false);
+  const [seccion, setSeccion] = useState<string | null>(null);
+  const [actualizadoEn, setActualizadoEn] = useState<number | null>(null);
   const { ubicacion, lecturas } = usePreferencias();
   const { ancha, anchoVentana } = useDisposicion();
 
@@ -60,11 +70,19 @@ export default function Portada() {
     () => (noticias === null ? null : personalizar(noticias, ubicacion, lecturas)),
     [noticias, ubicacion, lecturas],
   );
+  const visible = useMemo(
+    () => seccion === null ? lista : lista?.filter(item => item.noticia.seccion === seccion) ?? null,
+    [lista, seccion],
+  );
+  const indice = noticias && noticias.length > 0 ? (
+    <IndiceDeSecciones noticias={noticias} elegida={seccion} cambiar={setSeccion} />
+  ) : null;
 
   const cargar = useCallback(async () => {
     try {
       const leidas = await leerFeed();
       setNoticias(leidas);
+      setActualizadoEn(Date.now());
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -77,7 +95,7 @@ export default function Portada() {
     let vigente = true;
     leerFeed()
       .then((leidas) => {
-        if (vigente) setNoticias(leidas);
+        if (vigente) { setNoticias(leidas); setActualizadoEn(Date.now()); }
       })
       .catch((err) => {
         if (vigente) setError(err instanceof Error ? err.message : String(err));
@@ -99,15 +117,16 @@ export default function Portada() {
   const fecha = new Date().toLocaleDateString('es-GT', { weekday: 'long', day: 'numeric', month: 'long' });
   const hoy = fecha.charAt(0).toUpperCase() + fecha.slice(1);
   const orden = lecturas.length > 0 ? 'Para tu zona y lo que leés' : 'Ordenada para tu zona';
+  const cierre = visible && visible.length > 0 ? <CierreDeEdicion cantidad={visible.length} actualizadoEn={actualizadoEn} actualizar={refrescar} cargando={refrescando} filtrada={seccion !== null} error={error} /> : null;
 
   // En una pantalla ancha, la disposición de un diario en línea; el orden y las
   // razones son los mismos (src/componentes/portada-ancha.tsx).
   if (ancha) {
     return (
-      <SafeAreaView style={e.pantalla} edges={['top']}>
+      <AreaDePestana style={e.pantalla}>
         <ScrollView
           refreshControl={<RefreshControl refreshing={refrescando} onRefresh={refrescar} tintColor={c.acento} />}>
-          {error ? (
+          {error && lista === null ? (
             <Text style={e.error}>{error}</Text>
           ) : lista === null ? (
             <ActivityIndicator style={{ marginTop: 48 }} color={c.acento} />
@@ -115,7 +134,9 @@ export default function Portada() {
             <Text style={e.vacio}>Todavía no hay noticias verificadas.</Text>
           ) : (
             <PortadaAncha
-              lista={lista}
+              lista={visible ?? []}
+              indice={indice}
+              cierre={cierre}
               anchoVentana={anchoVentana}
               hoy={hoy}
               orden={orden}
@@ -126,20 +147,21 @@ export default function Portada() {
           )}
         </ScrollView>
         <SelectorDeUbicacion visible={eligiendo} cerrar={() => setEligiendo(false)} />
-      </SafeAreaView>
+      </AreaDePestana>
     );
   }
 
   return (
-    <SafeAreaView style={e.pantalla} edges={['top']}>
+    <AreaDePestana style={e.pantalla}>
       <FlatList
-        data={lista ?? []}
+        data={visible ?? []}
         keyExtractor={(n) => n.noticia.id}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={refrescar} tintColor={c.acento} />}
         ListHeaderComponent={
           <View style={e.cabecera}>
             <View style={e.filaMarca}>
               <Logotipo />
+              {Platform.OS !== 'web' ? <MenuEditorial /> : null}
               <Pressable
                 onPress={() => setEligiendo(true)}
                 style={e.ubicacion}
@@ -153,13 +175,12 @@ export default function Portada() {
               </Pressable>
             </View>
             <View style={e.filaFecha}>
-              <Text style={e.fecha}>{hoy}</Text>
+              <DatoEditorial tipo="fecha" texto={hoy} />
               <Text style={e.fecha}>{orden}</Text>
             </View>
-            {/* La doble raya de la cabecera de un diario. */}
-            <View style={e.rayaGruesa} />
+            <Text style={e.tituloPortada} accessibilityRole="header">La portada</Text>
             <View style={e.rayaFina} />
-            <SelectorDeUbicacion visible={eligiendo} cerrar={() => setEligiendo(false)} />
+            {indice}
           </View>
         }
         ListEmptyComponent={
@@ -168,29 +189,27 @@ export default function Portada() {
           ) : lista === null ? (
             <ActivityIndicator style={{ marginTop: 48 }} color={c.acento} />
           ) : (
-            <Text style={e.vacio}>Todavía no hay noticias verificadas.</Text>
+            <Text style={e.vacio}>{seccion === null ? 'Todavía no hay noticias verificadas.' : 'No hay noticias disponibles en esta sección.'}</Text>
           )
         }
         ListFooterComponent={
-          lista && lista.length > 0 ? (
-            <Text style={e.pie}>
-              Sin esconder lo local, lo nacional ni lo internacional. Cada noticia dice por qué está donde
-              está.
-            </Text>
-          ) : null
+          <View style={{ margin: Espacio.xl }}>{cierre}</View>
         }
         renderItem={({ item, index }) => {
           const props = { noticia: item.noticia, razon: porQue(item), e, onPress: () => abrir(item.noticia.id) };
-          return index === 0 ? (
-            <Principal {...props} />
-          ) : index <= DESTACADAS ? (
-            <Destacada {...props} />
-          ) : (
-            <Titular {...props} primero={index === DESTACADAS + 1} />
+          return (
+            <View>
+              {index === 0 ? <Principal {...props} /> : index <= DESTACADAS ? <Destacada {...props} /> : <Titular {...props} primero={index === DESTACADAS + 1} />}
+              {index === Math.min(2, (visible?.length ?? 1) - 1) ? (
+                <View style={{ marginHorizontal: Espacio.xl, marginBottom: Espacio.xxl }}><MesaDeContexto /></View>
+              ) : null}
+            </View>
           );
         }}
       />
-    </SafeAreaView>
+      {/* Fuera de FlatList: el modal no debe heredar su contexto de lista anidada. */}
+      <SelectorDeUbicacion visible={eligiendo} cerrar={() => setEligiendo(false)} />
+    </AreaDePestana>
   );
 }
 
@@ -201,19 +220,16 @@ type PropsDeTarjeta = {
   onPress: () => void;
 };
 
-/** «SALUD · QUETZALTENANGO»: la sección y, si es local, la zona. */
+/** La sección tiene su propia jerarquía; la ubicación lleva icono y texto. */
 function antetitulo(noticia: NoticiaDelFeed): string {
   const seccion = nombreDeSeccion(noticia.seccion);
-  return (noticia.zona ? `${seccion} · ${noticia.zona}` : seccion).toUpperCase();
+  return seccion.toUpperCase();
 }
 
 /** La línea de «por qué está aquí». */
-function PorQue({ razon, e }: { razon: Razon; e: ReturnType<typeof crearEstilos> }) {
+function PorQue({ razon }: { razon: Razon }) {
   return (
-    <Text
-      style={[e.razon, razon.tono === 'zona' ? e.razonZona : razon.tono === 'cobertura' ? e.razonCobertura : null]}>
-      {razon.texto}
-    </Text>
+    <DatoEditorial tipo={razon.tono === 'zona' ? 'zona' : 'contexto'} texto={razon.texto} destacado={razon.tono === 'zona'} />
   );
 }
 
@@ -221,54 +237,55 @@ function Meta({ noticia, e, compacta = false }: Pick<PropsDeTarjeta, 'noticia' |
   return (
     <View style={e.meta}>
       <Sello puntaje={noticia.puntajeVeracidad} compacto={compacta} />
-      <Text style={e.metaFuente} numberOfLines={1}>
-        {noticia.fuente ?? 'fuente no registrada'}
-      </Text>
-      <Text style={e.metaTexto}>{haceCuanto(noticia.publicadaEn)}</Text>
+      <DatoEditorial tipo="fuente" texto={noticia.fuente ?? 'Fuente no registrada'} />
+      <DatoEditorial tipo="fecha" texto={haceCuanto(noticia.publicadaEn)} />
     </View>
   );
 }
 
 function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
-    <Pressable onPress={onPress} style={e.principal} accessibilityRole="link">
-      <View style={{ marginBottom: Espacio.m }}>
-        {noticia.imagen ? (
+    <EnlaceDeNoticia onPress={onPress} style={e.principal}>
+      {!noticia.imagen ? (
+        <View style={{ marginBottom: Espacio.l }}><AperturaTipografica noticia={noticia} /></View>
+      ) : (
+        <View style={e.cuerpoPrincipal}>
+          <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
+          {noticia.zona ? <DatoEditorial tipo="zona" texto={noticia.zona} /> : null}
+          <Text style={e.tituloPrincipal}>{noticia.titulo}</Text>
+          <Text style={e.resumen}>{noticia.resumen}</Text>
+        </View>
+      )}
+      {noticia.imagen ? (
+        <View style={{ marginBottom: Espacio.l }}>
           <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenPrincipal} />
-        ) : (
-          <IlustracionTipografica seccion={nombreDeSeccion(noticia.seccion)} titulo={noticia.titulo} />
-        )}
-      </View>
+        </View>
+      ) : null}
       <View style={e.cuerpoPrincipal}>
-        <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
-        <Text style={e.tituloPrincipal}>{noticia.titulo}</Text>
-        <Text style={e.resumen} numberOfLines={3}>
-          {noticia.resumen}
-        </Text>
         <Meta noticia={noticia} e={e} />
-        <PorQue razon={razon} e={e} />
+        <PorQue razon={razon} />
       </View>
-    </Pressable>
+    </EnlaceDeNoticia>
   );
 }
 
 function Destacada({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
-    <Pressable onPress={onPress} style={e.destacada} accessibilityRole="link">
+    <EnlaceDeNoticia onPress={onPress} style={e.destacada}>
       <View style={{ flex: 1, gap: 6 }}>
-        <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
-        <Text style={e.tituloDestacada} numberOfLines={4}>
-          {noticia.titulo}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Espacio.s }}>
+          <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
+          {!noticia.imagen ? <GestoDeSeccion seccion={noticia.seccion} tamano={40} /> : null}
+        </View>
+        <Text style={e.tituloDestacada}>{noticia.titulo}</Text>
+        {!noticia.imagen ? <Text style={e.resumenDestacada} numberOfLines={3}>{noticia.resumen}</Text> : null}
         <Meta noticia={noticia} e={e} compacta />
-        <PorQue razon={razon} e={e} />
+        <PorQue razon={razon} />
       </View>
       {noticia.imagen ? (
         <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenDestacada} miniatura />
-      ) : (
-        <IlustracionTipografica seccion={nombreDeSeccion(noticia.seccion)} titulo={noticia.titulo} chica />
-      )}
-    </Pressable>
+      ) : null}
+    </EnlaceDeNoticia>
   );
 }
 
@@ -280,19 +297,14 @@ function Titular({ noticia, razon, e, onPress, primero }: PropsDeTarjeta & { pri
           <Text style={e.encabezadoTitularesTexto}>MÁS TITULARES</Text>
         </View>
       ) : null}
-      <Pressable onPress={onPress} style={e.titular} accessibilityRole="link">
-        <Text style={e.tituloTitular} numberOfLines={3}>
+      <EnlaceDeNoticia onPress={onPress} style={e.titular}>
+        <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
+        <Text style={e.tituloTitular}>
           {noticia.titulo}
         </Text>
-        <View style={e.meta}>
-          <Sello puntaje={noticia.puntajeVeracidad} compacto />
-          <Text style={e.metaTexto}>
-            {nombreDeSeccion(noticia.seccion)} · {noticia.fuente ?? 'sin registrar'} ·{' '}
-            {haceCuanto(noticia.publicadaEn)}
-          </Text>
-        </View>
-        <PorQue razon={razon} e={e} />
-      </Pressable>
+        <Meta noticia={noticia} e={e} compacta />
+        <PorQue razon={razon} />
+      </EnlaceDeNoticia>
     </>
   );
 }
@@ -300,8 +312,8 @@ function Titular({ noticia, razon, e, onPress, primero }: PropsDeTarjeta & { pri
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
-    cabecera: { paddingHorizontal: Espacio.l, paddingTop: Espacio.s, marginBottom: Espacio.l },
-    filaMarca: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m },
+    cabecera: { paddingHorizontal: Espacio.xl, paddingTop: Espacio.l, marginBottom: Espacio.xl },
+    filaMarca: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m },
     ubicacion: {
       marginLeft: 'auto',
       flexShrink: 1,
@@ -316,29 +328,24 @@ function crearEstilos(c: Paleta) {
     ubicacionTexto: { fontFamily: Tipos.textoMedio, fontSize: 13, color: c.tinta, flexShrink: 1 },
     filaFecha: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       justifyContent: 'space-between',
       gap: Espacio.s,
       marginTop: Espacio.m,
       marginBottom: 6,
     },
     fecha: { fontFamily: Tipos.textoMedio, fontSize: 12, color: c.tintaSuave },
-    rayaGruesa: { height: 3, backgroundColor: c.tinta },
-    rayaFina: { height: 1, backgroundColor: c.tinta, marginTop: 2 },
-
-    razon: { fontFamily: Tipos.texto, fontSize: 12, color: c.tintaTenue },
-    razonZona: { fontFamily: Tipos.textoMedio, color: c.acento },
-    razonCobertura: { fontFamily: Tipos.textoMedio, color: c.tintaSuave },
+    tituloPortada: { fontFamily: Tipos.lectura, fontSize: 42, lineHeight: 48, letterSpacing: -1, color: c.tinta, marginTop: Espacio.xl },
+    rayaFina: { height: 1, backgroundColor: c.bordeFuerte, marginTop: Espacio.l },
 
     antetitulo: { ...ROTULO, color: c.acento },
-    resumen: { fontFamily: Tipos.lectura, fontSize: 16, lineHeight: 23, color: c.tintaSuave },
-    meta: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-    metaFuente: { fontFamily: Tipos.textoMedio, fontSize: 12, color: c.tinta, flexShrink: 1 },
-    metaTexto: { fontFamily: Tipos.texto, fontSize: 12, color: c.tintaTenue },
+    resumen: { fontFamily: Tipos.lectura, fontSize: 18, lineHeight: 26, color: c.tintaSuave },
+    meta: { flexDirection: 'row', alignItems: 'center', columnGap: 14, rowGap: 8, flexWrap: 'wrap' },
 
     principal: {
-      marginHorizontal: Espacio.l,
-      marginBottom: Espacio.l,
-      paddingBottom: Espacio.l,
+      marginHorizontal: Espacio.xl,
+      marginBottom: Espacio.xl,
+      paddingBottom: Espacio.xl,
       borderBottomWidth: 1,
       borderBottomColor: c.borde,
     },
@@ -348,47 +355,39 @@ function crearEstilos(c: Paleta) {
       borderRadius: Radio.chico,
       backgroundColor: c.fotoVacia,
     },
-    cuerpoPrincipal: { gap: Espacio.s },
-    tituloPrincipal: { fontFamily: Tipos.titular, fontSize: 26, lineHeight: 30, color: c.tinta },
+    cuerpoPrincipal: { gap: Espacio.l, marginBottom: Espacio.l },
+    tituloPrincipal: { fontFamily: Tipos.titular, fontSize: 32, lineHeight: 36, color: c.tinta },
 
     destacada: {
       flexDirection: 'row',
       gap: Espacio.m,
-      marginHorizontal: Espacio.l,
-      marginBottom: Espacio.l,
-      paddingBottom: Espacio.l,
+      marginHorizontal: Espacio.xl,
+      marginBottom: Espacio.xl,
+      paddingBottom: Espacio.xl,
       borderBottomWidth: 1,
       borderBottomColor: c.borde,
     },
-    tituloDestacada: { fontFamily: Tipos.titular, fontSize: 18, lineHeight: 22, color: c.tinta },
+    tituloDestacada: { fontFamily: Tipos.titular, fontSize: 21, lineHeight: 26, color: c.tinta },
+    resumenDestacada: { fontFamily: Tipos.lectura, fontSize: 17, lineHeight: 25, color: c.tintaSuave },
     imagenDestacada: { width: 92, height: 92, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
 
     encabezadoTitulares: {
-      marginHorizontal: Espacio.l,
+      marginHorizontal: Espacio.xl,
       marginTop: Espacio.s,
       paddingBottom: 6,
-      borderBottomWidth: 3,
+      borderBottomWidth: 1,
       borderBottomColor: c.tinta,
     },
     encabezadoTitularesTexto: { ...ROTULO, color: c.tinta },
     titular: {
-      marginHorizontal: Espacio.l,
-      paddingVertical: Espacio.m,
+      marginHorizontal: Espacio.xl,
+      paddingVertical: Espacio.l,
       borderBottomWidth: 1,
       borderBottomColor: c.borde,
       gap: 6,
     },
-    tituloTitular: { fontFamily: Tipos.titular, fontSize: 16, lineHeight: 21, color: c.tinta },
+    tituloTitular: { fontFamily: Tipos.titular, fontSize: 20, lineHeight: 25, color: c.tinta },
 
-    pie: {
-      fontFamily: Tipos.texto,
-      fontSize: 12,
-      lineHeight: 17,
-      color: c.tintaTenue,
-      textAlign: 'center',
-      paddingHorizontal: Espacio.xl,
-      paddingVertical: Espacio.xl,
-    },
     error: { margin: Espacio.l, fontFamily: Tipos.texto, color: c.peligro },
     vacio: { margin: Espacio.l, fontFamily: Tipos.texto, color: c.tintaSuave, textAlign: 'center' },
   });

@@ -18,7 +18,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { AreaDePestana } from '@/componentes/area-de-pestana';
 
 import { BotonGoogle } from '@/componentes/boton-google';
 import { Cuentas } from '@/componentes/redaccion/cuentas';
@@ -54,8 +54,8 @@ export default function Redaccion() {
   const parte = partes.find(([clave]) => clave === elegida)?.[0] ?? partes[0]?.[0] ?? null;
 
   return (
-    <SafeAreaView style={e.pantalla} edges={['top']}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <AreaDePestana style={e.pantalla}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : Platform.OS === 'android' ? 'height' : undefined}>
         <ScrollView contentContainerStyle={e.contenido} keyboardShouldPersistTaps="handled">
           <Text style={e.titulo} accessibilityRole="header">
             Redacción
@@ -105,7 +105,7 @@ export default function Redaccion() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </AreaDePestana>
   );
 }
 

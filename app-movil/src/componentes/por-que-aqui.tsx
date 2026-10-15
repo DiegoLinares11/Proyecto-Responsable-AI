@@ -99,9 +99,7 @@ export function PorQueEnTuPortada({ noticia }: { noticia: NoticiaDelFeed }) {
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     caja: {
-      marginTop: Espacio.xl,
-      borderWidth: 1,
-      borderColor: c.bordeFuerte,
+      backgroundColor: c.papelHundido,
       borderRadius: Radio.medio,
       padding: Espacio.m,
       gap: 6,
