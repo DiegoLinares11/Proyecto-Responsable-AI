@@ -15,8 +15,8 @@ import type { Imagen } from '@/lib/noticias';
 
 const ROTULO_DE_ORIGEN = {
   medio: 'FOTO DEL MEDIO',
-  licencia_libre: 'FOTO DE ARCHIVO · NO ES DEL HECHO',
-  generada_ia: 'GENERADA POR IA · NO ES UNA FOTOGRAFÍA',
+  licencia_libre: 'FOTO DE ARCHIVO (NO ES DEL HECHO)',
+  generada_ia: 'GENERADA POR IA (NO ES UNA FOTOGRAFÍA)',
 } as const;
 
 const MARCA_CHICA = { licencia_libre: 'ARCHIVO', generada_ia: 'IA' } as const;
@@ -61,7 +61,7 @@ export function FotoDeNoticia({
 }
 
 const estilos = StyleSheet.create({
-  pie: { ...ROTULO, fontFamily: Tipos.texto, fontSize: 10, letterSpacing: 0.5, marginTop: 6 },
+  pie: { ...ROTULO, fontFamily: Tipos.texto, fontSize: 12, lineHeight: 18, letterSpacing: 0, marginTop: 8 },
   sobreIA: {
     position: 'absolute',
     top: 8,

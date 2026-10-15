@@ -1,13 +1,14 @@
 import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { FUENTES, Tipos, useColores } from '@/constants/tema';
 import { ProveedorDePermisos } from '@/lib/permisos';
 import { ProveedorDePreferencias } from '@/lib/preferencias';
 import { ProveedorDeSesion } from '@/lib/sesion';
+import { ProveedorDeApariencia, useApariencia } from '@/lib/apariencia';
 
 // La pantalla de inicio se queda hasta que llegan las letras: sin ellas, la app
 // aparecería un instante con la fuente del sistema y después saltaría.
@@ -16,7 +17,11 @@ SplashScreen.preventAutoHideAsync();
 // Una pila encima de las pestañas: la lectura de una noticia se apila sobre la
 // pestaña desde la que se abrió, con su botón de volver, como en cualquier app.
 export default function Raiz() {
-  const esquema = useColorScheme();
+  return <ProveedorDeApariencia><Contenido /></ProveedorDeApariencia>;
+}
+
+function Contenido() {
+  const { esquema } = useApariencia();
   const c = useColores();
   const [cargadas, error] = useFonts(FUENTES);
 
@@ -31,7 +36,14 @@ export default function Raiz() {
     <ProveedorDeSesion>
       <ProveedorDePermisos>
         <ProveedorDePreferencias>
-          <ThemeProvider value={esquema === 'dark' ? DarkTheme : DefaultTheme}>
+          <ThemeProvider value={{
+            ...(esquema === 'dark' ? DarkTheme : DefaultTheme),
+            colors: {
+              ...(esquema === 'dark' ? DarkTheme : DefaultTheme).colors,
+              background: c.papel, card: c.papel, text: c.tinta, primary: c.acento, border: c.borde,
+            },
+          }}>
+            <StatusBar style={esquema === 'dark' ? 'light' : 'dark'} />
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.papel } }}>
               <Stack.Screen name="(tabs)" />
               <Stack.Screen

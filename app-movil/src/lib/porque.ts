@@ -21,7 +21,7 @@ export function porQue(item: NoticiaPersonalizada<NoticiaDelFeed>): Razon {
   }
 
   const donde = {
-    tu_zona: `De tu zona · ${zona}`,
+    tu_zona: `De tu zona: ${zona}`,
     otra_zona: `Local de ${zona}`,
     tu_pais: 'Nacional',
     otro_pais: 'De otro país',
@@ -30,7 +30,7 @@ export function porQue(item: NoticiaPersonalizada<NoticiaDelFeed>): Razon {
 
   const seccion = nombreDeSeccion(interes.seccion);
   const gusto =
-    interes.valor >= 1.05 ? ` · leés ${seccion}` : interes.valor <= 0.95 ? ` · leés poco ${seccion}` : '';
+    interes.valor >= 1.05 ? `. Leés ${seccion}` : interes.valor <= 0.95 ? `. Leés poco ${seccion}` : '';
 
   return { texto: donde + gusto, tono: geografico.motivo === 'tu_zona' ? 'zona' : 'neutro' };
 }

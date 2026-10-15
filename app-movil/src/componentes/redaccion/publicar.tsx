@@ -212,7 +212,7 @@ export function Publicar() {
                 <Text style={[estilos.nota, { color: c.tinta }]}>Crédito: {elegida.credito}</Text>
                 <Entrada etiqueta="Texto alternativo" pista="qué se ve en la foto" value={alterno} onChangeText={setAlterno} />
                 <Text style={[estilos.nota, { color: c.tintaSuave }]}>
-                  En la portada va a decir «Foto de archivo · no es del hecho». Al guardar se vuelve a consultar
+                  En la portada va a decir «Foto de archivo (no es del hecho)». Al guardar se vuelve a consultar
                   Commons: el autor y la licencia salen de ahí.
                 </Text>
               </Tarjeta>

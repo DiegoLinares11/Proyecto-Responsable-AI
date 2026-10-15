@@ -8,11 +8,12 @@
 // ===========================================================================
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { AreaDePestana } from '@/componentes/area-de-pestana';
 
 import { BotonGoogle } from '@/componentes/boton-google';
 import { Pin } from '@/componentes/iconos';
 import { SelectorDeUbicacion } from '@/componentes/selector-de-ubicacion';
+import { SelectorDeApariencia } from '@/componentes/selector-de-apariencia';
 import { ANCHOS, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { FACTORES_GEOGRAFICOS, factorDeInteres, INTERES } from '@/lib/personalizacion';
 import { usePreferencias } from '@/lib/preferencias';
@@ -53,7 +54,7 @@ export default function Perfil() {
     '';
 
   return (
-    <SafeAreaView style={e.pantalla} edges={['top']}>
+    <AreaDePestana style={e.pantalla}>
       <ScrollView contentContainerStyle={e.contenido}>
         <Text style={e.titulo} accessibilityRole="header">
           Perfil
@@ -80,6 +81,10 @@ export default function Perfil() {
             </View>
           )}
         </View>
+
+        <Text style={e.seccion}>APARIENCIA</Text>
+        <SelectorDeApariencia />
+        <Text style={e.texto}>Elegí cómo querés leer. Sistema sigue la apariencia de tu dispositivo.</Text>
 
         <Text style={e.seccion}>TU UBICACIÓN</Text>
         <Pressable onPress={() => setEligiendo(true)} style={e.tarjeta} accessibilityRole="button">
@@ -137,8 +142,8 @@ export default function Perfil() {
         <View style={e.tarjeta}>
           <Text style={e.formula}>relevancia × ubicación × interés</Text>
           <Text style={e.texto}>
-            De tu zona ×{FACTORES_GEOGRAFICOS.tu_zona} · nacional ×{FACTORES_GEOGRAFICOS.tu_pais} ·
-            internacional ×{FACTORES_GEOGRAFICOS.internacional} · local de otra zona ×
+            De tu zona ×{FACTORES_GEOGRAFICOS.tu_zona}. Nacional ×{FACTORES_GEOGRAFICOS.tu_pais}.
+            Internacional ×{FACTORES_GEOGRAFICOS.internacional}. Local de otra zona ×
             {FACTORES_GEOGRAFICOS.otra_zona}. El interés va de ×{INTERES.minimo} a ×{INTERES.maximo}.
           </Text>
           <Text style={e.texto}>
@@ -156,9 +161,9 @@ export default function Perfil() {
           </View>
         ))}
 
-        <Text style={e.pie}>Proyecto de CC3106 · Universidad del Valle de Guatemala</Text>
+        <Text style={e.pie}>Proyecto de CC3106{'\n'}Universidad del Valle de Guatemala</Text>
       </ScrollView>
-    </SafeAreaView>
+    </AreaDePestana>
   );
 }
 

@@ -11,8 +11,10 @@
 
 import { Tabs, TabList, TabSlot, TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Logotipo } from '@/componentes/marca';
+import { MenuEditorial } from '@/componentes/menu-editorial';
 import { ANCHOS, Espacio, Tipos, useColores, useDisposicion } from '@/constants/tema';
 import { usePermisos } from '@/lib/permisos';
 
@@ -80,6 +82,16 @@ function botones(ancha: boolean, conRedaccion: boolean) {
 
 export default function Pestanas() {
   const c = useColores();
+  const { ancha } = useDisposicion();
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: c.papel }} edges={ancha ? ['top', 'left', 'right', 'bottom'] : ['top', 'left', 'right']}>
+      <ContenidoPestanas />
+    </SafeAreaView>
+  );
+}
+
+function ContenidoPestanas() {
+  const c = useColores();
   const { ancha, anchoVentana } = useDisposicion();
   const { redaccion } = usePermisos();
 
@@ -99,6 +111,7 @@ export default function Pestanas() {
             <Logotipo />
             <View style={{ flex: 1 }} />
             {botones(true, redaccion)}
+            <MenuEditorial />
           </View>
         </TabList>
         <TabSlot style={{ flex: 1 }} />
@@ -110,9 +123,10 @@ export default function Pestanas() {
     <Tabs>
       <TabSlot style={{ flex: 1 }} />
       <TabList asChild>
-        <View style={StyleSheet.flatten([estilos.barra, { backgroundColor: c.papel, borderTopColor: c.bordeFuerte }])}>
+        <SafeAreaView edges={['bottom']} style={StyleSheet.flatten([estilos.barra, { backgroundColor: c.papel, borderTopColor: c.bordeFuerte }])}>
           {botones(false, redaccion)}
-        </View>
+          <MenuEditorial barra />
+        </SafeAreaView>
       </TabList>
     </Tabs>
   );

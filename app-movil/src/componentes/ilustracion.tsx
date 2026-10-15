@@ -39,7 +39,7 @@ export function IlustracionTipografica({
         <Text style={[estilos.tituloMedio, { color: c.ilustracionTexto }]} numberOfLines={3}>
           {titulo}
         </Text>
-        <Text style={estilos.etiquetaChica}>ILUSTRACIÓN · NO ES UNA FOTOGRAFÍA</Text>
+        <Text style={estilos.etiquetaChica}>ILUSTRACIÓN TIPOGRÁFICA</Text>
       </View>
     );
   }
@@ -72,7 +72,7 @@ export function IlustracionTipografica({
       <Text style={[estilos.titulo, { color: c.ilustracionTexto }]} numberOfLines={3}>
         {titulo}
       </Text>
-      <Text style={estilos.etiqueta}>ILUSTRACIÓN · NO ES UNA FOTOGRAFÍA</Text>
+      <Text style={estilos.etiqueta}>ILUSTRACIÓN TIPOGRÁFICA</Text>
     </View>
   );
 }

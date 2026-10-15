@@ -10,9 +10,10 @@
 import * as Location from 'expo-location';
 import { useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { Pin } from '@/componentes/iconos';
+import { AtlasDeUbicacion } from '@/componentes/atlas-de-ubicacion';
 import { ANCHOS, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { departamentoMasCercano } from '@/lib/cercania';
 import { usePreferencias } from '@/lib/preferencias';
@@ -57,23 +58,30 @@ export function SelectorDeUbicacion({ visible, cerrar }: { visible: boolean; cer
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={cerrar}>
+      <SafeAreaProvider>
       <View style={e.fondo}>
         <SafeAreaView style={e.pantalla}>
           <View style={e.cabecera}>
             <View style={{ flex: 1 }}>
-              <Text style={e.titulo}>Tu ubicación</Text>
-              <Text style={e.nota}>Simulada: la elegís vos. Cambia lo que ves en la portada y en el chat.</Text>
+              <Text style={e.titulo} accessibilityRole="header">Atlas de noticias</Text>
+              <Text style={e.nota}>Elegí desde dónde leer. La ubicación es simulada y podés cambiarla cuando quieras.</Text>
             </View>
-            <Pressable onPress={cerrar} accessibilityRole="button" hitSlop={12}>
+            <Pressable onPress={cerrar} accessibilityRole="button" hitSlop={12} style={{ minHeight: 44, justifyContent: 'center' }}>
               <Text style={e.listo}>Listo</Text>
             </Pressable>
           </View>
 
-          <View style={e.gps}>
+          <SectionList
+            style={{ flex: 1, minHeight: 0 }}
+            sections={secciones}
+            keyExtractor={(u) => u.id}
+            ListHeaderComponent={<>
+            <AtlasDeUbicacion ubicacion={ubicacion} />
+            <View style={e.gps}>
             <Pressable
               onPress={usarUbicacionReal}
               disabled={buscando}
-              style={e.botonGps}
+                   style={({ pressed }) => [e.botonGps, pressed && { opacity: 0.65 }]}
               accessibilityRole="button">
               {buscando ? (
                 <ActivityIndicator color={c.acento} />
@@ -88,12 +96,9 @@ export function SelectorDeUbicacion({ visible, cerrar }: { visible: boolean; cer
               Se calcula en tu teléfono contra las cabeceras departamentales: las coordenadas no se
               mandan a ningún servidor ni se guardan.
             </Text>
-            {aviso ? <Text style={e.aviso}>{aviso}</Text> : null}
-          </View>
-
-          <SectionList
-            sections={secciones}
-            keyExtractor={(u) => u.id}
+            {aviso ? <Text style={e.aviso} accessibilityLiveRegion="polite">{aviso}</Text> : null}
+            </View>
+            </>}
             renderSectionHeader={({ section }) => <Text style={e.grupo}>{section.titulo}</Text>}
             renderItem={({ item }) => {
               const elegida = item.id === ubicacion.id;
@@ -116,6 +121,7 @@ export function SelectorDeUbicacion({ visible, cerrar }: { visible: boolean; cer
           />
         </SafeAreaView>
       </View>
+      </SafeAreaProvider>
     </Modal>
   );
 }
@@ -133,7 +139,7 @@ function crearEstilos(c: Paleta) {
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.borde,
     },
-    titulo: { fontFamily: Tipos.titular, fontSize: 24, color: c.tinta },
+    titulo: { fontFamily: Tipos.lectura, fontSize: 33, lineHeight: 38, color: c.tinta },
     nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 18, color: c.tintaSuave, marginTop: 4 },
     listo: { fontFamily: Tipos.textoFuerte, fontSize: 16, color: c.acento, paddingTop: 4 },
     gps: {

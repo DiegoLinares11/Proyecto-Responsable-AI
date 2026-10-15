@@ -50,7 +50,7 @@ export function Moderacion() {
 
   return (
     <View style={{ gap: Espacio.xl }}>
-      <Seccion titulo={`ALERTAS DE CONTENIDO · ${datos.alertas.length}`}>
+      <Seccion titulo={`ALERTAS DE CONTENIDO (${datos.alertas.length})`}>
         <Text style={[estilos.nota, { color: c.tintaSuave }]}>
           Noticias ya publicadas cuyo texto intentó manipular al chatbot. Siguen publicadas: una alerta no
           despublica nada sola. La decisión es tuya.
@@ -62,7 +62,7 @@ export function Moderacion() {
         )}
       </Seccion>
 
-      <Seccion titulo={`EN REVISIÓN · ${datos.cola.length}`}>
+      <Seccion titulo={`EN REVISIÓN (${datos.cola.length})`}>
         <Text style={[estilos.nota, { color: c.tintaSuave }]}>
           Lo que el canal de validación no dio por bueno. Aprobar la publica; rechazar la marca como no
           verificable; archivar la saca de la cola.
@@ -133,7 +133,7 @@ function FilaDeAlerta({ alerta, alCambiar }: { alerta: AlertaDeContenido; alCamb
     <Tarjeta>
       <Text style={[estilos.titulo, { color: c.tinta }]}>{alerta.titulo}</Text>
       <Text style={[estilos.resumen, { color: c.tintaSuave }]}>
-        {alerta.fuente ?? 'fuente no registrada'} · publicó {alerta.autor ?? 'desconocido'} · {alerta.veces}{' '}
+        {alerta.fuente ?? 'Fuente no registrada'}. Publicó {alerta.autor ?? 'desconocido'}. {alerta.veces}{' '}
         {alerta.veces === 1 ? 'detección' : 'detecciones'}
       </Text>
       {alerta.evidencias.slice(0, 2).map((ev, i) => (

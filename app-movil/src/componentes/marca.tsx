@@ -1,6 +1,6 @@
 // El sello de la marca y el logotipo. El sello es un check dentro de dos
-// anillos: el de afuera en celeste, el de adentro en tinta. Es lo mismo que la
-// plataforma le pone a una noticia cuando pasa la verificación.
+// anillos: el de afuera en naranja, el de adentro en tinta. El naranja es la
+// identidad; los sellos de verificación usan un color semántico independiente.
 
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';

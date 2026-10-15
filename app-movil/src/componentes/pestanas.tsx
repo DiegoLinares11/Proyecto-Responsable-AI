@@ -3,6 +3,7 @@
 // lo pide como pantalla inicial.
 
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Platform } from 'react-native';
 
 import { useColores } from '@/constants/tema';
 import { usePermisos } from '@/lib/permisos';
@@ -15,7 +16,7 @@ export default function Pestanas() {
 
   return (
     <NativeTabs backgroundColor={c.papel} indicatorColor={c.verificadoFondo} tintColor={c.acento}>
-      <NativeTabs.Trigger name="index">
+      <NativeTabs.Trigger name="index" disableAutomaticContentInsets={Platform.OS === 'ios'}>
         <NativeTabs.Trigger.Label>Chat</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="bubble.left.and.bubble.right.fill" md="chat" />
       </NativeTabs.Trigger>
