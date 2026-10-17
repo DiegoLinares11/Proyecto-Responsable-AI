@@ -24,7 +24,7 @@ function clienteFalso(opciones: {
   escribeAuditoria: boolean;
   /** Si la política deja hacer el cambio de estado. */
   puedeModerar?: boolean;
-  noticia?: { url_original: string | null; id_fuente: number | null };
+  noticia?: { url_original: string | null; id_fuente: number | null; id_autor?: string };
 }) {
   const inserciones: Insercion[] = [];
   const actualizaciones: Array<{ tabla: string; valores: Record<string, unknown> }> = [];
@@ -97,6 +97,44 @@ describe("la auditoría de la moderación", () => {
       (e: Error) => e instanceof ErrorDeNoticia && e.codigo === "sin_permiso",
     );
     assert.equal(sistema.inserciones.length, 0);
+  });
+
+  test("nadie aprueba su propia noticia, y no queda nada cambiado ni auditado", async () => {
+    const moderador = clienteFalso({
+      escribeAuditoria: false,
+      noticia: { url_original: null, id_fuente: 1, id_autor: "mod-1" },
+    });
+    const sistema = clienteFalso({ escribeAuditoria: true });
+
+    await assert.rejects(
+      () => decidirComoModerador(moderador.cliente, sistema.cliente, "n-3", "aprobar", "mod-1", MOTIVO),
+      (e: Error) => e instanceof ErrorDeNoticia && e.codigo === "propia" && /otro moderador/.test(e.message),
+    );
+    assert.equal(moderador.actualizaciones.length, 0);
+    assert.equal(sistema.inserciones.length, 0);
+  });
+
+  // Sacar de publicación la propia sí se puede: es la dirección segura.
+  test("archivar o rechazar la propia noticia sí se puede", async () => {
+    const moderador = clienteFalso({
+      escribeAuditoria: false,
+      noticia: { url_original: null, id_fuente: 1, id_autor: "mod-1" },
+    });
+    const sistema = clienteFalso({ escribeAuditoria: true });
+
+    await decidirComoModerador(moderador.cliente, sistema.cliente, "n-3", "archivar", "mod-1", MOTIVO);
+    assert.equal(moderador.actualizaciones[0]?.valores["estado"], "archivada");
+  });
+
+  test("aprobar la noticia de otra persona sí se puede", async () => {
+    const moderador = clienteFalso({
+      escribeAuditoria: false,
+      noticia: { url_original: null, id_fuente: 1, id_autor: "publicador-7" },
+    });
+    const sistema = clienteFalso({ escribeAuditoria: true });
+
+    await decidirComoModerador(moderador.cliente, sistema.cliente, "n-4", "aprobar", "mod-1", MOTIVO);
+    assert.equal(moderador.actualizaciones[0]?.valores["estado"], "verificada");
   });
 
   test("aprobar una nota de un dominio sin registrar deja el candidato en la auditoría", async () => {

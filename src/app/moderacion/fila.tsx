@@ -15,6 +15,7 @@ export type NoticiaDeLaCola = {
   rafagaSospechosa: boolean;
   rafagaMotivo: string | null;
   recomendada: boolean;
+  enDesarrollo: boolean;
 };
 
 export function FilaDeModeracion({ noticia }: { noticia: NoticiaDeLaCola }) {
@@ -33,8 +34,12 @@ export function FilaDeModeracion({ noticia }: { noticia: NoticiaDeLaCola }) {
       </p>
 
       <div className="meta">
-        <span className={`sello ${noticia.estado === "en_revision" ? "aviso" : "malo"}`}>
-          {noticia.estado === "en_revision" ? "en revisión" : "no verificable"}
+        <span className={`sello ${noticia.estado === "no_verificable" ? "malo" : "aviso"}`}>
+          {noticia.enDesarrollo
+            ? "publicada en desarrollo"
+            : noticia.estado === "en_revision"
+              ? "en revisión"
+              : "no verificable"}
         </span>
         {noticia.puntajeVeracidad === null ? null : (
           <span>veracidad {noticia.puntajeVeracidad}/100</span>
@@ -85,17 +90,32 @@ export function FilaDeModeracion({ noticia }: { noticia: NoticiaDeLaCola }) {
           Motivo de la decisión
           <input name="motivo" required minLength={10} placeholder="Por qué se decide esto" />
         </label>
-        <div className="acciones">
-          <button type="submit" name="decision" value="aprobar" className="principal" disabled={enviando}>
-            Aprobar y publicar
-          </button>
-          <button type="submit" name="decision" value="rechazar" disabled={enviando}>
-            No verificable
-          </button>
-          <button type="submit" name="decision" value="archivar" disabled={enviando}>
-            Archivar
-          </button>
-        </div>
+        {/* Publicada en desarrollo (R-13): se confirma cuando se confirme, o se saca. */}
+        {noticia.enDesarrollo ? (
+          <div className="acciones">
+            <button type="submit" name="decision" value="confirmar" className="principal" disabled={enviando}>
+              Confirmar
+            </button>
+            <button type="submit" name="decision" value="archivar" disabled={enviando}>
+              Sacar de publicación
+            </button>
+          </div>
+        ) : (
+          <div className="acciones">
+            <button type="submit" name="decision" value="aprobar" className="principal" disabled={enviando}>
+              Aprobar y publicar
+            </button>
+            <button type="submit" name="decision" value="aprobar_en_desarrollo" disabled={enviando}>
+              Publicar en desarrollo
+            </button>
+            <button type="submit" name="decision" value="rechazar" disabled={enviando}>
+              No verificable
+            </button>
+            <button type="submit" name="decision" value="archivar" disabled={enviando}>
+              Archivar
+            </button>
+          </div>
+        )}
         {estado === undefined ? null : "error" in estado ? (
           <p className="error">{estado.error}</p>
         ) : (

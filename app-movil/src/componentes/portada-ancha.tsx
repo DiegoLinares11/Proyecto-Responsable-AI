@@ -160,7 +160,7 @@ function Principal({ item, ancho, abrir, e }: { item: Item; ancho: number; abrir
         <FotoDeNoticia imagen={n.imagen} estilo={e.imagenPrincipal} />
       ) : null}
       <View style={e.meta}>
-        <Sello puntaje={n.puntajeVeracidad} />
+        <Sello puntaje={n.puntajeVeracidad} enDesarrollo={n.enDesarrollo} />
         <DatoEditorial tipo="fuente" texto={n.fuente ?? 'Fuente no registrada'} />
         <DatoEditorial tipo="fecha" texto={haceCuanto(n.publicadaEn)} />
       </View>
@@ -184,7 +184,7 @@ function Tarjeta({ item, ancho, abrir, e, lateral = false }: { item: Item; ancho
       </View>
       <Text style={e.resumenTarjeta} numberOfLines={3}>{n.resumen}</Text>
       <View style={e.meta}>
-        <Sello puntaje={n.puntajeVeracidad} compacto />
+        <Sello puntaje={n.puntajeVeracidad} compacto enDesarrollo={n.enDesarrollo} />
         <DatoEditorial tipo="fuente" texto={n.fuente ?? 'Fuente no registrada'} />
         <DatoEditorial tipo="fecha" texto={haceCuanto(n.publicadaEn)} />
       </View>

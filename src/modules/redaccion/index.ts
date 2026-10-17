@@ -20,7 +20,14 @@ import { interpretarSeccion } from "../../lib/secciones.ts";
 import type { PerfilDelVisitante } from "../../lib/supabase-servidor.ts";
 import { registrar } from "../auditoria/index.ts";
 import { verificarArchivo } from "../imagenes/commons.ts";
-import { crearBorrador, decidirComoModerador, ErrorDeNoticia, validarYResolver } from "../noticias/index.ts";
+import {
+  crearBorrador,
+  DECISIONES_DE_MODERADOR,
+  decidirComoModerador,
+  ErrorDeNoticia,
+  validarYResolver,
+  type DecisionDeModerador,
+} from "../noticias/index.ts";
 import type { ImagenDeBorrador } from "../noticias/servicio.ts";
 
 /** Un campo de texto, venga de un FormData o de un JSON. */
@@ -258,7 +265,7 @@ export async function moderarNoticia(
   const decision = campo("decision");
   const motivo = campo("motivo").trim();
 
-  if (!["aprobar", "rechazar", "archivar"].includes(decision)) {
+  if (!(DECISIONES_DE_MODERADOR as readonly string[]).includes(decision)) {
     return { error: "Decisión no reconocida." };
   }
 
@@ -273,7 +280,7 @@ export async function moderarNoticia(
       clienteDelModerador,
       clienteDeServicio(),
       idNoticia,
-      decision as "aprobar" | "rechazar" | "archivar",
+      decision as DecisionDeModerador,
       perfil.usuario.id,
       motivo,
     );
@@ -284,12 +291,14 @@ export async function moderarNoticia(
     return { error: error instanceof Error ? error.message : String(error) };
   }
 
-  const hechos: Record<string, string> = {
+  const hechos: Record<DecisionDeModerador, string> = {
     aprobar: "Aprobada y publicada.",
+    aprobar_en_desarrollo: "Publicada en desarrollo: la portada, la lectura y el chat dicen que no está confirmada.",
+    confirmar: "Confirmada: ya no figura como en desarrollo.",
     rechazar: "Marcada como no verificable.",
     archivar: "Archivada.",
   };
-  return { ok: hechos[decision] ?? "Listo." };
+  return { ok: hechos[decision as DecisionDeModerador] ?? "Listo." };
 }
 
 /**

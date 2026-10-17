@@ -158,6 +158,8 @@ export type NoticiaConDesglose = NoticiaDelFeed & {
   cuerpo: string;
   urlOriginal: string | null;
   estado: string;
+  /** Publicada en desarrollo: lo que dice todavía no está confirmado (R-13). */
+  enDesarrollo: boolean;
   senales: SenalDeValidacion[];
 };
 
@@ -182,7 +184,7 @@ export async function leerNoticia(id: string): Promise<NoticiaConDesglose | null
 
   const { data, error } = await cliente
     .from("noticias")
-    .select(`${CAMPOS_DEL_FEED},cuerpo,url_original,estado`)
+    .select(`${CAMPOS_DEL_FEED},cuerpo,url_original,estado,en_desarrollo`)
     .eq("id", id)
     .maybeSingle();
 
@@ -193,6 +195,7 @@ export async function leerNoticia(id: string): Promise<NoticiaConDesglose | null
     cuerpo: string;
     url_original: string | null;
     estado: string;
+    en_desarrollo: boolean;
   };
 
   const { data: senales } = await cliente
@@ -205,6 +208,7 @@ export async function leerNoticia(id: string): Promise<NoticiaConDesglose | null
     cuerpo: fila.cuerpo,
     urlOriginal: fila.url_original,
     estado: fila.estado,
+    enDesarrollo: fila.en_desarrollo === true,
     senales: ((senales ?? []) as SenalDeValidacion[])
       .map((s) => ({ ...s, aporte: Number(s.aporte) }))
       .sort((a, b) => ORDEN_DE_SENALES.indexOf(a.senal) - ORDEN_DE_SENALES.indexOf(b.senal)),
@@ -223,6 +227,8 @@ export type NoticiaEnRevision = {
   rafagaMotivo: string | null;
   /** El canal la recomienda: pasó el umbral y espera a un moderador (R-09). */
   recomendada: boolean;
+  /** Publicada en desarrollo: espera que alguien la confirme (R-13). */
+  enDesarrollo: boolean;
 };
 
 /**
@@ -237,10 +243,12 @@ export async function leerColaDeModeracion(sesion?: SupabaseClient): Promise<Not
   // Con el token de la app llega su cliente; desde el portal, el de la cookie.
   const cliente = sesion ?? (await clienteDelServidor());
 
+  // Además de lo que espera decisión, lo publicado en desarrollo: espera que
+  // alguien lo confirme o lo saque (R-13).
   const { data, error } = await cliente
     .from("noticias")
-    .select("id,titulo,resumen,url_original,estado,puntaje_veracidad,creado_en,rafaga_sospechosa,rafaga_motivo")
-    .in("estado", ["en_revision", "no_verificable"])
+    .select("id,titulo,resumen,url_original,estado,puntaje_veracidad,creado_en,rafaga_sospechosa,rafaga_motivo,en_desarrollo")
+    .or("estado.in.(en_revision,no_verificable),and(estado.eq.verificada,en_desarrollo.is.true)")
     .order("creado_en", { ascending: true })
     .limit(50);
 
@@ -256,6 +264,7 @@ export async function leerColaDeModeracion(sesion?: SupabaseClient): Promise<Not
     creado_en: string;
     rafaga_sospechosa: boolean;
     rafaga_motivo: string | null;
+    en_desarrollo: boolean;
   }>).map((f) => ({
     id: f.id,
     titulo: f.titulo,
@@ -267,6 +276,7 @@ export async function leerColaDeModeracion(sesion?: SupabaseClient): Promise<Not
     rafagaSospechosa: f.rafaga_sospechosa,
     rafagaMotivo: f.rafaga_motivo,
     recomendada: recomendadaParaPublicar(f.estado, f.puntaje_veracidad),
+    enDesarrollo: f.en_desarrollo,
   }));
 }
 
@@ -294,6 +304,7 @@ export async function leerMisBorradores(): Promise<NoticiaEnRevision[]> {
     rafagaSospechosa: f["rafaga_sospechosa"] as boolean,
     rafagaMotivo: f["rafaga_motivo"] as string | null,
     recomendada: recomendadaParaPublicar(f["estado"] as string, f["puntaje_veracidad"] as number | null),
+    enDesarrollo: false,
   }));
 }
 

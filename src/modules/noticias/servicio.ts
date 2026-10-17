@@ -73,7 +73,7 @@ export type DatosDeBorrador = {
 };
 
 export class ErrorDeNoticia extends Error {
-  readonly codigo: "sin_permiso" | "no_encontrada" | "estado_invalido" | "base_de_datos";
+  readonly codigo: "sin_permiso" | "no_encontrada" | "estado_invalido" | "base_de_datos" | "propia";
 
   constructor(codigo: ErrorDeNoticia["codigo"], mensaje: string) {
     super(mensaje);
@@ -329,7 +329,38 @@ async function resolverFuente(
   return null;
 }
 
-export type DecisionDeModerador = "aprobar" | "rechazar" | "archivar";
+export type DecisionDeModerador = "aprobar" | "aprobar_en_desarrollo" | "confirmar" | "rechazar" | "archivar";
+
+export const DECISIONES_DE_MODERADOR: readonly DecisionDeModerador[] = [
+  "aprobar",
+  "aprobar_en_desarrollo",
+  "confirmar",
+  "rechazar",
+  "archivar",
+];
+
+/**
+ * Lo que cambia en la fila con cada decisión. Pura, para poder probarla.
+ *
+ * La marca `en_desarrollo` siempre queda en un valor explícito: la base solo la
+ * acepta en una noticia publicada (R-13), así que rechazar o archivar tienen
+ * que quitarla en el mismo cambio. «Confirmar» quita la marca y nada más: la
+ * noticia ya estaba publicada y su fecha de publicación no cambia.
+ */
+export function cambioDeLaDecision(decision: DecisionDeModerador, ahora: Date): Record<string, unknown> {
+  switch (decision) {
+    case "aprobar":
+      return { estado: "verificada", publicada_en: ahora.toISOString(), en_desarrollo: false };
+    case "aprobar_en_desarrollo":
+      return { estado: "verificada", publicada_en: ahora.toISOString(), en_desarrollo: true };
+    case "confirmar":
+      return { en_desarrollo: false };
+    case "rechazar":
+      return { estado: "no_verificable", publicada_en: null, en_desarrollo: false };
+    case "archivar":
+      return { estado: "archivada", publicada_en: null, en_desarrollo: false };
+  }
+}
 
 /**
  * La decisión humana sobre una noticia en revisión.
@@ -372,27 +403,35 @@ export async function decidirComoModerador(
   idModerador: string,
   motivo: string,
 ): Promise<void> {
-  const estados: Record<DecisionDeModerador, string> = {
-    aprobar: "verificada",
-    rechazar: "no_verificable",
-    archivar: "archivada",
-  };
-
-  const estadoNuevo = estados[decision];
+  const cambio = cambioDeLaDecision(decision, new Date());
 
   const { data: antes } = await clienteDelModerador
     .from("noticias")
-    .select("url_original,id_fuente")
+    .select("url_original,id_fuente,id_autor,estado,en_desarrollo")
     .eq("id", idNoticia)
     .maybeSingle();
 
-  const { error } = await clienteDelModerador
-    .from("noticias")
-    .update({
-      estado: estadoNuevo,
-      publicada_en: estadoNuevo === "verificada" ? new Date().toISOString() : null,
-    })
-    .eq("id", idNoticia);
+  const fila = antes as { id_autor?: string; estado?: string; en_desarrollo?: boolean } | null;
+
+  // Nadie publica su propia noticia, ni la confirma: lo hace otro moderador. La
+  // frontera de verdad es la política `noticias_edicion` (migración
+  // 20261016150000); esto está para dar un mensaje claro en vez del «sin
+  // permiso» genérico que daría la base.
+  const publica = decision === "aprobar" || decision === "aprobar_en_desarrollo" || decision === "confirmar";
+  if (publica && fila?.id_autor === idModerador) {
+    throw new ErrorDeNoticia(
+      "propia",
+      "Nadie publica ni confirma su propia noticia: lo tiene que hacer otro moderador.",
+    );
+  }
+
+  if (decision === "confirmar" && !(fila?.estado === "verificada" && fila.en_desarrollo === true)) {
+    throw new ErrorDeNoticia("estado_invalido", "Solo se confirma una noticia publicada en desarrollo.");
+  }
+
+  const estadoNuevo = (cambio["estado"] as string | undefined) ?? fila?.estado ?? "verificada";
+
+  const { error } = await clienteDelModerador.from("noticias").update(cambio).eq("id", idNoticia);
 
   if (error !== null) {
     if (error.code === "42501") {
@@ -406,7 +445,7 @@ export async function decidirComoModerador(
     idEntidad: idNoticia,
     accion: `moderada_${decision}`,
     idActor: idModerador,
-    detalle: { estado_nuevo: estadoNuevo, motivo },
+    detalle: { estado_nuevo: estadoNuevo, en_desarrollo: cambio["en_desarrollo"] === true, motivo },
   });
 
   // Si se aprobó una nota de un medio que no está en el registro, el dominio
@@ -415,7 +454,7 @@ export async function decidirComoModerador(
   const url = (antes as { url_original: string | null; id_fuente: number | null } | null)?.url_original;
   const yaRegistrada = (antes as { id_fuente: number | null } | null)?.id_fuente;
 
-  if (decision === "aprobar" && url != null && yaRegistrada == null) {
+  if ((decision === "aprobar" || decision === "aprobar_en_desarrollo") && url != null && yaRegistrada == null) {
     const dominio = candidatosDeUrl(url).at(-1);
     if (dominio !== undefined) {
       await registrar(clienteDeAuditoria, {

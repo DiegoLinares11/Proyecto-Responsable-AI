@@ -6,7 +6,9 @@
 // ===========================================================================
 
 export {
+  cambioDeLaDecision,
   crearBorrador,
+  DECISIONES_DE_MODERADOR,
   decidirComoModerador,
   validarYResolver,
   ErrorDeNoticia,

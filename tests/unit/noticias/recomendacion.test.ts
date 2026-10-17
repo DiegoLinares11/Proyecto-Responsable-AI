@@ -9,7 +9,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
-import { ESTADO_POR_VEREDICTO } from "../../../src/modules/noticias/servicio.ts";
+import { cambioDeLaDecision, ESTADO_POR_VEREDICTO } from "../../../src/modules/noticias/servicio.ts";
 import { recomendadaParaPublicar } from "../../../src/modules/noticias/recomendacion.ts";
 import { UMBRAL_VERIFICADA } from "../../../src/modules/validacion/index.ts";
 
@@ -53,5 +53,32 @@ describe("la recomendación en la cola de moderación", () => {
   test("acepta el puntaje como texto", () => {
     assert.equal(recomendadaParaPublicar("en_revision", "80"), true);
     assert.equal(recomendadaParaPublicar("en_revision", "abc"), false);
+  });
+});
+
+describe("lo que cambia cada decisión del moderador (R-13)", () => {
+  const AHORA = new Date("2026-10-16T12:00:00Z");
+
+  test("publicar en desarrollo publica y deja la marca", () => {
+    assert.deepEqual(cambioDeLaDecision("aprobar_en_desarrollo", AHORA), {
+      estado: "verificada",
+      publicada_en: AHORA.toISOString(),
+      en_desarrollo: true,
+    });
+  });
+
+  test("publicar normal deja la marca apagada", () => {
+    assert.equal(cambioDeLaDecision("aprobar", AHORA)["en_desarrollo"], false);
+  });
+
+  // La noticia ya estaba publicada: su fecha no cambia al confirmarla.
+  test("confirmar solo quita la marca, sin tocar el estado ni la fecha", () => {
+    assert.deepEqual(cambioDeLaDecision("confirmar", AHORA), { en_desarrollo: false });
+  });
+
+  // La base solo acepta la marca en una publicada: sacarla tiene que quitarla.
+  test("rechazar y archivar quitan la marca en el mismo cambio", () => {
+    assert.equal(cambioDeLaDecision("rechazar", AHORA)["en_desarrollo"], false);
+    assert.equal(cambioDeLaDecision("archivar", AHORA)["en_desarrollo"], false);
   });
 });

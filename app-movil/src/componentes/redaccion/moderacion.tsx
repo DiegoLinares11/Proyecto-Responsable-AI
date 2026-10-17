@@ -64,8 +64,10 @@ export function Moderacion() {
 
       <Seccion titulo={`EN REVISIÓN (${datos.cola.length})`}>
         <Text style={[estilos.nota, { color: c.tintaSuave }]}>
-          Lo que el canal de validación no dio por bueno. Aprobar la publica; rechazar la marca como no
-          verificable; archivar la saca de la cola.
+          Ninguna noticia se publica sola: el canal recomienda y vos decidís. Aprobar la publica;
+          «en desarrollo» la publica avisando que no está confirmada; rechazar la marca como no
+          verificable; archivar la saca de la cola. Lo publicado en desarrollo vuelve acá hasta que
+          alguien lo confirme.
         </Text>
         {datos.cola.length === 0 ? (
           <Text style={[estilos.vacio, { color: c.tintaSuave }]}>No hay noticias esperando.</Text>
@@ -83,7 +85,7 @@ function FilaDeRevision({ noticia, alCambiar }: { noticia: NoticiaEnRevision; al
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [resultado, setResultado] = useState<{ error: string } | { ok: string } | null>(null);
 
-  async function tomar(decision: 'aprobar' | 'rechazar' | 'archivar') {
+  async function tomar(decision: 'aprobar' | 'aprobar_en_desarrollo' | 'confirmar' | 'rechazar' | 'archivar') {
     setOcupado(decision);
     const r = await decidir('noticia', noticia.id, decision, motivo);
     setOcupado(null);
@@ -94,8 +96,10 @@ function FilaDeRevision({ noticia, alCambiar }: { noticia: NoticiaEnRevision; al
   return (
     <Tarjeta>
       <View style={estilos.cabecera}>
-        <Sello puntaje={noticia.puntajeVeracidad} />
-        <Text style={[estilos.estado, { color: c.tintaSuave }]}>{ESTADO[noticia.estado] ?? noticia.estado}</Text>
+        <Sello puntaje={noticia.puntajeVeracidad} enDesarrollo={noticia.enDesarrollo === true} />
+        <Text style={[estilos.estado, { color: c.tintaSuave }]}>
+          {noticia.enDesarrollo ? 'Publicada en desarrollo' : (ESTADO[noticia.estado] ?? noticia.estado)}
+        </Text>
       </View>
       <Text style={[estilos.titulo, { color: c.tinta }]}>{noticia.titulo}</Text>
       <Text style={[estilos.resumen, { color: c.tintaSuave }]} numberOfLines={3}>
@@ -111,11 +115,25 @@ function FilaDeRevision({ noticia, alCambiar }: { noticia: NoticiaEnRevision; al
         <Text style={[estilos.aviso, { color: c.alerta }]}>Tracción sospechosa: {noticia.rafagaMotivo ?? 'ráfaga de cuentas nuevas'}</Text>
       ) : null}
       <Entrada etiqueta="Motivo" pista="queda en la auditoría" value={motivo} onChangeText={setMotivo} />
-      <View style={estilos.botones}>
-        <Boton texto="Aprobar y publicar" alPresionar={() => tomar('aprobar')} ocupado={ocupado === 'aprobar'} />
-        <Boton texto="Rechazar" secundario peligro alPresionar={() => tomar('rechazar')} ocupado={ocupado === 'rechazar'} />
-        <Boton texto="Archivar" secundario alPresionar={() => tomar('archivar')} ocupado={ocupado === 'archivar'} />
-      </View>
+      {/* Publicada en desarrollo (R-13): se confirma cuando se confirme, o se saca. */}
+      {noticia.enDesarrollo ? (
+        <View style={estilos.botones}>
+          <Boton texto="Confirmar" alPresionar={() => tomar('confirmar')} ocupado={ocupado === 'confirmar'} />
+          <Boton texto="Sacar de publicación" secundario alPresionar={() => tomar('archivar')} ocupado={ocupado === 'archivar'} />
+        </View>
+      ) : (
+        <View style={estilos.botones}>
+          <Boton texto="Aprobar y publicar" alPresionar={() => tomar('aprobar')} ocupado={ocupado === 'aprobar'} />
+          <Boton
+            texto="Publicar en desarrollo"
+            secundario
+            alPresionar={() => tomar('aprobar_en_desarrollo')}
+            ocupado={ocupado === 'aprobar_en_desarrollo'}
+          />
+          <Boton texto="Rechazar" secundario peligro alPresionar={() => tomar('rechazar')} ocupado={ocupado === 'rechazar'} />
+          <Boton texto="Archivar" secundario alPresionar={() => tomar('archivar')} ocupado={ocupado === 'archivar'} />
+        </View>
+      )}
       <Mensaje resultado={resultado} />
     </Tarjeta>
   );

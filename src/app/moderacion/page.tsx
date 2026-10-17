@@ -63,7 +63,8 @@ export default async function Moderacion() {
 
       <h2 style={{ fontSize: "1.2rem", marginTop: "2.5rem" }}>Cola de moderación</h2>
       <p style={{ color: "var(--tinta-suave)", fontSize: "0.875rem" }}>
-        Lo que el canal de validación no se animó a decidir solo. Cada decisión necesita un motivo
+        Ninguna noticia se publica sola: el canal recomienda y una persona decide. Lo publicado
+        «en desarrollo» vuelve acá hasta que alguien lo confirme. Cada decisión necesita un motivo
         escrito: una decisión editorial sin explicación no se puede auditar después, y la
         auditoría es la mitad del punto de tener moderación humana.
       </p>

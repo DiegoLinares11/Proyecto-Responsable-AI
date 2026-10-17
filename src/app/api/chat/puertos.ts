@@ -31,7 +31,7 @@ import {
 } from "../../../modules/chatbot/index.ts";
 
 const CAMPOS =
-  "id,titulo,resumen,publicada_en,puntaje_veracidad,relevancia,alcance,fuentes(nombre),ubicaciones(nombre)";
+  "id,titulo,resumen,publicada_en,puntaje_veracidad,relevancia,alcance,en_desarrollo,fuentes(nombre),ubicaciones(nombre)";
 
 type FilaDeNoticia = {
   id: string;
@@ -41,6 +41,7 @@ type FilaDeNoticia = {
   puntaje_veracidad: number | null;
   relevancia: number | string;
   alcance: "local" | "nacional" | "internacional";
+  en_desarrollo: boolean;
   fuentes: { nombre: string } | null;
   ubicaciones: { nombre: string } | null;
 };
@@ -56,6 +57,7 @@ function aNoticiaDelModelo(fila: FilaDeNoticia): NoticiaParaElModelo {
     relevancia: Number(fila.relevancia),
     alcance: fila.alcance,
     zona: fila.ubicaciones?.nombre ?? null,
+    enDesarrollo: fila.en_desarrollo === true,
   };
 }
 

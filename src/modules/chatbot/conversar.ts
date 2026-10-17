@@ -40,6 +40,7 @@ import {
   RESPUESTA_BLOQUEADA_POR_CONTENIDO_SIN_REPORTE,
   RESPUESTA_BLOQUEADA_POR_GUARDIA,
 } from "./capa3-guardia.ts";
+import { avisarLoNoConfirmado } from "./en-desarrollo.ts";
 import { PROMPT_DEL_SISTEMA } from "./prompt.ts";
 import {
   COSTO_CERO,
@@ -242,15 +243,23 @@ export async function conversar(
     });
   }
 
+  // Lo que cita algo en desarrollo lo dice, y no sale con confianza alta (R-13).
+  const avisada = avisarLoNoConfirmado(
+    respondido.valor.respuesta,
+    respondido.valor.confianza as NivelDeConfianza,
+    respondido.valor.noticias_citadas,
+    noticias,
+  );
+
   return terminar({
-    respuesta: respondido.valor.respuesta,
+    respuesta: avisada.respuesta,
     bloqueado: false,
     capaQueCorto: null,
     motivoBloqueo: null,
     categoria,
     sospechas: capa0.sospechas,
     noticiasCitadas: respondido.valor.noticias_citadas,
-    confianza: respondido.valor.confianza as NivelDeConfianza,
+    confianza: avisada.confianza,
     costo,
   });
 }

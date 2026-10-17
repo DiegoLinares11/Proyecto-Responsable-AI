@@ -28,6 +28,8 @@ export type NoticiaEnRevision = {
   rafagaMotivo: string | null;
   /** El canal la recomienda: pasó el umbral y espera a un moderador (R-09). */
   recomendada: boolean;
+  /** Publicada en desarrollo: espera que alguien la confirme (R-13). */
+  enDesarrollo?: boolean;
 };
 
 export type AlertaDeContenido = {

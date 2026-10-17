@@ -79,10 +79,18 @@ export default function Lectura() {
           </View>
           <Text style={[e.titulo, conMargen && { fontSize: 44, lineHeight: 49 }]} accessibilityRole="header">{noticia.titulo}</Text>
           <View style={e.firma}>
-            <Sello puntaje={noticia.puntajeVeracidad} />
+            <Sello puntaje={noticia.puntajeVeracidad} enDesarrollo={noticia.enDesarrollo} />
             <DatoEditorial tipo="fuente" texto={notas.fuente} />
             <DatoEditorial tipo="fecha" texto={fecha} />
           </View>
+          {/* R-13: lo no confirmado se dice con palabras, no con un puntaje. */}
+          {noticia.enDesarrollo ? (
+            <View style={[e.enDesarrollo, { backgroundColor: c.alertaFondo, borderLeftColor: c.alerta }]} accessibilityRole="alert">
+              <Text style={[e.enDesarrolloTexto, { color: c.alertaTexto }]}>
+                En desarrollo: lo que dice esta nota todavía no está confirmado. Una persona la publicó así porque el hecho sigue en curso, y puede cambiar.
+              </Text>
+            </View>
+          ) : null}
           {noticia.imagen ? <View style={{ marginBottom: Espacio.xl }}><FotoDeNoticia imagen={noticia.imagen} estilo={e.imagen} /></View> : null}
           <Text style={e.rotulo}>LO QUE DICE EL MEDIO</Text>
           <Text style={e.entradilla}>{noticia.resumen}</Text>
@@ -116,6 +124,8 @@ function crearEstilos(c: Paleta) {
     firma: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m, paddingVertical: Espacio.l, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.borde, marginBottom: Espacio.xl },
     imagen: { width: '100%', aspectRatio: 3 / 2, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
     rotulo: { ...ROTULO, fontSize: 10, color: c.tintaSuave, marginBottom: Espacio.s },
+    enDesarrollo: { borderLeftWidth: 3, padding: Espacio.m, marginBottom: Espacio.xl, borderRadius: Radio.chico },
+    enDesarrolloTexto: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 21 },
     entradilla: { fontFamily: Tipos.lectura, fontSize: 22, lineHeight: 31, color: c.tinta, marginBottom: Espacio.xl },
     parrafo: { fontFamily: Tipos.lectura, fontSize: 19, lineHeight: 30, color: c.tinta, marginBottom: Espacio.xl },
     error: { margin: Espacio.l, fontFamily: Tipos.texto, color: c.peligro },
