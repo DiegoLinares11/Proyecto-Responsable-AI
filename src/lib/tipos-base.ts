@@ -324,7 +324,6 @@ export type Database = {
         Row: {
           bloqueado: boolean
           categoria_intencion: string | null
-          contenido: string
           costo_usd: number | null
           creado_en: string
           id: number
@@ -343,7 +342,6 @@ export type Database = {
         Insert: {
           bloqueado?: boolean
           categoria_intencion?: string | null
-          contenido: string
           costo_usd?: number | null
           creado_en?: string
           id?: never
@@ -362,7 +360,6 @@ export type Database = {
         Update: {
           bloqueado?: boolean
           categoria_intencion?: string | null
-          contenido?: string
           costo_usd?: number | null
           creado_en?: string
           id?: never

@@ -64,13 +64,14 @@ export default function Privacidad() {
       </p>
 
       <p>
-        <strong>Lo que le preguntás al chat.</strong> Tus mensajes y las respuestas del asistente
-        se guardan en tu conversación, junto con datos técnicos de cada turno: la categoría que le
-        asignó el filtro de seguridad, si se bloqueó, qué noticias citó y cuánto costó. Sirven para
-        mostrarte el historial, para que el servicio no supere su tope de gasto y para comprobar que
-        las defensas del chat funcionan. Dentro de la app, solo vos ves tu conversación. Lo que
-        preguntás <strong>no</strong> se usa para ordenarte la portada: lo que alguien le pregunta a
-        un asistente no es una preferencia que haya declarado.
+        <strong>Lo que le preguntás al chat no se guarda.</strong> La conversación vive en tu
+        pantalla y desaparece al cerrarla: la base de datos ni siquiera tiene dónde guardar el
+        texto. De cada turno quedan solo datos técnicos, sin lo que escribiste ni lo que te
+        respondieron: la fecha, la categoría que le asignó el filtro de seguridad, si se bloqueó,
+        qué noticias citó y cuánto costó. Sirven para que nadie pase del límite de mensajes por
+        día, para que el servicio no supere su tope de gasto y para comprobar que las defensas del
+        chat funcionan. Lo que preguntás tampoco se usa para ordenarte la portada: lo que alguien le
+        pregunta a un asistente no es una preferencia que haya declarado.
       </p>
 
       <p>
@@ -81,8 +82,8 @@ export default function Privacidad() {
 
       <p>
         Las personas que mantienen el proyecto tienen acceso técnico a la base de datos y pueden
-        revisar estos registros para corregir errores o investigar un abuso. Hoy los datos no se
-        borran solos: se guardan mientras exista tu cuenta, salvo que pidas borrarlos.
+        revisar estos registros para corregir errores o investigar un abuso. Fuera del chat, los
+        datos no se borran solos: se guardan mientras exista tu cuenta, salvo que pidas borrarlos.
       </p>
 
       <h3 style={subtitulo}>Con quién se comparte</h3>
@@ -129,7 +130,7 @@ export default function Privacidad() {
       <h3 style={subtitulo}>Lo que podés pedir</h3>
       <p>
         Podés pedir una copia de tus datos, corregirlos o borrar tu cuenta con todo lo asociado:
-        preferencias, lecturas y conversaciones. Escribí a{" "}
+        preferencias, lecturas y los datos técnicos del chat. Escribí a{" "}
         <a href={`mailto:${CONTACTO}`}>{CONTACTO}</a>. Tu nombre lo podés corregir también desde
         tu cuenta de Google, y tus intereses los reiniciás desde Perfil sin pedírselo a nadie.
       </p>

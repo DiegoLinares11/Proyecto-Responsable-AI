@@ -23,6 +23,7 @@ import { dirname, join } from "node:path";
 
 import { conversar } from "../src/modules/chatbot/index.ts";
 import { crearProveedor } from "../src/modules/chatbot/proveedor/index.ts";
+import { filasDelTurno } from "../src/app/api/chat/puertos.ts";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -99,56 +100,14 @@ const verificarNoticias = async (ids) => {
 };
 
 /**
- * PostgREST exige que todos los objetos de una inserción múltiple tengan
- * EXACTAMENTE las mismas claves; si no, responde 400 «All object keys must
- * match». De ahí que las dos filas se armen desde una misma plantilla y lo que
- * no aplica vaya en null en vez de omitirse.
+ * Las mismas filas que guarda el servidor, de la misma función: sin el texto
+ * del chat (R-04). Si el script armara las suyas, se podría desalinear y volver
+ * a guardar lo que la aplicación ya no guarda.
  */
 const guardarTurno = async (turno) => {
-  const base = {
-    id_conversacion: turno.idConversacion,
-    rol: null,
-    contenido: null,
-    veredicto_capa0: null,
-    categoria_intencion: null,
-    veredicto_capa3: null,
-    bloqueado: false,
-    motivo_bloqueo: null,
-    modelo: null,
-    tokens_entrada: null,
-    tokens_salida: null,
-    tokens_cache: null,
-    costo_usd: null,
-    latencia_ms: null,
-    noticias_citadas: [],
-  };
-
   await rest("mensajes", {
     method: "POST",
-    body: JSON.stringify([
-      {
-        ...base,
-        rol: "usuario",
-        contenido: turno.mensajeDelUsuario,
-        veredicto_capa0: turno.sospechas.map((s) => s.clave).join(",") || null,
-        categoria_intencion: turno.categoria,
-      },
-      {
-        ...base,
-        rol: "asistente",
-        contenido: turno.respuesta,
-        veredicto_capa3: turno.capaQueCorto === "capa3" ? turno.motivoBloqueo : null,
-        bloqueado: turno.bloqueado,
-        motivo_bloqueo: turno.motivoBloqueo,
-        modelo: turno.costo.modelo,
-        tokens_entrada: turno.costo.tokensEntrada,
-        tokens_salida: turno.costo.tokensSalida,
-        tokens_cache: turno.costo.tokensCache,
-        costo_usd: turno.costo.costoUsd,
-        latencia_ms: turno.costo.latenciaMs,
-        noticias_citadas: turno.noticiasCitadas,
-      },
-    ]),
+    body: JSON.stringify(filasDelTurno(turno)),
   });
 };
 
