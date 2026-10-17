@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 const CONTACTO = "lin221256@uvg.edu.gt";
-const ACTUALIZADA = "13 de octubre de 2026";
+const ACTUALIZADA = "16 de octubre de 2026";
 
 const subtitulo = { fontSize: "1.05rem", marginTop: "2rem" } as const;
 
@@ -103,6 +103,12 @@ export default function Privacidad() {
         <li>
           <strong>Vercel</strong> aloja el servidor y la versión web. Como cualquier servidor,
           registra datos técnicos de cada petición, como la dirección IP.
+        </li>
+        <li>
+          <strong>Expo</strong>: al abrirse, la app instalada le pregunta a sus servidores si hay
+          una actualización y, si la hay, la descarga. En esa consulta viajan datos técnicos: la
+          plataforma, la versión de la app, un identificador aleatorio de la instalación y la
+          dirección IP; si una actualización falla, también el error. No viaja tu cuenta.
         </li>
         <li>
           <strong>Wikimedia Commons</strong>: algunas fotos de archivo se cargan directo desde sus

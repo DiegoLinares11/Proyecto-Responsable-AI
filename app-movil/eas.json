@@ -4,7 +4,8 @@
   },
   "build": {
     "base": {
-      "node": "24.13.0"
+      "node": "24.13.0",
+      "channel": "production"
     },
     "preview": {
       "extends": "base",

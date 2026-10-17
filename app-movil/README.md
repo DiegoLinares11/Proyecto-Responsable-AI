@@ -133,6 +133,33 @@ npx eas-cli@latest build --profile preview --platform android
 ninguna llave secreta va dentro de la app. Al terminar, EAS da un link y un QR
 para descargar el APK; Android pide permitir la instalación desde el navegador.
 
+## Actualizar la app instalada sin recompilar
+
+Con EAS Update, un cambio que es solo código (pantallas, textos, estilos, lógica)
+llega a la app instalada, en iPhone (TestFlight) y en Android (APK), sin
+compilar de nuevo:
+
+```bash
+cd app-movil
+npm run actualizar -- --message "qué cambió"
+```
+
+La app baja la actualización al abrirse y la aplica la vez siguiente que se
+abre. El comando ya trae `--environment production`: sin eso, la actualización
+se arma con el `.env.local` de quien la publica y la app perdería la dirección
+del servidor. Las dos compilaciones escuchan el mismo canal (`production`), así
+que un solo comando actualiza las dos. La web no usa esto: se actualiza
+publicando en Vercel.
+
+**Cuándo NO alcanza y hay que recompilar** (`eas build`): cuando se agrega o se
+actualiza un paquete con código nativo (cualquier `npx expo install` de un
+módulo nuevo), o cuando cambia `app.json` (permisos, ícono, nombre). En ese
+caso hay que **subir `version` en `app.json`** (por ejemplo, de 1.0.0 a 1.1.0)
+antes de compilar: la versión es la que decide qué actualizaciones le llegan a
+cada compilación (`runtimeVersion` con la política `appVersion`). Si no se sube,
+una actualización pensada para la compilación nueva le llegaría también a la
+vieja, que no tiene el código nativo, y la app se cerraría al abrir.
+
 ## Antes de la presentación
 
 Expo Go del App Store solo abre proyectos de **su** versión de SDK. Si para la
