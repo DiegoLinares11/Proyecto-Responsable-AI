@@ -28,15 +28,14 @@ Estados: ✅ cumple · 🟡 parcial · ❌ falta.
 
 ## 2. Requerimientos
 
-### R-01 · App móvil en iPhone y Android — 🟡
+### R-01 · App móvil en iPhone y Android — ✅
 
 `app-movil/`: Expo SDK 57 con pestañas nativas. Chat (inicial), Portada,
 lectura de noticia con su ficha de validación, y Perfil. Lee las noticias
-reales por Supabase y conversa por el servidor del portal. `expo-doctor` pasa
-sus 21 comprobaciones. Para Android hay además un perfil de compilación que da
-un APK instalable desde un link, gratis (`app-movil/eas.json`); en iPhone eso
-exige la cuenta paga de Apple, así que ahí se usa Expo Go. **Falta: probarla en
-un iPhone y un Android de verdad.**
+reales por Supabase y conversa por el servidor del portal. Se distribuye por
+tres vías: **TestFlight** en iPhone (instalada en iPhones reales de testers),
+un **APK** de Android desde un link de EAS Build, y la **web** en Vercel. Los
+cambios llegan sin recompilar por EAS Update (canal `production`).
 
 **Criterios de aceptación**
 - Abre en Expo Go en iPhone y en Android escaneando un QR; nadie necesita una
@@ -47,15 +46,13 @@ un iPhone y un Android de verdad.**
 - Usable con una mano: objetivos táctiles de 44 px como mínimo, teclado que no
   tapa la caja de texto del chat.
 
-### R-02 · Login con Google — 🟡
+### R-02 · Login con Google — ✅
 
-El código de la app está listo (`app-movil/src/lib/sesion.tsx`); el servidor
-del chat ya acepta el token de la app y lo valida contra Supabase (probado:
-sin token 401, token inventado 401, token válido 200). Google ya está habilitado
-en Supabase y el login de la app se probó con una cuenta real. El portal tiene
-«Entrar con Google» con la misma cuenta (`src/app/entrar`, `src/app/auth/callback`),
-probado hasta la pantalla de Google. **Falta: probar el portal de punta a punta**,
-que necesita `http://localhost:3000/**` en las Redirect URLs de Supabase.
+La app inicia sesión con Google por Supabase Auth (`app-movil/src/lib/sesion.tsx`),
+probado con una cuenta real; el servidor del chat acepta el token de la app y lo
+valida contra Supabase (sin token 401, token inventado 401, token válido 200).
+El portal y la web usan el mismo flujo (`src/app/entrar`, `src/app/auth/callback`),
+con el Site URL y las Redirect URLs de producción configuradas en Supabase.
 
 **Criterios de aceptación**
 - La app y el portal inician sesión con Google.
@@ -207,9 +204,9 @@ sistema. 8 pruebas de esas reglas en `tests/unit/usuarios/`.
   veredicto del canal lleva a `verificada` (`ESTADO_POR_VEREDICTO`, con sus
   pruebas en `tests/unit/noticias/recomendacion.test.ts`).
 
-### R-10 · Imagen para una noticia sin imagen — 🟡
+### R-10 · Imagen para una noticia sin imagen — ✅
 
-Hecho, salvo la prueba de punta a punta con sesión:
+Hecho, con la prueba de punta a punta del 16 de octubre de 2026 (abajo):
 
 - **La base guarda el origen** de cada imagen (`origen_imagen`: medio, licencia
   libre, ilustración o generada por IA) y la página de su licencia
@@ -233,9 +230,12 @@ Hecho, salvo la prueba de punta a punta con sesión:
 - Nadie genera imágenes con IA: la categoría existe para que, si se usa, la base
   la distinga y la interfaz la rotule.
 
-**Falta: publicar una noticia desde el formulario con una cuenta de
-publicador.** La búsqueda y la verificación contra Commons se probaron con red,
-pero no dentro del formulario con sesión.
+**Probado de punta a punta en producción** (16 de octubre de 2026), con la
+cuenta demo de publicador y por la misma API que usa la app: una noticia con
+cada camino. La base guardó `ilustracion` sin archivo, `licencia_libre` con el
+crédito armado por el servidor («Photo by Infrogmation, 1980 · CC BY-SA 3.0 ·
+Wikimedia Commons») y `medio` con el crédito escrito. Las tres llegaron a la
+cola del moderador y se archivaron al terminar.
 
 **Criterios de aceptación**
 - Si la noticia no trae imagen, el portal ofrece, dentro del mismo flujo:
@@ -249,9 +249,19 @@ pero no dentro del formulario con sesión.
 - La base distingue el **origen** de cada imagen: fotografía del medio, licencia
   libre, ilustración o generada por IA. La interfaz lo muestra siempre.
 
-### R-11 · Costos visibles — 🟡
+### R-11 · Costos visibles — ✅
 
-El tope de gasto se cumple en la capa 0 (`vista_gasto_api`).
+El tope de gasto se cumple en la capa 0 (`vista_gasto_api`). El panel de gasto
+está en la pestaña Redacción de la app (sección «Gasto») y en `/gasto` del
+portal, solo para `usuarios_administrar`: lo gastado, el tope, el margen y
+cuántas respuestas caben, el crédito de la cuenta (`CREDITO_API_USD`) y el
+costo promedio de cada función, deducido del modelo con el que terminó cada
+turno (`vista_gasto_por_modelo`): filtro previo (gratis), solo el clasificador,
+o clasificador y respuesta. La suite de RLS comprueba que el desglose suma
+exactamente lo que ve el tope (sección 18) y que ninguna sesión lee esas
+vistas. 9 pruebas en `tests/unit/gasto/`. El presupuesto cambió desde que se
+escribió el criterio: el chat corre con una llave de OpenAI de USD 5 y un tope
+de USD 4, así que el panel muestra eso y no «USD 20 menos el gasto».
 
 **Criterios de aceptación**
 - El portal muestra el gasto acumulado, el saldo (USD 20 menos el gasto), el
@@ -265,7 +275,20 @@ El tope de gasto se cumple en la capa 0 (`vista_gasto_api`).
 Cinco señales deterministas, umbrales, cola de moderación, red team, alertas de
 contenido envenenado (Fases 2, 5 y posteriores).
 
-### R-13 · Lo no confirmado se comunica como tal — 🟡
+### R-13 · Lo no confirmado se comunica como tal — ✅
+
+Un moderador puede «Publicar en desarrollo» (app y portal), con motivo. La
+columna `en_desarrollo` solo se acepta en una noticia publicada, así que un
+autor no puede marcar su borrador y sacarla de publicación obliga a quitar la
+marca (sección 20 de la suite de RLS). La portada y la lectura muestran «En
+desarrollo» en vez del sello de verificada, y la lectura lo explica con
+palabras. En el chat, `avisarLoNoConfirmado` corre después de la capa 3: si la
+respuesta cita una noticia en desarrollo y no lo dice, agrega «Ojo: «…» está
+en desarrollo; lo que dice todavía no está confirmado», y la confianza no puede
+quedar en alta. Probado en producción: la primera versión aceptaba «no
+confirmado» como suficiente, y el modelo escribió «no hay respaldo suficiente
+para confirmar»; ahora exige la etiqueta. Lo publicado en desarrollo vuelve a la
+cola hasta que otro moderador lo confirme.
 
 **Criterios de aceptación**
 - Una noticia puede publicarse como **en desarrollo**, con una etiqueta visible
@@ -275,7 +298,7 @@ contenido envenenado (Fases 2, 5 y posteriores).
 - Cuando el sistema no puede confirmar algo, lo dice con esas palabras, no con un
   puntaje que haya que interpretar.
 
-### R-14 · Transparencia en la interfaz — 🟡
+### R-14 · Transparencia en la interfaz — ✅
 
 En la app, la identidad lo separa a la vista: lo que dice el medio va en
 Newsreader, lo que ordena y explica la plataforma en Public Sans, los números
@@ -285,6 +308,12 @@ comprobar —por ejemplo, desmentidos sin verificador configurado— en vez de
 mostrar solo lo que salió bien. Y la lectura de cada noticia dice por qué está
 en tu portada, con los números: los cuatro componentes de la relevancia global,
 tu factor de ubicación, tu factor de interés y el resultado.
+
+Las respuestas del chat dicen «Generado por IA» y «Puede equivocarse». Perfil,
+en «Cómo funciona», responde las preguntas de transparencia del enunciado: de
+dónde salen las noticias, cómo se validan (y que publica una persona), por qué
+una noticia está donde está, qué hace y qué no hace la IA, de dónde salen las
+imágenes y qué se guarda, con un enlace a la política de privacidad.
 
 **Criterios de aceptación**
 - Lo que escribió el medio, lo que resumió el sistema y lo que generó la IA se
