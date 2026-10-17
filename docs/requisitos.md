@@ -84,13 +84,23 @@ Guatemala no sugiere nada. **Falta probarlo en dos teléfonos a la vez.**
 - Dos teléfonos con ubicaciones distintas muestran feeds distintos para las
   mismas noticias publicadas (es la demostración del punto 4 de la presentación).
 
-### R-04 · Chat como pantalla inicial, temporal — 🟡
+### R-04 · Chat como pantalla inicial, temporal — ✅
 
 En la app es la pantalla inicial. Conoce la ubicación simulada: con el modelo
 real, «¿qué está pasando en mi zona?» contestó con la nota de Quetzaltenango
 desde Quetzaltenango y con la de Petén desde Petén, citando medio y fecha, y
-diciendo cuando no había más. **Falta: que el servidor deje de guardar el texto
-de las conversaciones**, y distinguir lo que está en desarrollo (R-13).
+diciendo cuando no había más.
+
+**El texto no se guarda** (16 de octubre de 2026). La conversación vive en la
+pantalla y desaparece al cerrarla; el servidor nunca le pasó el historial al
+modelo, así que guardarlo no servía para conversar. La base ni siquiera tiene
+la columna: la quitó la migración `20261016120100_chat_temporal.sql`, con el
+texto de los turnos anteriores, y la sección 17 de la suite de RLS lo
+comprueba. Quedan los metadatos que necesitan los topes (rol, fecha, modelo,
+tokens, costo). El motivo de un bloqueo de la capa 1 se guarda sin el
+razonamiento del clasificador, que parafraseaba lo que escribió la persona. 7
+pruebas en `tests/unit/chatbot/chat-temporal.test.ts`. Distinguir lo que está
+en desarrollo es de R-13.
 
 **Criterios de aceptación**
 - Es lo primero que se ve al abrir la app.
@@ -159,7 +169,7 @@ las cinco señales de validación.
 
 **Criterio pendiente**: que se vea bien dentro de la PWA (R-01).
 
-### R-09 · Portal administrativo autenticado — 🟡
+### R-09 · Portal administrativo autenticado — ✅
 
 El formulario de publicar ya registra el alcance y la zona o el país, con la
 misma regla que impone la base.
@@ -191,8 +201,11 @@ sistema. 8 pruebas de esas reglas en `tests/unit/usuarios/`.
   internacional) y su **región**, además de la sección, la procedencia y la
   imagen.
 - **Publica una persona.** El canal de validación recomienda y explica; el botón
-  de publicar lo aprieta alguien con permiso. Hoy el canal publica solo lo que
-  pasa de 75, y el enunciado pide que lo haga una persona.
+  de publicar lo aprieta alguien con permiso. Cumplido el 16 de octubre de
+  2026: lo que pasa de 75 queda en revisión con «El canal recomienda
+  publicarla» en la cola (app y portal), y lo publica un moderador. Ningún
+  veredicto del canal lleva a `verificada` (`ESTADO_POR_VEREDICTO`, con sus
+  pruebas en `tests/unit/noticias/recomendacion.test.ts`).
 
 ### R-10 · Imagen para una noticia sin imagen — 🟡
 

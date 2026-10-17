@@ -40,14 +40,15 @@ export default function ComoFunciona() {
         </li>
       </ul>
       <p>
-        De {UMBRAL_VERIFICADA} para arriba se publica. Entre {UMBRAL_REVISION} y{" "}
-        {UMBRAL_VERIFICADA} la lee una persona antes. Por debajo no se publica, y el autor ve el
-        desglose para corregir.
+        De {UMBRAL_VERIFICADA} para arriba, el canal recomienda publicarla. Entre{" "}
+        {UMBRAL_REVISION} y {UMBRAL_VERIFICADA} la marca como dudosa. En los dos casos la lee una
+        persona con permiso de moderar, y esa persona decide. Por debajo de {UMBRAL_REVISION} no se
+        publica, y el autor ve el desglose para corregir.
       </p>
       <p>
-        <strong>La regla que no se negocia:</strong> nada por debajo del umbral se publica
-        automáticamente, y una señal que no se pudo comprobar nunca se asume favorable. Si no se
-        pudo averiguar, decide una persona.
+        <strong>La regla que no se negocia:</strong> ninguna noticia se publica sola. El canal
+        recomienda y explica; el botón de publicar lo aprieta una persona. Y una señal que no se
+        pudo comprobar nunca se asume favorable.
       </p>
 
       <h3 style={{ fontSize: "1.05rem", marginTop: "2rem" }}>En qué orden aparece</h3>

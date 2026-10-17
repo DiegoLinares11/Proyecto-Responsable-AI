@@ -26,6 +26,8 @@ export type NoticiaEnRevision = {
   creadoEn: string;
   rafagaSospechosa: boolean;
   rafagaMotivo: string | null;
+  /** El canal la recomienda: pasó el umbral y espera a un moderador (R-09). */
+  recomendada: boolean;
 };
 
 export type AlertaDeContenido = {

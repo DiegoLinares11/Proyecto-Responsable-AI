@@ -176,11 +176,19 @@ sin necesidad de un `if` que alguien pueda borrar:
 
 ## La regla que no se negocia
 
-**Nada por debajo del umbral se publica automáticamente.** Los pesos se pueden
-discutir, los umbrales se pueden calibrar, pero el sistema nunca publica solo
-algo de lo que no está seguro. Un moderador que espera es un costo; una noticia
-falsa publicada con el sello de «verificada» es el daño que este proyecto
-existe para evitar.
+**Ninguna noticia se publica sola.** Los pesos se pueden discutir, los
+umbrales se pueden calibrar, pero el canal recomienda y no publica. Un moderador
+que espera es un costo; una noticia falsa publicada con el sello de «verificada»
+es el daño que este proyecto existe para evitar.
+
+Hasta el 16 de octubre de 2026, lo que pasaba de 75 se publicaba solo. El
+enunciado pide que el botón de publicar lo apriete una persona (R-09), así que
+ahora lo que pasa el umbral queda en revisión con la recomendación a la vista
+(«el canal recomienda publicarla») y lo aprueba alguien con `noticias_moderar`.
+`ESTADO_POR_VEREDICTO`, en `src/modules/noticias/servicio.ts`, ya no tiene
+ningún veredicto que lleve a `verificada`: esa transición es solo del
+moderador. La auditoría guarda las dos cosas, lo que recomendó el canal y lo
+que decidió la persona.
 
 Y en la otra dirección: el sistema tampoco borra. Marca, explica y escala a una
 persona. La decisión editorial la toma un humano.

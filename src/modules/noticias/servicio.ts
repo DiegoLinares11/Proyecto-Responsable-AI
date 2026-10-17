@@ -160,9 +160,20 @@ type FilaDeNoticia = {
   id_autor: string;
 };
 
-/** Qué estado de la base le corresponde a cada veredicto del canal. */
-const ESTADO_POR_VEREDICTO: Readonly<Record<EstadoVeredicto, string>> = {
-  verificada: "verificada",
+/**
+ * Qué estado de la base le corresponde a cada veredicto del canal.
+ *
+ * **El canal recomienda; publica una persona** (R-09). Lo que pasa el umbral
+ * no se publica solo: queda en revisión, con la recomendación a la vista del
+ * moderador, y el botón de publicar lo aprieta alguien con `noticias_moderar`.
+ * El canal sí decide solo en la dirección segura: lo que no se pudo verificar
+ * y lo desmentido no llegan a la portada sin que nadie lo revise.
+ *
+ * Ningún veredicto devuelve `verificada`: esa transición es solo de
+ * `decidirComoModerador`.
+ */
+export const ESTADO_POR_VEREDICTO: Readonly<Record<EstadoVeredicto, string>> = {
+  verificada: "en_revision",
   en_revision: "en_revision",
   no_verificable: "no_verificable",
   desmentida: "desmentida",
@@ -244,7 +255,8 @@ export async function validarYResolver(
   const estadoNuevo = ESTADO_POR_VEREDICTO[veredicto.estado];
 
   // La restricción `noticias_publicada_tiene_fecha` exige que solo las
-  // verificadas tengan fecha de publicación.
+  // verificadas tengan fecha de publicación, y el canal ya no publica: la
+  // fecha la pone el moderador al aprobar.
   const idFuente = await resolverFuente(clienteDeServicio, fila.url_original);
 
   const { error: errorEstado } = await clienteDeServicio
@@ -252,7 +264,7 @@ export async function validarYResolver(
     .update({
       estado: estadoNuevo,
       puntaje_veracidad: veredicto.puntaje,
-      publicada_en: estadoNuevo === "verificada" ? new Date().toISOString() : null,
+      publicada_en: null,
       ...(idFuente === null ? {} : { id_fuente: idFuente }),
     })
     .eq("id", idNoticia);
@@ -272,6 +284,9 @@ export async function validarYResolver(
     detalle: {
       estado_anterior: fila.estado,
       estado_nuevo: estadoNuevo,
+      // Lo que dijo el canal, aunque ya no lo aplique solo: es lo que el
+      // moderador tuvo enfrente al decidir.
+      recomendacion: veredicto.estado,
       puntaje: veredicto.puntaje,
       motivo: veredicto.motivo,
       senales: veredicto.senales.map((s) => ({

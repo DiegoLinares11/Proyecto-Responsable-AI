@@ -20,6 +20,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { clienteDelServidor } from "./supabase-servidor.ts";
 import { agruparAlertas, type AlertaDeContenido, type FilaDeAlerta } from "./alertas.ts";
+import { recomendadaParaPublicar } from "../modules/noticias/recomendacion.ts";
 
 export type { AlertaDeContenido };
 
@@ -220,6 +221,8 @@ export type NoticiaEnRevision = {
   creadoEn: string;
   rafagaSospechosa: boolean;
   rafagaMotivo: string | null;
+  /** El canal la recomienda: pasó el umbral y espera a un moderador (R-09). */
+  recomendada: boolean;
 };
 
 /**
@@ -263,6 +266,7 @@ export async function leerColaDeModeracion(sesion?: SupabaseClient): Promise<Not
     creadoEn: f.creado_en,
     rafagaSospechosa: f.rafaga_sospechosa,
     rafagaMotivo: f.rafaga_motivo,
+    recomendada: recomendadaParaPublicar(f.estado, f.puntaje_veracidad),
   }));
 }
 
@@ -289,6 +293,7 @@ export async function leerMisBorradores(): Promise<NoticiaEnRevision[]> {
     creadoEn: f["creado_en"] as string,
     rafagaSospechosa: f["rafaga_sospechosa"] as boolean,
     rafagaMotivo: f["rafaga_motivo"] as string | null,
+    recomendada: recomendadaParaPublicar(f["estado"] as string, f["puntaje_veracidad"] as number | null),
   }));
 }
 

@@ -101,6 +101,12 @@ function FilaDeRevision({ noticia, alCambiar }: { noticia: NoticiaEnRevision; al
       <Text style={[estilos.resumen, { color: c.tintaSuave }]} numberOfLines={3}>
         {noticia.resumen}
       </Text>
+      {/* El canal recomienda; publica una persona (R-09). */}
+      {noticia.recomendada ? (
+        <Text style={[estilos.aviso, { color: c.verificado }]}>
+          El canal recomienda publicarla: pasó las cinco señales. Falta que la apruebe una persona.
+        </Text>
+      ) : null}
       {noticia.rafagaSospechosa ? (
         <Text style={[estilos.aviso, { color: c.alerta }]}>Tracción sospechosa: {noticia.rafagaMotivo ?? 'ráfaga de cuentas nuevas'}</Text>
       ) : null}
