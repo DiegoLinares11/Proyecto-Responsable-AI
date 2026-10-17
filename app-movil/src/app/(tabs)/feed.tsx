@@ -43,6 +43,7 @@ import { PortadaAncha } from '@/componentes/portada-ancha';
 import { Sello } from '@/componentes/sello';
 import { SelectorDeUbicacion } from '@/componentes/selector-de-ubicacion';
 import { Espacio, Radio, ROTULO, Tipos, useColores, useDisposicion, type Paleta } from '@/constants/tema';
+import { useHidratado } from '@/lib/hidratacion';
 import { haceCuanto, leerFeed, type NoticiaDelFeed } from '@/lib/noticias';
 import { personalizar } from '@/lib/personalizacion';
 import { porQue, type Razon } from '@/lib/porque';
@@ -114,8 +115,13 @@ export default function Portada() {
   const abrir = (id: string) => router.push({ pathname: '/noticia/[id]', params: { id } });
 
   // Solo la primera letra en mayúscula: «Sábado, 3 de octubre», no «3 De Octubre».
+  // En la web, la portada se genera al compilar, en el reloj (UTC) del servidor
+  // de Vercel: pasadas las 18:00 en Guatemala ya es el día siguiente allá. La
+  // fecha se calcula recién con el reloj del navegador; antes, un espacio que no
+  // mueve la línea. En el teléfono no hay HTML previo y sale de una vez.
+  const hidratado = useHidratado();
   const fecha = new Date().toLocaleDateString('es-GT', { weekday: 'long', day: 'numeric', month: 'long' });
-  const hoy = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  const hoy = hidratado ? fecha.charAt(0).toUpperCase() + fecha.slice(1) : ' ';
   const orden = lecturas.length > 0 ? 'Para tu zona y lo que leés' : 'Ordenada para tu zona';
   const cierre = visible && visible.length > 0 ? <CierreDeEdicion cantidad={visible.length} actualizadoEn={actualizadoEn} actualizar={refrescar} cargando={refrescando} filtrada={seccion !== null} error={error} /> : null;
 
