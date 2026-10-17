@@ -7,6 +7,7 @@
 // persona pueda ver qué aprendió y borrarlo.
 // ===========================================================================
 
+import * as WebBrowser from 'expo-web-browser';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AreaDePestana } from '@/componentes/area-de-pestana';
 
@@ -17,22 +18,39 @@ import { SelectorDeApariencia } from '@/componentes/selector-de-apariencia';
 import { ANCHOS, Espacio, Radio, ROTULO, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { FACTORES_GEOGRAFICOS, factorDeInteres, INTERES } from '@/lib/personalizacion';
 import { usePreferencias } from '@/lib/preferencias';
+import { urlDelServidor } from '@/lib/chat';
 import { SECCIONES } from '@/lib/secciones';
 import { useSesion } from '@/lib/sesion';
 import { useState } from 'react';
 
+// Las preguntas de transparencia del enunciado (R-14): de dónde sale cada
+// noticia, cómo se valida, por qué está donde está, qué hace y qué no hace la
+// IA, de dónde salen las imágenes y qué se guarda. Cada respuesta describe lo
+// que hace el código; si el código cambia, esto cambia con él.
 const COMO_FUNCIONA: readonly (readonly [string, string])[] = [
   [
+    'De dónde salen las noticias',
+    'Las suben periodistas con permiso de publicar, siempre con el enlace al medio original. El registro de medios lo cura el equipo a mano: un medio que no está registrado no se rechaza, lo revisa una persona.',
+  ],
+  [
     'Cada noticia se valida antes de publicarse',
-    'Cinco señales sin inteligencia artificial: la fuente, que el enlace exista y diga lo mismo, que otros medios lo cubran, que no haya desmentidos y que la nota sea coherente.',
+    'Cinco señales sin inteligencia artificial: la fuente, que el enlace exista y diga lo mismo, que otros medios lo cubran, que ningún verificador la haya desmentido y que la nota sea coherente. Si pasa, el sistema recomienda publicarla, pero el botón lo aprieta una persona: ninguna noticia se publica sola.',
   ],
   [
     'El orden lo decide una fórmula pública',
-    'Interacciones, respaldo de cuentas verificadas, credibilidad de la fuente y veracidad, divididas por la antigüedad. Cada noticia explica su lugar.',
+    'Interacciones, respaldo de cuentas verificadas, credibilidad de la fuente y veracidad, divididas por la antigüedad. Cada noticia explica su lugar en «¿Por qué aparece en tu portada?».',
   ],
   [
-    'El asistente solo habla de lo publicado',
-    'Responde con las noticias verificadas y cita de dónde sale cada cosa. Puede equivocarse: una respuesta suya no es prueba de que algo sea cierto.',
+    'Qué hace y qué no hace la IA',
+    'Solo el asistente usa un modelo de lenguaje. No decide qué es cierto, no ordena tu portada y no genera imágenes. Responde solo con las noticias publicadas, cita de dónde sale cada cosa y puede equivocarse: una respuesta suya no es prueba de que algo sea cierto.',
+  ],
+  [
+    'De dónde salen las imágenes',
+    'La foto del medio, una foto de archivo con licencia libre de Wikimedia Commons, rotulada «no es del hecho», o una ilustración tipográfica que no se confunde con una foto. Ninguna imagen se genera con IA.',
+  ],
+  [
+    'Qué se guarda de vos',
+    'La ubicación que elegís y qué noticias abrís, para ordenar tu portada. Lo que le preguntás al asistente no se guarda: desaparece al cerrar la conversación.',
   ],
 ];
 
@@ -160,6 +178,12 @@ export default function Perfil() {
             <Text style={e.texto}>{texto}</Text>
           </View>
         ))}
+        <Pressable
+          onPress={() => WebBrowser.openBrowserAsync(`${urlDelServidor()}/privacidad`)}
+          accessibilityRole="link"
+          style={({ pressed }) => [e.punto, pressed && { opacity: 0.65 }]}>
+          <Text style={[e.puntoTitulo, { color: c.acento }]}>Leer la política de privacidad ↗</Text>
+        </Pressable>
 
         <Text style={e.pie}>Proyecto de CC3106{'\n'}Universidad del Valle de Guatemala</Text>
       </ScrollView>
