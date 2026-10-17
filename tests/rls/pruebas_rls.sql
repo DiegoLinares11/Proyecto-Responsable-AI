@@ -902,5 +902,51 @@ select pg_temp.debe_contar($q$
      and attname in ('costo_usd', 'modelo', 'rol', 'creado_en') and not attisdropped
 $q$, 4, 'quedan los metadatos que necesitan los topes de gasto y de mensajes');
 
+-- ---------------------------------------------------------------------------
+-- 18. El panel de gasto (R-11)
+--
+-- Usa los mensajes de la sección 12. Lo que importa es que el desglose y el
+-- total del tope no puedan contar cosas distintas: un solo número de verdad.
+-- ---------------------------------------------------------------------------
+\echo ''
+\echo '--- 18. El panel de gasto ---'
+
+reset role;
+
+select pg_temp.debe_contar($q$
+  select ((select coalesce(sum(gasto_usd), 0) from public.vista_gasto_por_modelo where modelo is not null)
+        = (select gasto_usd from public.vista_gasto_api))::int
+$q$, 1, 'el desglose por modelo suma exactamente lo que ve el tope');
+
+select pg_temp.debe_contar(
+  $q$select count(*) from public.vista_gasto_por_modelo where modelo = 'suscripcion'$q$,
+  0, 'el desglose tampoco cuenta los estimados de suscripcion');
+
+select pg_temp.debe_contar(
+  $q$select turnos from public.vista_gasto_por_modelo where modelo is null$q$,
+  1, 'los turnos que corto la capa 0, sin modelo, aparecen aparte y gratis');
+
+select pg_temp.debe_contar($q$
+  select count(*) from pg_class c
+  where c.relname = 'vista_gasto_por_modelo' and c.relkind = 'v'
+    and exists (
+      select 1 from pg_options_to_table(c.reloptions)
+      where option_name = 'security_invoker' and option_value = 'true'
+    )
+$q$, 1, 'la vista del desglose tiene security_invoker activo');
+
+set role authenticated;
+
+select pg_temp.debe_fallar('select gasto_usd from public.vista_gasto_por_modelo',
+  'un usuario con sesion NO ve el desglose del gasto: lo ve el administrador por el servidor');
+
+reset role;
+set role anon;
+
+select pg_temp.debe_fallar('select gasto_usd from public.vista_gasto_por_modelo',
+  'un visitante sin cuenta tampoco');
+
+reset role;
+
 \echo ''
 \echo '=== todas las pruebas pasaron ==='

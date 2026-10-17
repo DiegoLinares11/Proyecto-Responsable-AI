@@ -22,13 +22,14 @@ import { AreaDePestana } from '@/componentes/area-de-pestana';
 
 import { BotonGoogle } from '@/componentes/boton-google';
 import { Cuentas } from '@/componentes/redaccion/cuentas';
+import { Gasto } from '@/componentes/redaccion/gasto';
 import { Moderacion } from '@/componentes/redaccion/moderacion';
 import { Publicar } from '@/componentes/redaccion/publicar';
 import { ANCHOS, Espacio, Radio, Tipos, useColores, type Paleta } from '@/constants/tema';
 import { usePermisos } from '@/lib/permisos';
 import { useSesion } from '@/lib/sesion';
 
-type Parte = 'publicar' | 'moderar' | 'cuentas';
+type Parte = 'publicar' | 'moderar' | 'cuentas' | 'gasto';
 
 const NOMBRE_DE_ROL: Record<string, string> = {
   publicador: 'publicador',
@@ -47,6 +48,7 @@ export default function Redaccion() {
       ['publicar', 'Publicar', permisos.publicar],
       ['moderar', 'Moderación', permisos.moderar],
       ['cuentas', 'Cuentas', permisos.administrar],
+      ['gasto', 'Gasto', permisos.administrar],
     ] as const
   ).filter(([, , puede]) => puede);
 
@@ -100,7 +102,15 @@ export default function Redaccion() {
                 </View>
               ) : null}
 
-              {parte === 'publicar' ? <Publicar /> : parte === 'moderar' ? <Moderacion /> : <Cuentas />}
+              {parte === 'publicar' ? (
+                <Publicar />
+              ) : parte === 'moderar' ? (
+                <Moderacion />
+              ) : parte === 'gasto' ? (
+                <Gasto />
+              ) : (
+                <Cuentas />
+              )}
             </>
           )}
         </ScrollView>

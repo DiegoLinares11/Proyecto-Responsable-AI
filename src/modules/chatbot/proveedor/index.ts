@@ -7,8 +7,8 @@
 // ===========================================================================
 
 import { ConfiguracionInvalida, type ModoLlm, type ProveedorLlm } from "./tipos.ts";
-import { crearProveedorApi, type OpcionesProveedorApi } from "./proveedor-api.ts";
-import { crearProveedorOpenAI, type OpcionesProveedorOpenAI } from "./proveedor-openai.ts";
+import { crearProveedorApi, MODELO_GUARDIA_API_POR_OMISION, type OpcionesProveedorApi } from "./proveedor-api.ts";
+import { crearProveedorOpenAI, MODELOS_OPENAI_POR_OMISION, type OpcionesProveedorOpenAI } from "./proveedor-openai.ts";
 import {
   crearProveedorSuscripcion,
   MODELO_DE_SUSCRIPCION,
@@ -95,6 +95,18 @@ export function crearProveedor(opciones: OpcionesDeSeleccion = {}): ProveedorLlm
 
 export { crearProveedorApi, crearProveedorOpenAI, crearProveedorSuscripcion, MODELO_DE_SUSCRIPCION };
 export { MODELOS_OPENAI_POR_OMISION, medirCostoOpenAI } from "./proveedor-openai.ts";
+
+/**
+ * Los modelos de guardia que puede estar usando el chatbot, de los dos
+ * proveedores con llave. El panel de gasto los usa para saber hasta dónde llegó
+ * cada turno: si terminó en uno de estos, solo pasó por el clasificador.
+ */
+export function modelosDeGuardiaConfigurados(): string[] {
+  return [
+    process.env["MODELO_GUARDIA_OPENAI"] ?? MODELOS_OPENAI_POR_OMISION.guardia,
+    process.env["MODELO_GUARDIA"] ?? MODELO_GUARDIA_API_POR_OMISION,
+  ];
+}
 export { validarClasificacion, validarRespuesta } from "./validacion.ts";
 export {
   calcularCosto,

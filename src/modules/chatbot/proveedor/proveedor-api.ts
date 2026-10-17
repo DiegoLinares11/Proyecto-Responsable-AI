@@ -44,6 +44,8 @@ import {
   type Respondido,
 } from "./tipos.ts";
 
+export const MODELO_GUARDIA_API_POR_OMISION = "claude-haiku-4-5";
+
 export type OpcionesProveedorApi = {
   llave?: string | undefined;
   modeloGuardia?: string;
@@ -99,7 +101,7 @@ export function crearProveedorApi(opciones: OpcionesProveedorApi = {}): Proveedo
   }
 
   const cliente = opciones.cliente ?? new Anthropic({ apiKey: llave });
-  const modeloGuardia = opciones.modeloGuardia ?? process.env["MODELO_GUARDIA"] ?? "claude-haiku-4-5";
+  const modeloGuardia = opciones.modeloGuardia ?? process.env["MODELO_GUARDIA"] ?? MODELO_GUARDIA_API_POR_OMISION;
   const modeloRespuesta =
     opciones.modeloRespuesta ?? process.env["MODELO_RESPUESTA"] ?? "claude-sonnet-5";
 
