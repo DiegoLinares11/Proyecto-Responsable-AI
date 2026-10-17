@@ -83,6 +83,8 @@ export type NoticiaParaElModelo = {
   alcance?: "local" | "nacional" | "internacional";
   /** El nombre de la zona, si es local: «Quetzaltenango». */
   zona?: string | null;
+  /** Publicada en desarrollo: lo que dice todavía no está confirmado (R-13). */
+  enDesarrollo?: boolean;
 };
 
 /** La ubicación simulada que eligió el usuario. Viene de la lista cerrada. */

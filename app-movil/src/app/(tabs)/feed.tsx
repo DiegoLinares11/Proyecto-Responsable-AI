@@ -242,7 +242,7 @@ function PorQue({ razon }: { razon: Razon }) {
 function Meta({ noticia, e, compacta = false }: Pick<PropsDeTarjeta, 'noticia' | 'e'> & { compacta?: boolean }) {
   return (
     <View style={e.meta}>
-      <Sello puntaje={noticia.puntajeVeracidad} compacto={compacta} />
+      <Sello puntaje={noticia.puntajeVeracidad} compacto={compacta} enDesarrollo={noticia.enDesarrollo} />
       <DatoEditorial tipo="fuente" texto={noticia.fuente ?? 'Fuente no registrada'} />
       <DatoEditorial tipo="fecha" texto={haceCuanto(noticia.publicadaEn)} />
     </View>

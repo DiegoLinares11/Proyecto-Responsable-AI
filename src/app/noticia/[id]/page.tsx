@@ -76,7 +76,11 @@ export default async function Noticia({ params }: { params: Promise<{ id: string
         <p className="entradilla">{noticia.resumen}</p>
 
         <div className="firma">
-          <span className="sello">verificada · {noticia.puntajeVeracidad ?? "?"}/100</span>
+          {noticia.enDesarrollo ? (
+            <span className="sello aviso">en desarrollo · no confirmada</span>
+          ) : (
+            <span className="sello">verificada · {noticia.puntajeVeracidad ?? "?"}/100</span>
+          )}
           <span className="fuente">{noticia.fuente ?? "fuente no registrada"}</span>
           <span>
             {new Date(noticia.publicadaEn).toLocaleString("es-GT", {

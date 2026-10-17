@@ -36,6 +36,8 @@ export type NoticiaDelFeed = NoticiaPersonalizable & {
   componentes: { interacciones: number; verificadas: number; fuente: number; veracidad: number };
   /** El nombre de la zona, si es local: «Quetzaltenango». */
   zona: string | null;
+  /** Publicada en desarrollo: lo que dice todavía no está confirmado (R-13). */
+  enDesarrollo: boolean;
 };
 
 export type Senal = {
@@ -53,7 +55,7 @@ export type NoticiaCompleta = NoticiaDelFeed & {
 
 const CAMPOS =
   'id,titulo,resumen,publicada_en,seccion,url_imagen,credito_imagen,texto_alterno_imagen,origen_imagen,url_fuente_imagen,' +
-  'puntaje_veracidad,relevancia,alcance,pais,id_ubicacion,fuentes(nombre),ubicaciones(nombre),' +
+  'puntaje_veracidad,relevancia,alcance,pais,id_ubicacion,en_desarrollo,fuentes(nombre),ubicaciones(nombre),' +
   'componente_interacciones,componente_verificadas,componente_fuente,componente_veracidad';
 
 type Fila = {
@@ -76,6 +78,7 @@ type Fila = {
   alcance: Alcance;
   pais: string | null;
   id_ubicacion: string | null;
+  en_desarrollo: boolean | null;
   fuentes: { nombre: string } | null;
   ubicaciones: { nombre: string } | null;
 };
@@ -112,6 +115,7 @@ function aNoticia(f: Fila): NoticiaDelFeed {
     pais: f.pais,
     idUbicacion: f.id_ubicacion,
     zona: f.ubicaciones?.nombre ?? null,
+    enDesarrollo: f.en_desarrollo === true,
   };
 }
 

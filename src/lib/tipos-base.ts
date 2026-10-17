@@ -398,6 +398,7 @@ export type Database = {
           credito_imagen: string | null
           cuerpo: string
           estado: Database["public"]["Enums"]["estado_noticia"]
+          en_desarrollo: boolean
           id: string
           id_autor: string
           id_fuente: number | null
@@ -432,6 +433,7 @@ export type Database = {
           credito_imagen?: string | null
           cuerpo: string
           estado?: Database["public"]["Enums"]["estado_noticia"]
+          en_desarrollo?: boolean
           id?: string
           id_autor: string
           id_fuente?: number | null
@@ -466,6 +468,7 @@ export type Database = {
           credito_imagen?: string | null
           cuerpo?: string
           estado?: Database["public"]["Enums"]["estado_noticia"]
+          en_desarrollo?: boolean
           id?: string
           id_autor?: string
           id_fuente?: number | null

@@ -948,5 +948,97 @@ select pg_temp.debe_fallar('select gasto_usd from public.vista_gasto_por_modelo'
 
 reset role;
 
+-- ---------------------------------------------------------------------------
+-- 19. Nadie publica su propia noticia
+--
+-- Desde que el canal solo recomienda (R-09), aprobar es publicar. La noticia
+-- de un moderador la publica otro moderador.
+-- ---------------------------------------------------------------------------
+\echo ''
+\echo '--- 19. Nadie publica su propia noticia ---'
+
+insert into public.noticias (id, titulo, resumen, cuerpo, id_autor, estado) values
+  ('aaaaaaaa-0000-0000-0000-000000000019',
+   'Noticia escrita por la moderadora',
+   'Un resumen suficientemente largo para pasar la restriccion de longitud.',
+   repeat('Cuerpo de la noticia de prueba. ', 5),
+   '33333333-3333-3333-3333-333333333333', 'en_revision'),
+  ('aaaaaaaa-0000-0000-0000-000000000020',
+   'Noticia del publicador que espera moderacion',
+   'Un resumen suficientemente largo para pasar la restriccion de longitud.',
+   repeat('Cuerpo de la noticia de prueba. ', 5),
+   '22222222-2222-2222-2222-222222222222', 'en_revision');
+
+set role authenticated;
+select pg_temp.entrar_como('33333333-3333-3333-3333-333333333333');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias set estado = 'verificada', publicada_en = now()
+  where id = 'aaaaaaaa-0000-0000-0000-000000000019'
+$q$, 'una moderadora NO puede publicar su propia noticia');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias set estado = 'verificada', publicada_en = now()
+  where id = 'aaaaaaaa-0000-0000-0000-000000000020'
+$q$, 'la misma moderadora SI publica la noticia de otra persona');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias set estado = 'archivada'
+  where id = 'aaaaaaaa-0000-0000-0000-000000000019'
+$q$, 'y SI puede sacar de circulacion la propia: es la direccion segura');
+
+reset role;
+
+-- ---------------------------------------------------------------------------
+-- 20. Publicada en desarrollo (R-13)
+--
+-- Usa la noticia 0020, que la moderadora publicó en la sección 19. Solo una
+-- publicada puede estar en desarrollo, así que un autor no puede marcar su
+-- borrador, y sacarla de publicación obliga a quitar la marca.
+-- ---------------------------------------------------------------------------
+\echo ''
+\echo '--- 20. Publicada en desarrollo ---'
+
+insert into public.noticias (id, titulo, resumen, cuerpo, id_autor) values
+  ('aaaaaaaa-0000-0000-0000-000000000021',
+   'Borrador del publicador sobre un hecho que sigue en curso',
+   'Un resumen suficientemente largo para pasar la restriccion de longitud.',
+   repeat('Cuerpo de la noticia de prueba. ', 5),
+   '22222222-2222-2222-2222-222222222222');
+
+set role authenticated;
+select pg_temp.entrar_como('22222222-2222-2222-2222-222222222222');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias set en_desarrollo = true
+  where id = 'aaaaaaaa-0000-0000-0000-000000000021'
+$q$, 'un autor NO puede marcar su borrador en desarrollo: solo una publicada puede estarlo');
+
+select pg_temp.entrar_como('33333333-3333-3333-3333-333333333333');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias set en_desarrollo = true
+  where id = 'aaaaaaaa-0000-0000-0000-000000000020'
+$q$, 'una moderadora SI marca en desarrollo una noticia publicada de otra persona');
+
+select pg_temp.debe_fallar($q$
+  update public.noticias set estado = 'archivada', publicada_en = null
+  where id = 'aaaaaaaa-0000-0000-0000-000000000020'
+$q$, 'sacarla de publicacion sin quitar la marca NO se puede');
+
+select pg_temp.debe_pasar($q$
+  update public.noticias set en_desarrollo = false
+  where id = 'aaaaaaaa-0000-0000-0000-000000000020'
+$q$, 'confirmarla es quitar la marca, y SI se puede');
+
+select pg_temp.entrar_como('11111111-1111-1111-1111-111111111111');
+
+select pg_temp.debe_no_afectar_filas($q$
+  update public.noticias set en_desarrollo = true
+  where id = 'aaaaaaaa-0000-0000-0000-000000000020'
+$q$, 'un lector NO puede marcar nada');
+
+reset role;
+
 \echo ''
 \echo '=== todas las pruebas pasaron ==='

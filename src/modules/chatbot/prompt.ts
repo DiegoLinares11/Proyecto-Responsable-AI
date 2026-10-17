@@ -137,6 +137,9 @@ export function delimitarAcervo(
       ...(n.alcance === undefined
         ? []
         : [`alcance: ${n.alcance}${n.alcance === "local" && n.zona ? ` (${escapar(n.zona)})` : ""}`]),
+      // Un dato, no una orden: va solo en las que lo están, y quien garantiza
+      // que la respuesta lo diga es avisarLoNoConfirmado, no el modelo.
+      ...(n.enDesarrollo === true ? ["estado: en desarrollo (no confirmada)"] : []),
       `resumen: ${escapar(n.resumen)}`,
       "</noticia>",
     ].join("\n"),
