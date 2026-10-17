@@ -313,7 +313,9 @@ falla si alguno vuelve a hacerlo.
 Hay una excepción que tenemos que declarar. Sin la llave de Google Fact Check, la señal de
 desmentidos queda como \emph{no disponible}: no suma ni veta. Es una decisión editorial que queda
 registrada en el detalle de la señal, y la ficha de verificación la muestra en lugar de ocultarla.
-Hoy, en producción, esa llave no está configurada.
+Así estuvo producción hasta el 16 de octubre: la nota de la imagen se validó sin esa señal. Desde
+ese día la llave está configurada, y cada noticia se compara con lo que ya calificaron
+verificadores como Maldita.es o AFP Factual.
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{ficha_verificacion.png}
@@ -839,9 +841,9 @@ medios guatemaltecos. Lo que cambió es que está escrito, tiene una vía humana
 cualquiera puede ver el criterio.
 
 \item \textbf{Limitaciones:} el sistema aguanta 95 ataques conocidos, no es seguro en general; la
-capa de salida comprueba que las noticias citadas existan, no que el resumen sea fiel; en producción
-falta la llave del verificador de desmentidos; un moderador todavía puede aprobar sus propias
-noticias; y cuatro requerimientos siguen parciales: R-10, R-11, R-13 y R-14.
+capa de salida comprueba que las noticias citadas existan, no que el resumen sea fiel; el veto por
+desmentidos solo atrapa afirmaciones que un verificador ya calificó; un moderador todavía puede
+aprobar sus propias noticias; y cuatro requerimientos siguen parciales: R-10, R-11, R-13 y R-14.
 \end{enumerate}
 
 % ---------------------------------------------------
