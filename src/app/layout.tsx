@@ -78,6 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {perfil?.permisos.has("usuarios_administrar") === true ? (
                 <a href="/administracion">Administración</a>
               ) : null}
+              {perfil?.permisos.has("usuarios_administrar") === true ? <a href="/gasto">Gasto</a> : null}
               <a className="interno" href="/como-funciona">
                 ¿Cómo funciona?
               </a>

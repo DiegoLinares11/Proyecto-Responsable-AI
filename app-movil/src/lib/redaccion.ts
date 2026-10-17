@@ -80,3 +80,30 @@ export const leerCuentas = (conDemostracion: boolean) =>
 
 export const cambiarRol = (idUsuario: string, rol: string, motivo: string) =>
   pedir<Resultado>('POST', '/cuentas', { id_usuario: idUsuario, rol, motivo });
+
+// ---------------------------------------------------------------------------
+// El panel de gasto (R-11), solo para administradores
+// ---------------------------------------------------------------------------
+
+export type GastoDeFuncion = {
+  funcion: 'filtro' | 'clasificador' | 'respuesta';
+  nombre: string;
+  explicacion: string;
+  modelos: string[];
+  turnos: number;
+  gastoUsd: number;
+  promedioUsd: number;
+};
+
+export type ResumenDeGasto = {
+  gastoUsd: number;
+  turnos: number;
+  topeUsd: number;
+  margenUsd: number;
+  usoDelTope: number;
+  creditoUsd: number | null;
+  porFuncion: GastoDeFuncion[];
+  respuestasRestantes: number | null;
+};
+
+export const leerGasto = () => pedir<ResumenDeGasto>('GET', '/gasto');

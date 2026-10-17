@@ -75,5 +75,7 @@ export function entornoDelModelo() {
     llaveFactCheck: opcional("GOOGLE_FACT_CHECK_API_KEY"),
     topeMensajesPorUsuarioDia: numero("TOPE_MENSAJES_POR_USUARIO_DIA", 40),
     topeGastoUsd: numero("TOPE_GASTO_USD_ACUMULADO", 18),
+    /** El crédito cargado en la cuenta del proveedor. Solo para mostrarlo en el panel de gasto. */
+    creditoUsd: opcional("CREDITO_API_USD") === undefined ? null : numero("CREDITO_API_USD", 0),
   };
 }
