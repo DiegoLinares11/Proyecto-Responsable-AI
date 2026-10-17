@@ -560,12 +560,13 @@ reset role;
 insert into public.conversaciones (id, id_usuario)
 values ('cccccccc-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111');
 
-insert into public.mensajes (id_conversacion, rol, contenido, modelo, costo_usd) values
-  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'turno por API',             'claude-sonnet-5',  0.011),
-  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'clasificado y negado',      'claude-haiku-4-5', 0.0004),
-  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'turno en modo suscripcion', 'suscripcion',      0.15),
-  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'cortado en capa 0',         null,               0),
-  ('cccccccc-0000-0000-0000-000000000001', 'usuario',   'mensaje del usuario',       null,               null);
+-- Sin texto: el chat es temporal y la tabla ya no tiene la columna (sección 17).
+insert into public.mensajes (id_conversacion, rol, modelo, costo_usd) values
+  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'claude-sonnet-5',  0.011),  -- turno por API
+  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'claude-haiku-4-5', 0.0004), -- clasificado y negado
+  ('cccccccc-0000-0000-0000-000000000001', 'asistente', 'suscripcion',      0.15),   -- modo suscripción
+  ('cccccccc-0000-0000-0000-000000000001', 'asistente', null,               0),      -- cortado en capa 0
+  ('cccccccc-0000-0000-0000-000000000001', 'usuario',   null,               null);   -- mensaje del usuario
 
 select pg_temp.debe_contar(
   $q$select (gasto_usd * 10000)::bigint from public.vista_gasto_api$q$,
@@ -876,6 +877,30 @@ select pg_temp.debe_pasar($q$
          texto_alterno_imagen = 'Una imagen generada', origen_imagen = 'generada_ia'
    where id = 'aaaaaaaa-0000-0000-0000-000000000001'
 $q$, 'una imagen de IA SI entra, rotulada como tal');
+
+-- ---------------------------------------------------------------------------
+-- 17. El chat es temporal (R-04)
+--
+-- El texto de las conversaciones no se guarda. No se prueba con una política
+-- sino con el esquema: la columna no existe, así que no hay dónde guardarlo
+-- aunque el código lo intente. Se lee del catálogo, que cualquier rol ve
+-- entero; information_schema escondería una columna sin permiso y la prueba
+-- pasaría por la razón equivocada.
+-- ---------------------------------------------------------------------------
+\echo ''
+\echo '--- 17. El chat es temporal ---'
+
+select pg_temp.debe_contar($q$
+  select count(*) from pg_attribute
+   where attrelid = 'public.mensajes'::regclass
+     and attname = 'contenido' and not attisdropped
+$q$, 0, 'la tabla de mensajes NO tiene dónde guardar el texto del chat');
+
+select pg_temp.debe_contar($q$
+  select count(*) from pg_attribute
+   where attrelid = 'public.mensajes'::regclass
+     and attname in ('costo_usd', 'modelo', 'rol', 'creado_en') and not attisdropped
+$q$, 4, 'quedan los metadatos que necesitan los topes de gasto y de mensajes');
 
 \echo ''
 \echo '=== todas las pruebas pasaron ==='

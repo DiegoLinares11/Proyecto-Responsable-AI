@@ -229,17 +229,37 @@ async function conversacionDelUsuario(
 }
 
 /**
- * Escribe los dos mensajes del turno.
+ * Lo que se guarda del motivo de un bloqueo.
+ *
+ * El de la capa 1 trae el razonamiento del clasificador, que parafrasea lo que
+ * escribió la persona («el usuario pide una receta de…»). Guardarlo sería
+ * guardar el texto del chat por la puerta de atrás, así que queda solo la
+ * categoría. Los de la capa 0 son frases fijas, y los de la capa 3 hablan de
+ * la respuesta del modelo, no de lo que escribió el usuario.
+ */
+export function motivoParaGuardar(turno: Pick<TurnoRegistrado, "capaQueCorto" | "motivoBloqueo">): string | null {
+  if (turno.motivoBloqueo === null) return null;
+  if (turno.capaQueCorto !== "capa1") return turno.motivoBloqueo;
+  const separador = turno.motivoBloqueo.indexOf(":");
+  return separador === -1 ? turno.motivoBloqueo : turno.motivoBloqueo.slice(0, separador);
+}
+
+/**
+ * Las dos filas del turno, **sin el texto**: el chat es temporal (R-04). Lo que
+ * se escribió y lo que se respondió vive en la pantalla de quien conversa y
+ * desaparece al cerrarla. Quedan los metadatos que necesitan el tope diario
+ * (el rol y la fecha), el tope de gasto (modelo, tokens y costo) y la
+ * auditoría de la defensa (qué decidió cada capa). La base ni siquiera tiene
+ * la columna: la quitó la migración 20261016120100.
  *
  * Las dos filas se arman desde una misma plantilla porque PostgREST exige que
  * todos los objetos de una inserción múltiple tengan exactamente las mismas
  * claves; si no, responde 400 «All object keys must match».
  */
-async function guardarTurno(cliente: SupabaseClient, turno: TurnoRegistrado): Promise<void> {
+export function filasDelTurno(turno: TurnoRegistrado) {
   const base = {
     id_conversacion: turno.idConversacion,
     rol: null as string | null,
-    contenido: null as string | null,
     veredicto_capa0: null as string | null,
     categoria_intencion: null as string | null,
     veredicto_capa3: null as string | null,
@@ -254,21 +274,19 @@ async function guardarTurno(cliente: SupabaseClient, turno: TurnoRegistrado): Pr
     noticias_citadas: [] as readonly string[],
   };
 
-  const { error } = await cliente.from("mensajes").insert([
+  return [
     {
       ...base,
       rol: "usuario",
-      contenido: turno.mensajeDelUsuario,
       veredicto_capa0: turno.sospechas.map((s) => s.clave).join(",") || null,
       categoria_intencion: turno.categoria,
     },
     {
       ...base,
       rol: "asistente",
-      contenido: turno.respuesta,
       veredicto_capa3: turno.capaQueCorto === "capa3" ? turno.motivoBloqueo : null,
       bloqueado: turno.bloqueado,
-      motivo_bloqueo: turno.motivoBloqueo,
+      motivo_bloqueo: motivoParaGuardar(turno),
       modelo: turno.costo.modelo,
       tokens_entrada: turno.costo.tokensEntrada,
       tokens_salida: turno.costo.tokensSalida,
@@ -277,7 +295,12 @@ async function guardarTurno(cliente: SupabaseClient, turno: TurnoRegistrado): Pr
       latencia_ms: turno.costo.latenciaMs,
       noticias_citadas: turno.noticiasCitadas,
     },
-  ]);
+  ];
+}
+
+/** Escribe los dos mensajes del turno. */
+async function guardarTurno(cliente: SupabaseClient, turno: TurnoRegistrado): Promise<void> {
+  const { error } = await cliente.from("mensajes").insert(filasDelTurno(turno));
 
   if (error !== null) throw new Error(`No se pudo registrar el turno: ${error.message}`);
 
