@@ -67,6 +67,12 @@
         "projectId": "eac3579d-f092-446d-b130-b25148781672"
       }
     },
-    "owner": "diegolinares11"
+    "owner": "diegolinares11",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/eac3579d-f092-446d-b130-b25148781672"
+    }
   }
 }
