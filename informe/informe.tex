@@ -12,6 +12,7 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{longtable} % tablas que se pueden partir entre páginas
 \usepackage{enumitem}
 \usepackage{parskip}
 \usepackage{verbatim}
@@ -113,12 +114,12 @@ cualquiera puede leer, y cada noticia explica con números por qué está donde 
 casos. En la corrida facturada que reportamos, ningún contenido prohibido llegó al usuario en el
 \textbf{98.6\,\%} de los ataques.
 \item \textbf{Pusimos el control de acceso en la base de datos}, no en el código: 35 políticas de
-fila y 93 aserciones que las prueban. Un publicador puede crear, pero no aprobarse.
+fila y 107 aserciones que las prueban. Nadie publica su propia noticia, ni siquiera un moderador.
 \item \textbf{El chat es temporal.} La conversación vive en la pantalla; en la base no queda el
 texto, porque la tabla ni siquiera tiene dónde guardarlo.
 \item \textbf{Publicamos la app} en iPhone (TestFlight), Android (APK) y web, con la redacción
 dentro de la app, visible solo para quien tiene permiso.
-\item \textbf{Gastamos alrededor de USD 0.45} de API hasta hoy, porque el modelo solo participa en
+\item \textbf{Gastamos alrededor de USD 0.47} de API hasta hoy, porque el modelo solo participa en
 el chat.
 \end{enumerate}
 
@@ -192,8 +193,8 @@ dentro del plan, los escribimos como requerimientos con criterios de aceptación
 autenticación con Google); Expo SDK 57 y React Native para iPhone, Android y web; EAS Build,
 Submit y Update; la API de OpenAI para el chat en producción y Claude para desarrollarlo; GDELT,
 los feeds RSS de los medios y Google Fact Check Tools para validar; y Wikimedia Commons para las
-imágenes, de las que solo aceptamos licencias libres (Wikimedia Commons, s.f.). En total, 359
-pruebas unitarias, 93 aserciones de control de acceso y 95 casos de red team.
+imágenes, de las que solo aceptamos licencias libres (Wikimedia Commons, s.f.). En total, 386
+pruebas unitarias, 107 aserciones de control de acceso y 95 casos de red team.
 
 % ---------------------------------------------------
 \section{2. La restricción que definió el diseño}
@@ -361,6 +362,17 @@ que había recomendado el canal. Las alertas de contenido
 envenenado, que veremos en el chatbot, llegan a la misma pantalla. \textbf{Ninguna alerta despublica
 nada sola}: el sistema marca, explica y escala; la decisión es de una persona.
 
+Para lo que sigue en curso hay una cuarta salida: \textbf{publicar en desarrollo}. La noticia sale
+con un sello que dice que no está confirmada y vuelve a la cola, donde se queda hasta que alguien la
+confirme o la saque. Si el chatbot la cita, el servidor agrega el aviso aunque el modelo no lo haya
+dicho, y la respuesta no sale con confianza alta. En producción hizo falta: el modelo escribió que
+``no hay respaldo suficiente para confirmar'', que expresa la duda pero no dice que la noticia está
+en desarrollo, así que la comprobación solo acepta esas palabras.
+
+Y \textbf{nadie publica su propia noticia}. Desde que el canal solo recomienda, aprobar es publicar,
+así que la noticia de un moderador la aprueba otro moderador. La regla vive en la política de fila,
+no en la pantalla, y archivar lo propio sí se puede.
+
 % ---------------------------------------------------
 \section{5. Ranking y personalización}
 
@@ -464,6 +476,11 @@ red team y control de gasto \\
 no hay bucle de agente, no hay turnos intermedios donde inyectar y cada turno cuesta una sola
 llamada. Lo que se pierde es que el modelo no puede refinar su búsqueda; en la práctica dice que no
 encontró la noticia, que es una respuesta honesta.
+
+Por eso la búsqueda que hace el servidor importa. Al principio exigía todas las palabras de la
+pregunta, y ``¿qué se sabe del festival de cine?'' no encontraba nada aunque la noticia estuviera
+publicada, porque ninguna nota dice ``sabe''. Ahora, si ninguna tiene todas las palabras, busca las
+que tengan alguna, antes de caer en lo más relevante.
 
 \subsection{El atacante es el dato}
 
@@ -644,6 +661,9 @@ create policy "noticias_alta_por_publicador" on public.noticias
   );
 \end{verbatim}
 
+La misma idea llega hasta la moderación: la política de edición no deja que un moderador publique
+ni confirme una noticia de la que es autor.
+
 Toda cuenta nueva entra como lectora. Un administrador puede hacer publicador o moderador a otra
 cuenta, con un motivo que queda en la auditoría, pero nadie cambia su propio rol: un
 \emph{trigger} lo rechaza desde cualquier sesión, y un administrador solo se nombra desde el
@@ -717,12 +737,12 @@ leído ni el corpus ni el chatbot.
 % ---------------------------------------------------
 \section{10. Cumplimiento del enunciado}
 
-\begin{center}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabular}{|p{1.1cm}|>{\raggedright\arraybackslash}p{4.4cm}|p{1.6cm}|>{\raggedright\arraybackslash}p{6.2cm}|}
+{\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{|p{1.1cm}|>{\raggedright\arraybackslash}p{4.4cm}|p{1.6cm}|>{\raggedright\arraybackslash}p{6.2cm}|}
 \hline
-\textbf{ID} & \textbf{Requerimiento} & \textbf{Estado} & \textbf{Evidencia o lo que falta} \\
+\textbf{ID} & \textbf{Requerimiento} & \textbf{Estado} & \textbf{Evidencia} \\
 \hline
+\endhead
 R-01 & App en iPhone y Android & \cumple & TestFlight, APK y web; instalada en iPhone reales por
 TestFlight \\
 \hline
@@ -744,21 +764,21 @@ R-08 & Lectura con procedencia & \cumple & Medio, fecha, enlace, crédito y las 
 R-09 & Portal autenticado & \cumple & Redacción en la app; el canal recomienda y publica una
 persona \\
 \hline
-R-10 & Imagen para la nota sin imagen & \parcial & Ilustración, foto libre o del medio, siempre
-rotulada; falta la prueba con sesión de punta a punta \\
+R-10 & Imagen para la nota sin imagen & \cumple & Ilustración, foto libre o del medio, siempre
+rotulada; probada de punta a punta en producción \\
 \hline
-R-11 & Costos visibles & \parcial & El tope funciona; falta el panel de gasto \\
+R-11 & Costos visibles & \cumple & Tope en el servidor y panel de gasto por función para
+administración \\
 \hline
 R-12 & Validación & \cumple & Cinco señales, umbrales y moderación \\
 \hline
-R-13 & Lo no confirmado se dice & \parcial & La ficha muestra lo no comprobado; falta el estado
-``en desarrollo'' \\
+R-13 & Lo no confirmado se dice & \cumple & Estado ``en desarrollo'' con sello, aviso en la
+lectura y en el chat \\
 \hline
-R-14 & Transparencia & \parcial & Medio, plataforma e IA se distinguen a la vista; faltan
-respuestas en la app a todas las preguntas del enunciado \\
+R-14 & Transparencia & \cumple & Medio, plataforma e IA se distinguen; ``Cómo funciona'', en
+Perfil, responde las preguntas del enunciado \\
 \hline
-\end{tabular}
-\end{center}
+\end{longtable}}
 
 % ---------------------------------------------------
 \section{11. Despliegue y costos}
@@ -799,9 +819,9 @@ Infraestructura (Supabase, Vercel y Expo, en planes gratuitos) & 0.00 \\
 \hline
 Red team completo con OpenAI (95 casos) & 0.415 \\
 \hline
-Chat en producción y pruebas & 0.04 \\
+Chat en producción y pruebas & 0.05 \\
 \hline
-\textbf{Total gastado en API} & \textbf{0.45} \\
+\textbf{Total gastado en API} & \textbf{0.47} \\
 \hline
 Tope del servidor (sobre un crédito de USD 5) & 4.00 \\
 \hline
@@ -809,7 +829,9 @@ Tope del servidor (sobre un crédito de USD 5) & 4.00 \\
 \end{center}
 
 Una respuesta del chat cuesta entre USD 0.003 y 0.006, así que el tope alcanza para entre 650 y
-1,300 preguntas. Una salvedad que también declaramos: el chatbot y el red team se desarrollaron con una
+1,300 preguntas. El gasto del chat ya no hay que pedirlo: el panel de gasto de la redacción se lo
+muestra a quien administra, con el mismo total que usa el tope, desglosado en filtro, clasificador
+y respuesta. Una salvedad que también declaramos: el chatbot y el red team se desarrollaron con una
 suscripción personal de Claude, no con créditos de API, y lo consultamos con el profesor.
 
 % ---------------------------------------------------
@@ -842,8 +864,8 @@ cualquiera puede ver el criterio.
 
 \item \textbf{Limitaciones:} el sistema aguanta 95 ataques conocidos, no es seguro en general; la
 capa de salida comprueba que las noticias citadas existan, no que el resumen sea fiel; el veto por
-desmentidos solo atrapa afirmaciones que un verificador ya calificó; un moderador todavía puede
-aprobar sus propias noticias; y cuatro requerimientos siguen parciales: R-10, R-11, R-13 y R-14.
+desmentidos solo atrapa afirmaciones que un verificador ya calificó; y la regla de que nadie publica
+lo propio necesita al menos dos moderadores: con uno solo, lo que esa persona escribe no se publica.
 \end{enumerate}
 
 % ---------------------------------------------------
