@@ -14,6 +14,7 @@ export type NoticiaDeLaCola = {
   creadoEn: string;
   rafagaSospechosa: boolean;
   rafagaMotivo: string | null;
+  recomendada: boolean;
 };
 
 export function FilaDeModeracion({ noticia }: { noticia: NoticiaDeLaCola }) {
@@ -47,6 +48,22 @@ export function FilaDeModeracion({ noticia }: { noticia: NoticiaDeLaCola }) {
           </a>
         )}
       </div>
+
+      {/* El canal recomienda; publica una persona (R-09). Es un dato para
+          decidir, no una decisión. */}
+      {noticia.recomendada ? (
+        <p
+          style={{
+            marginTop: "0.6rem",
+            fontSize: "0.82rem",
+            color: "var(--verificado)",
+            borderLeft: "2px solid var(--verificado)",
+            paddingLeft: "0.6rem",
+          }}
+        >
+          El canal recomienda publicarla: pasó las cinco señales. Falta que la apruebe una persona.
+        </p>
+      ) : null}
 
       {noticia.rafagaSospechosa ? (
         <p

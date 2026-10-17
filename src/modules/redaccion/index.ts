@@ -210,8 +210,12 @@ export async function publicarNoticia(
       idActor: perfil.usuario.id,
     });
 
+    // Se explica según lo que recomendó el canal, no según el estado: pasar el
+    // umbral y quedar dudosa terminan las dos en revisión (R-09), pero no son
+    // lo mismo para quien publica.
     const explicacion: Record<string, string> = {
-      verificada: "Se publicó: pasó las cinco señales.",
+      verificada:
+        "Pasó las cinco señales y el canal recomienda publicarla. La publica un moderador cuando la revise.",
       en_revision: "Quedó en revisión. La va a leer un moderador antes de publicarse.",
       no_verificable: "No se pudo verificar. En el desglose de las cinco señales está qué falló.",
       desmentida:
@@ -219,7 +223,7 @@ export async function publicarNoticia(
     };
 
     return {
-      ok: explicacion[resultado.estadoNuevo] ?? `Quedó en estado ${resultado.estadoNuevo}.`,
+      ok: explicacion[resultado.veredicto.estado] ?? `Quedó en estado ${resultado.estadoNuevo}.`,
       idNoticia,
       estado: resultado.estadoNuevo,
       puntaje: resultado.veredicto.puntaje,
