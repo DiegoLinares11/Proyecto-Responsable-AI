@@ -105,17 +105,20 @@ contra 14 requerimientos propios que tradujimos del enunciado. Lo más important
 
 \begin{enumerate}[leftmargin=1.4em]
 \item \textbf{Validamos sin modelo de lenguaje.} Cada noticia pasa por cinco señales deterministas
-y gratuitas. Lo que no llega al umbral no se publica solo: lo lee una persona.
+y gratuitas. Ninguna se publica sola: el canal recomienda y el botón de publicar lo aprieta una
+persona.
 \item \textbf{Ordenamos con una fórmula publicada.} La portada se ordena con una fórmula que
 cualquiera puede leer, y cada noticia explica con números por qué está donde está.
 \item \textbf{Defendimos el chatbot en cinco capas} y lo atacamos con un \emph{red team} de 95
 casos. En la corrida facturada que reportamos, ningún contenido prohibido llegó al usuario en el
 \textbf{98.6\,\%} de los ataques.
 \item \textbf{Pusimos el control de acceso en la base de datos}, no en el código: 35 políticas de
-fila y 91 aserciones que las prueban. Un publicador puede crear, pero no aprobarse.
+fila y 93 aserciones que las prueban. Un publicador puede crear, pero no aprobarse.
+\item \textbf{El chat es temporal.} La conversación vive en la pantalla; en la base no queda el
+texto, porque la tabla ni siquiera tiene dónde guardarlo.
 \item \textbf{Publicamos la app} en iPhone (TestFlight), Android (APK) y web, con la redacción
 dentro de la app, visible solo para quien tiene permiso.
-\item \textbf{Gastamos alrededor de USD 0.44} de API hasta hoy, porque el modelo solo participa en
+\item \textbf{Gastamos alrededor de USD 0.45} de API hasta hoy, porque el modelo solo participa en
 el chat.
 \end{enumerate}
 
@@ -137,7 +140,7 @@ Medir la defensa fue más difícil que construirla & Con la definición de éxit
 42/92; con la correcta, 89/92 sobre los mismos datos \\
 \hline
 El registro de fuentes penaliza a los medios guatemaltecos & Dos notas idénticas en cuatro
-señales: la de BBC se publica (78) y la de La Hora queda en revisión (73) \\
+señales: la de BBC pasó el umbral (78) y la de La Hora no (73) \\
 \hline
 Cinco veces el sistema afirmó un control que no tenía & Documentos, pantallas y respuestas
 describían controles que ninguna prueba comprobaba \\
@@ -189,8 +192,8 @@ dentro del plan, los escribimos como requerimientos con criterios de aceptación
 autenticación con Google); Expo SDK 57 y React Native para iPhone, Android y web; EAS Build,
 Submit y Update; la API de OpenAI para el chat en producción y Claude para desarrollarlo; GDELT,
 los feeds RSS de los medios y Google Fact Check Tools para validar; y Wikimedia Commons para las
-imágenes, de las que solo aceptamos licencias libres (Wikimedia Commons, s.f.). En total, 344 pruebas unitarias, 91 aserciones de control de acceso y 95 casos de red
-team.
+imágenes, de las que solo aceptamos licencias libres (Wikimedia Commons, s.f.). En total, 359
+pruebas unitarias, 93 aserciones de control de acceso y 95 casos de red team.
 
 % ---------------------------------------------------
 \section{2. La restricción que definió el diseño}
@@ -298,9 +301,14 @@ Desmentidos & Si una organización de verificación ya la calificó como falsa (
 \end{tabular}
 \end{center}
 
-De 75 puntos para arriba la noticia se publica; entre 45 y 75 la lee una persona antes; por debajo
-no se publica y el autor ve el desglose para corregirla. La regla que no se negocia es que
-\textbf{una señal que no se pudo comprobar nunca se asume favorable}.
+De 75 puntos para arriba, el canal recomienda publicarla; entre 45 y 75 la marca como dudosa; por
+debajo no se publica y el autor ve el desglose para corregirla. Las reglas que no se negocian son
+dos: \textbf{ninguna noticia se publica sola}, porque el botón de publicar lo aprieta una persona
+con permiso de moderar, y \textbf{una señal que no se pudo comprobar nunca se asume favorable}.
+
+Al principio, lo que pasaba de 75 se publicaba solo. El enunciado pide que publique una persona,
+así que el canal pasó a recomendar: ningún veredicto lleva una noticia a la portada, y una prueba
+falla si alguno vuelve a hacerlo.
 
 Hay una excepción que tenemos que declarar. Sin la llave de Google Fact Check, la señal de
 desmentidos queda como \emph{no disponible}: no suma ni veta. Es una decisión editorial que queda
@@ -332,19 +340,22 @@ Coherencia & 20 / 20 & 20 / 20 \\
 \hline
 \textbf{Credibilidad de la fuente} & \textbf{25.5 / 30} & \textbf{21 / 30} \\
 \hline
-\textbf{Resultado} & \textbf{78: se publica} & \textbf{73: queda en revisión} \\
+\textbf{Resultado} & \textbf{78: se publicó} & \textbf{73: quedó en revisión} \\
 \hline
 \end{tabular}
 \end{center}
 
 Son idénticas en todo lo que se comprueba. Lo único que las separa es el registro que escribimos a
-mano, y esos 4.5 puntos son la diferencia entre publicarse y no. El medio penalizado es el
-guatemalteco. Lo retomamos en la sección de sesgos.
+mano, y con la regla de entonces esos 4.5 puntos fueron la diferencia entre publicarse y no. Hoy
+son la diferencia entre llegar a la cola como recomendada o como dudosa, que sigue pesando en quien
+decide. El medio penalizado es el guatemalteco. Lo retomamos en la sección de sesgos.
 
 \subsection{Moderación humana}
 
-Lo que queda en revisión va a una cola. Aprobar, rechazar o archivar exige un motivo escrito, que
-queda en la bitácora de auditoría con el nombre de quien decidió. Las alertas de contenido
+Lo que queda en revisión va a una cola, donde las noticias que pasaron el umbral dicen ``el canal
+recomienda publicarla''. Es un dato para decidir, no una decisión. Aprobar, rechazar o archivar
+exige un motivo escrito, que queda en la bitácora de auditoría con el nombre de quien decidió y lo
+que había recomendado el canal. Las alertas de contenido
 envenenado, que veremos en el chatbot, llegan a la misma pantalla. \textbf{Ninguna alerta despublica
 nada sola}: el sistema marca, explica y escala; la decisión es de una persona.
 
@@ -651,8 +662,8 @@ Ubicación elegida & Ordenar la portada & Solo su dueño \\
 \hline
 Noticias abiertas & Intereses propios y tracción agregada & Solo su dueño \\
 \hline
-Conversación del chat & Historial, tope de gasto y auditoría de la defensa & Solo su dueño, en la
-app \\
+Chat: datos técnicos, sin el texto & Límite de mensajes, tope de gasto y auditoría de la defensa
+& Nadie: el texto no se guarda \\
 \hline
 Decisiones editoriales & Auditar quién decidió qué & Moderación y administración \\
 \hline
@@ -665,9 +676,12 @@ conversación, el nombre de la ubicación elegida y las noticias necesarias, sin
 política de privacidad publicada describe esto mismo, y cada afirmación sale de una tabla, una
 política o una llamada concreta.
 
-\textbf{Un pendiente que declaramos:} en los requerimientos decidimos que el chat fuera temporal y
-que su texto no se guardara. El código todavía lo guarda. La política de privacidad dice la
-verdad, que hoy se guarda, pero la decisión no está cumplida.
+\textbf{El chat es temporal.} La conversación vive en la pantalla de quien pregunta y desaparece
+al cerrarla. Quitamos la columna del texto de la base, en vez de dejarla vacía, para que no haya
+dónde guardarlo aunque alguien vuelva a escribir código que lo intente; con ella se fue el texto de
+los 36 mensajes de prueba que había. Una aserción de la suite de control de acceso comprueba que la
+columna no existe. Encontramos una fuga más: el motivo de un bloqueo guardaba el razonamiento del
+clasificador, que parafraseaba lo que había escrito la persona. Ahora queda solo la categoría.
 
 % ---------------------------------------------------
 \section{9. Sesgos conocidos}
@@ -714,7 +728,8 @@ R-02 & Login con Google & \cumple & Supabase Auth en vez de Firebase, aceptado p
 \hline
 R-03 & Ubicación simulada & \cumple & 27 ubicaciones; GPS opcional en el dispositivo \\
 \hline
-R-04 & Chat inicial y temporal & \parcial & Es la pantalla inicial; falta no guardar el texto \\
+R-04 & Chat inicial y temporal & \cumple & Es la pantalla inicial; la base no tiene dónde guardar
+el texto \\
 \hline
 R-05 & Feed personalizado con jerarquía & \cumple & Tres tamaños y el ``¿por qué está aquí?'' \\
 \hline
@@ -724,8 +739,8 @@ R-07 & La personalización no oculta & \cumple & Cupos de cobertura con pruebas 
 \hline
 R-08 & Lectura con procedencia & \cumple & Medio, fecha, enlace, crédito y las cinco señales \\
 \hline
-R-09 & Portal autenticado & \parcial & Redacción en la app; el canal todavía publica solo lo que
-pasa de 75, y el enunciado pide que publique una persona \\
+R-09 & Portal autenticado & \cumple & Redacción en la app; el canal recomienda y publica una
+persona \\
 \hline
 R-10 & Imagen para la nota sin imagen & \parcial & Ilustración, foto libre o del medio, siempre
 rotulada; falta la prueba con sesión de punta a punta \\
@@ -782,9 +797,9 @@ Infraestructura (Supabase, Vercel y Expo, en planes gratuitos) & 0.00 \\
 \hline
 Red team completo con OpenAI (95 casos) & 0.415 \\
 \hline
-Chat en producción y pruebas & 0.03 \\
+Chat en producción y pruebas & 0.04 \\
 \hline
-\textbf{Total gastado en API} & \textbf{0.44} \\
+\textbf{Total gastado en API} & \textbf{0.45} \\
 \hline
 Tope del servidor (sobre un crédito de USD 5) & 4.00 \\
 \hline
@@ -825,8 +840,8 @@ cualquiera puede ver el criterio.
 
 \item \textbf{Limitaciones:} el sistema aguanta 95 ataques conocidos, no es seguro en general; la
 capa de salida comprueba que las noticias citadas existan, no que el resumen sea fiel; en producción
-falta la llave del verificador de desmentidos; y cinco requerimientos están parciales,
-empezando por que el texto del chat todavía se guarda.
+falta la llave del verificador de desmentidos; un moderador todavía puede aprobar sus propias
+noticias; y cuatro requerimientos siguen parciales: R-10, R-11, R-13 y R-14.
 \end{enumerate}
 
 % ---------------------------------------------------
