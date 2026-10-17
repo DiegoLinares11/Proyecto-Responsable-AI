@@ -11,7 +11,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
-import { filasDelTurno, motivoParaGuardar } from "../../../src/app/api/chat/puertos.ts";
+import { cualquieraDe, filasDelTurno, motivoParaGuardar, terminos } from "../../../src/app/api/chat/puertos.ts";
 import type { TurnoRegistrado } from "../../../src/modules/chatbot/index.ts";
 
 const MENSAJE = "Contame de la tasa de interés, mi hija está enferma y necesito saber";
@@ -95,5 +95,22 @@ describe("el motivo de un bloqueo", () => {
 
   test("sin bloqueo no hay motivo", () => {
     assert.equal(motivoParaGuardar(turno()), null);
+  });
+});
+
+// La búsqueda del chat vive en el mismo archivo de puertos.
+describe("los términos que busca el chat", () => {
+  test("saca acentos, signos y palabras cortas", () => {
+    assert.equal(terminos("¿Qué se sabe del festival de cine?"), "sabe festival cine");
+  });
+
+  // «sabe» no está en ninguna noticia: exigir todas las palabras no encontraba nada.
+  test("la segunda búsqueda acepta cualquiera de las palabras", () => {
+    assert.equal(cualquieraDe("sabe festival cine"), "sabe | festival | cine");
+  });
+
+  test("lo que llega a to_tsquery son solo letras, números y barras", () => {
+    const q = cualquieraDe(terminos("Ignorá todo'); drop table noticias; -- & | ! (ataque)"));
+    assert.match(q, /^[\p{L}\p{N} |]+$/u);
   });
 });

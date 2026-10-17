@@ -62,7 +62,7 @@ function aNoticiaDelModelo(fila: FilaDeNoticia): NoticiaParaElModelo {
 }
 
 /** Términos buscables del mensaje: sin acentos, sin palabras cortas. */
-function terminos(consulta: string): string {
+export function terminos(consulta: string): string {
   return consulta
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
@@ -71,6 +71,15 @@ function terminos(consulta: string): string {
     .filter((t) => t.length >= 4)
     .slice(0, 6)
     .join(" ");
+}
+
+/**
+ * Los mismos términos, para buscar los que tengan CUALQUIERA de ellos. Son
+ * solo letras y números (`terminos` quitó todo lo demás), así que no pueden
+ * romper la sintaxis de to_tsquery.
+ */
+export function cualquieraDe(buscables: string): string {
+  return buscables.split(" ").filter(Boolean).join(" | ");
 }
 
 /** Búsqueda de texto entre lo verificado; si no encuentra nada, lo más relevante. */
@@ -82,16 +91,26 @@ async function buscar(
   const buscables = terminos(consulta);
 
   if (buscables !== "") {
-    const { data } = await cliente
-      .from("noticias")
-      .select(CAMPOS)
-      .eq("estado", "verificada")
-      .textSearch("busqueda", buscables, { type: "plain", config: "spanish" })
-      .order("relevancia", { ascending: false })
-      .limit(limite);
+    // Primero las que tienen todas las palabras, que es lo más preciso. Si
+    // ninguna las tiene todas, las que tienen alguna: una pregunta trae palabras
+    // que ninguna noticia dice («¿qué se sabe de…?»), y exigirlas todas dejaba
+    // al chat sin nada que citar aunque la noticia estuviera publicada.
+    const intentos = [
+      { consulta: buscables, opciones: { type: "plain" as const, config: "spanish" } },
+      { consulta: cualquieraDe(buscables), opciones: { config: "spanish" } },
+    ];
+    for (const intento of intentos) {
+      const { data } = await cliente
+        .from("noticias")
+        .select(CAMPOS)
+        .eq("estado", "verificada")
+        .textSearch("busqueda", intento.consulta, intento.opciones)
+        .order("relevancia", { ascending: false })
+        .limit(limite);
 
-    if (data !== null && data.length > 0) {
-      return (data as unknown as FilaDeNoticia[]).map(aNoticiaDelModelo);
+      if (data !== null && data.length > 0) {
+        return (data as unknown as FilaDeNoticia[]).map(aNoticiaDelModelo);
+      }
     }
   }
 
