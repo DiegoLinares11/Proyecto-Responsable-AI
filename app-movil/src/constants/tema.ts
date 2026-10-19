@@ -1,92 +1,58 @@
 // ===========================================================================
-// La identidad: un diario que muestra cómo sabe lo que publica
+// NEXO · identidad editorial compartida por iOS, Android y web.
 //
-// Tres voces, tres letras, para que se distinga a la vista de quién es cada
-// cosa (el enunciado lo pide: lo del medio, lo del sistema y lo de la IA):
-//   - Newsreader: lo que dice el medio (titulares, resúmenes, texto de la nota).
-//   - Public Sans: lo que ordena y explica la plataforma. Con un icono y una
-//     etiqueta explícita se identifica lo que escribe el asistente.
-//   - IBM Plex Mono: los números de la verificación.
+// Manrope para titulares; Inter para lectura, interfaz y cifras.
+// El asistente conserva su icono y etiqueta explícita.
+// Google Sans Medium se reserva para el botón oficial de acceso con Google.
 //
-// Papel cálido y naranja para la marca. La verificación tiene su propio verde;
-// las advertencias usan ámbar para no confundirse con una acción de la app.
+// Naranja, negro y neutros. Los estados conservan texto e icono además del color.
 //
-// Cada peso es su propia familia (Newsreader_600SemiBold…), sin fontWeight: con
+// Cada peso es su propia familia (Inter_600SemiBold…), sin fontWeight: con
 // fuentes cargadas, Android ignora el peso o cae a la fuente del sistema.
 // ===========================================================================
 
-import { IBMPlexMono_500Medium } from '@expo-google-fonts/ibm-plex-mono';
-import {
-  Newsreader_400Regular,
-  Newsreader_400Regular_Italic,
-  Newsreader_600SemiBold,
-} from '@expo-google-fonts/newsreader';
-import {
-  PublicSans_400Regular,
-  PublicSans_400Regular_Italic,
-  PublicSans_600SemiBold,
-  PublicSans_700Bold,
-} from '@expo-google-fonts/public-sans';
-import { useWindowDimensions } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import { useApariencia } from '@/lib/apariencia';
 import { useHidratado } from '@/lib/hidratacion';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+/** Valores aprobados en la guía de identidad NEXO. */
+export const PALETA_EDITORIAL = {
+  naranja: '#FF6B00', negro: '#111318', blanco: '#FFFFFF', grisClaro: '#F3F4F6',
+};
+
 const claro = {
-  tinta: '#20211E',
-  tintaSuave: '#55574F',
-  tintaTenue: '#696B62',
-  papel: '#FAF8F3',
-  papelHundido: '#F0EDE5',
-  borde: '#E1DED5',
-  bordeFuerte: '#BDB9AE',
-  /** Naranja oscuro para texto y enlaces sobre papel. */
-  acento: '#AD3B08',
-  /** Naranja vivo para detalles de identidad, nunca texto sobre papel. */
-  marca: '#FF6113',
+  tinta: PALETA_EDITORIAL.negro,
+  tintaSuave: '#5B616E', tintaTenue: '#626A78',
+  papel: PALETA_EDITORIAL.blanco, papelHundido: PALETA_EDITORIAL.grisClaro,
+  superficieElevada: '#FFFFFF', borde: '#E5E7EB', bordeFuerte: '#7D8592',
+  acento: '#B94600', marca: PALETA_EDITORIAL.naranja, sobreMarca: PALETA_EDITORIAL.negro,
   sobreAcento: '#FFFFFF',
-  /** Los botones principales van en tinta, no en color. */
-  primario: '#20211E',
-  sobrePrimario: '#FFFFFF',
-  verificado: '#3F591B',
-  verificadoFondo: '#E5FF8B',
-  asistente: '#075B69',
-  asistenteFondo: '#D9F8FC',
-  alerta: '#805600',
-  alertaFondo: '#F8EDCD',
-  alertaTexto: '#654500',
-  peligro: '#8F1D14',
-  fotoVacia: '#E4E4DA',
-  ilustracion: '#292C25',
-  ilustracionTexto: '#F7F6F2',
-  ilustracionAntetitulo: '#E5FF8B',
+  primario: '#C94F00', sobrePrimario: '#FFFFFF',
+  verificado: '#16803D', verificadoFondo: '#F0FDF4',
+  asistente: '#303641', asistenteFondo: PALETA_EDITORIAL.grisClaro,
+  alerta: '#84500A', alertaFondo: '#FFF8E6', alertaTexto: '#734508',
+  peligro: '#B42318', peligroFondo: '#FFF1F0', fotoVacia: '#E5E7EB',
+  ilustracion: PALETA_EDITORIAL.negro, ilustracionTexto: '#FFFFFF',
+  ilustracionAntetitulo: '#D1D5DB',
+  editorial: PALETA_EDITORIAL.negro, sobreEditorial: '#FFFFFF',
+  editorialSuave: '#D1D5DB', editorialBorde: '#454B56', marcaSuave: '#FFF1E7',
 };
 
 const oscuro: typeof claro = {
-  tinta: '#F0F0E7',
-  tintaSuave: '#B8BAAE',
-  tintaTenue: '#A0A395',
-  papel: '#191A18',
-  papelHundido: '#242522',
-  borde: '#353732',
-  bordeFuerte: '#65685F',
-  acento: '#FFAC80',
-  marca: '#FF6113',
-  sobreAcento: '#191A18',
-  primario: '#F0F0E7',
-  sobrePrimario: '#191A18',
-  verificado: '#E5FF8B',
-  verificadoFondo: '#303729',
-  asistente: '#8AEAF8',
-  asistenteFondo: '#15363B',
-  alerta: '#EBC76D',
-  alertaFondo: '#382E16',
-  alertaTexto: '#F0D798',
-  peligro: '#F08A80',
-  fotoVacia: '#30352B',
-  ilustracion: '#292F22',
-  ilustracionTexto: '#F0F0E7',
-  ilustracionAntetitulo: '#E5FF8B',
+  tinta: '#F9FAFB', tintaSuave: '#B8BEC9', tintaTenue: '#A6AEBB',
+  papel: PALETA_EDITORIAL.negro, papelHundido: '#1B1E24', superficieElevada: '#252A32',
+  borde: '#343A45', bordeFuerte: '#697587',
+  acento: '#FF8A3D', marca: PALETA_EDITORIAL.naranja, sobreMarca: PALETA_EDITORIAL.negro,
+  sobreAcento: PALETA_EDITORIAL.negro,
+  primario: PALETA_EDITORIAL.naranja, sobrePrimario: PALETA_EDITORIAL.negro,
+  verificado: '#86EFAC', verificadoFondo: '#142A1D',
+  asistente: '#E5E7EB', asistenteFondo: '#1B1E24',
+  alerta: '#F1C783', alertaFondo: '#302719', alertaTexto: '#F3D6A9',
+  peligro: '#FDA29B', peligroFondo: '#351C1B', fotoVacia: '#252A32',
+  ilustracion: '#111318', ilustracionTexto: '#FFFFFF', ilustracionAntetitulo: '#D1D5DB',
+  editorial: '#111318', sobreEditorial: '#FFFFFF',
+  editorialSuave: '#D1D5DB', editorialBorde: '#454B56', marcaSuave: '#332317',
 };
 
 export type Paleta = typeof claro;
@@ -95,37 +61,43 @@ export function useColores(): Paleta {
   return useApariencia().esquema === 'dark' ? oscuro : claro;
 }
 
-/** Las familias, una por peso. Los nombres son las llaves de FUENTES. */
+/** Web admite una pila de respaldo; iOS y Android resuelven la familia nativa. */
+const familia = (nombre: string) => Platform.OS === 'web'
+  ? `"${nombre}", system-ui, -apple-system, "Segoe UI", sans-serif`
+  : nombre;
+
+/** Las familias conservan sus nombres públicos y los pesos empaquetados. */
 export const Tipos = {
   /** Titulares del medio. */
-  titular: 'Newsreader_600SemiBold',
+  titular: familia('Manrope_700Bold'),
+  titularMedio: familia('Manrope_600SemiBold'),
   /** Resúmenes y texto de la nota. */
-  lectura: 'Newsreader_400Regular',
+  lectura: familia('Inter_400Regular'),
   /** La ilustración tipográfica de una nota sin foto. */
-  lecturaCursiva: 'Newsreader_400Regular_Italic',
+  lecturaCursiva: familia('Inter_400Regular_Italic'),
   /** La interfaz. */
-  texto: 'PublicSans_400Regular',
+  texto: familia('Inter_400Regular'),
   /** Cursiva auxiliar; la IA se identifica por icono y etiqueta, no por cursiva. */
-  textoCursiva: 'PublicSans_400Regular_Italic',
-  textoMedio: 'PublicSans_600SemiBold',
-  textoFuerte: 'PublicSans_700Bold',
+  textoCursiva: familia('Inter_400Regular_Italic'),
+  textoMedio: familia('Inter_600SemiBold'),
+  textoFuerte: familia('Inter_700Bold'),
   /** Puntajes, señales y factores. */
-  numeros: 'IBMPlexMono_500Medium',
+  numeros: familia('Inter_600SemiBold'),
+  google: familia('GoogleSans_500Medium'),
 } as const;
 
 /** Lo que carga la raíz antes de mostrar la app (src/app/_layout.tsx). */
 export const FUENTES = {
-  Newsreader_400Regular,
-  Newsreader_400Regular_Italic,
-  Newsreader_600SemiBold,
-  PublicSans_400Regular,
-  PublicSans_400Regular_Italic,
-  PublicSans_600SemiBold,
-  PublicSans_700Bold,
-  IBMPlexMono_500Medium,
+  Manrope_600SemiBold: require('../../assets/fonts/Manrope_600SemiBold.ttf'),
+  Manrope_700Bold: require('../../assets/fonts/Manrope_700Bold.ttf'),
+  Inter_400Regular: require('../../assets/fonts/Inter_400Regular.ttf'),
+  Inter_400Regular_Italic: require('../../assets/fonts/Inter_400Regular_Italic.ttf'),
+  Inter_600SemiBold: require('../../assets/fonts/Inter_600SemiBold.ttf'),
+  Inter_700Bold: require('../../assets/fonts/Inter_700Bold.ttf'),
+  GoogleSans_500Medium: require('../../assets/fonts/GoogleSans_500Medium.ttf'),
 };
 
-export const Espacio = { xs: 4, s: 8, m: 12, l: 16, xl: 24, xxl: 32 } as const;
+export const Espacio = { xs: 4, s: 8, m: 12, l: 16, pagina: 20, xl: 24, xxl: 32, xxxl: 40, amplio: 48 } as const;
 
 /**
  * Los anchos de una pantalla grande (la web, una tableta). La portada usa el
@@ -145,8 +117,8 @@ export function useDisposicion(): { ancha: boolean; anchoVentana: number } {
   return { ancha: hidratado && anchoUtil >= PUNTO_DE_QUIEBRE, anchoVentana: hidratado ? anchoUtil : 0 };
 }
 
-/** Esquinas: rectas, de diario. */
-export const Radio = { chico: 3, medio: 4 } as const;
+/** Radios discretos: fotos y controles, sin convertir el diario en tarjetas. */
+export const Radio = { chico: 8, medio: 12, amplio: 16 } as const;
 
 /** Los rótulos en mayúsculas espaciadas («SALUD · QUETZALTENANGO»). */
-export const ROTULO = { fontFamily: Tipos.textoFuerte, fontSize: 11, letterSpacing: 1.6 } as const;
+export const ROTULO = { fontFamily: Tipos.textoMedio, fontSize: 12, lineHeight: 18, letterSpacing: 0.9 } as const;

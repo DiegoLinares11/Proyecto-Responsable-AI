@@ -2,9 +2,12 @@ import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import Head from 'expo-router/head';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 
 import { FUENTES, Tipos, useColores } from '@/constants/tema';
+import { MarcaNexo } from '@/componentes/marca';
 import { ProveedorDePermisos } from '@/lib/permisos';
 import { ProveedorDePreferencias } from '@/lib/preferencias';
 import { ProveedorDeSesion } from '@/lib/sesion';
@@ -43,14 +46,17 @@ function Contenido() {
               background: c.papel, card: c.papel, text: c.tinta, primary: c.acento, border: c.borde,
             },
           }}>
+            {Platform.OS === 'web' ? <Head><title>NEXO · Noticias</title></Head> : null}
             <StatusBar style={esquema === 'dark' ? 'light' : 'dark'} />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.papel } }}>
+            <Stack screenOptions={{ title: 'NEXO', headerShown: false, contentStyle: { backgroundColor: c.papel } }}>
               <Stack.Screen name="(tabs)" />
               <Stack.Screen
                 name="noticia/[id]"
                 options={{
                   headerShown: true,
-                  title: '',
+                  title: 'NEXO',
+                  headerTitle: () => <MarcaNexo tamano={22} etiqueta="NEXO" />,
+                  headerTitleAlign: 'center',
                   headerBackTitle: 'Volver',
                   headerBackTitleStyle: { fontFamily: Tipos.textoMedio },
                   headerTintColor: c.tinta,

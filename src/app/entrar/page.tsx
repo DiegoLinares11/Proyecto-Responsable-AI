@@ -37,9 +37,9 @@ function FormulariosDeEntrada() {
       {/* La misma cuenta que en la app del teléfono. */}
       <form action={entrarConGoogle} className="formulario">
         <button type="submit" className="boton-google">
-          <span aria-hidden="true" style={{ color: "#4285F4", fontWeight: 800 }}>
-            G
-          </span>{" "}
+          {/* Recurso oficial de Google, servido localmente y sin deformarlo. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/google-g.png" width="20" height="20.4" alt="" aria-hidden="true" />
           Entrar con Google
         </button>
         {errorDeGoogle ? (

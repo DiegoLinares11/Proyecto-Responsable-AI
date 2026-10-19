@@ -36,7 +36,7 @@ export function DetalleEditorial({ titulo, children, abierto: controlado, alCamb
 }
 
 const estilos = StyleSheet.create({
-  control: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: Espacio.l, borderTopWidth: 1, paddingVertical: Espacio.m },
-  titulo: { flex: 1, fontFamily: Tipos.textoMedio, fontSize: 15, lineHeight: 22 },
-  detalle: { paddingTop: Espacio.s, gap: Espacio.l },
+  control: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: Espacio.l, borderTopWidth: 1, paddingVertical: Espacio.l },
+  titulo: { flex: 1, fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 23 },
+  detalle: { paddingTop: Espacio.s, paddingBottom: Espacio.s, gap: Espacio.l },
 });

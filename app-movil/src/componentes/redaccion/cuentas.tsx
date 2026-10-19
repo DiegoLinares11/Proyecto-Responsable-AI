@@ -149,12 +149,12 @@ function FilaDeCuenta({ cuenta, esMia, alCambiar }: { cuenta: Cuenta; esMia: boo
 }
 
 const estilos = StyleSheet.create({
-  nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 19 },
+  nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 23 },
   enlace: { minHeight: 44, justifyContent: 'center' },
-  enlaceTexto: { fontFamily: Tipos.textoMedio, fontSize: 14 },
-  fila: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m },
-  nombre: { fontFamily: Tipos.textoFuerte, fontSize: 15 },
-  rol: { fontFamily: Tipos.textoFuerte, fontSize: 11, letterSpacing: 1.2 },
-  cambio: { paddingVertical: Espacio.s, borderBottomWidth: 1, gap: 2 },
-  cambioTexto: { fontFamily: Tipos.texto, fontSize: 14 },
+  enlaceTexto: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 23 },
+  fila: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m },
+  nombre: { fontFamily: Tipos.textoFuerte, fontSize: 16, lineHeight: 25 },
+  rol: { fontFamily: Tipos.textoFuerte, fontSize: 11, lineHeight: 19, letterSpacing: 1.2 },
+  cambio: { paddingVertical: Espacio.l, borderBottomWidth: 1, gap: 6 },
+  cambioTexto: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 24 },
 });

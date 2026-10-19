@@ -8,9 +8,10 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { MOVIMIENTO } from '@/constants/movimiento';
 import { ANCHOS, Espacio, ROTULO, Tipos, useColores, useDisposicion } from '@/constants/tema';
 import { usePermisos } from '@/lib/permisos';
-import { Asistente, Derecha, Diario, Pantalla } from './iconos';
+import { Asistente, Derecha, Diario, Editar, Persona } from './iconos';
 import { Logotipo } from './marca';
 import { SelectorDeApariencia } from './selector-de-apariencia';
+import { ACCESO_DE_ENLACE } from './acceso-de-enlace';
 
 /** La misma hoja de navegación se abre desde escritorio, móvil web y la app. */
 export function MenuEditorial({ barra = false }: { barra?: boolean }) {
@@ -39,8 +40,8 @@ export function MenuEditorial({ barra = false }: { barra?: boolean }) {
   const destinos = [
     { nombre: 'Portada', detalle: 'La edición que estás leyendo', ruta: '/feed', Icono: Diario },
     { nombre: 'Cuaderno de contexto', detalle: 'Preguntas, noticias y fuentes', ruta: '/', Icono: Asistente },
-    ...(redaccion ? [{ nombre: 'Redacción', detalle: 'Tu espacio de trabajo editorial', ruta: '/redaccion', Icono: Diario }] : []),
-    { nombre: 'Perfil', detalle: 'Tu ubicación y tus preferencias', ruta: '/perfil', Icono: Pantalla },
+    ...(redaccion ? [{ nombre: 'Redacción', detalle: 'Tu espacio de trabajo editorial', ruta: '/redaccion', Icono: Editar }] : []),
+    { nombre: 'Perfil', detalle: 'Tu ubicación y tus preferencias', ruta: '/perfil', Icono: Persona },
   ];
   return (
     <>
@@ -92,7 +93,7 @@ function Destino({ nombre, detalle, Icono, indice, activo, ir }: { nombre: strin
   const { ancha } = useDisposicion();
   const progreso = useSharedValue(0);
   const flecha = useAnimatedStyle(() => ({ transform: [{ translateX: progreso.value * 8 }] }));
-  return <Pressable onPress={ir} accessibilityRole="link" accessibilityLabel={`${nombre}${activo ? ', estás aquí' : ''}`}
+  return <Pressable {...ACCESO_DE_ENLACE} onPress={ir} accessibilityRole="link" accessibilityLabel={`${nombre}${activo ? ', estás aquí' : ''}`}
     onHoverIn={() => { progreso.set(withTiming(1, MOVIMIENTO.breve)); }} onHoverOut={() => { progreso.set(withTiming(0, MOVIMIENTO.breve)); }}
     onFocus={() => { progreso.set(withTiming(1, MOVIMIENTO.breve)); }} onBlur={() => { progreso.set(withTiming(0, MOVIMIENTO.breve)); }}
     style={({ pressed }) => [estilos.destino, { borderColor: c.bordeFuerte, opacity: pressed ? 0.65 : 1 }]}>
@@ -108,18 +109,18 @@ function Destino({ nombre, detalle, Icono, indice, activo, ir }: { nombre: strin
 const estilos = StyleSheet.create({
   pantalla: { flex: 1 },
   disparador: { minHeight: 48, minWidth: 80, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: Espacio.s, paddingHorizontal: Espacio.m },
-  disparadorBarra: { flex: 1, minWidth: 0 },
-  textoBoton: { fontFamily: Tipos.textoMedio, fontSize: 13 },
-  icono: { width: 24, height: 20, justifyContent: 'center' },
-  trazo: { height: 2, width: 24 },
-  cabecera: { width: '100%', maxWidth: ANCHOS.portada, alignSelf: 'center', padding: Espacio.l, paddingHorizontal: Espacio.xl, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1 },
-  contenido: { width: '100%', maxWidth: 1100, alignSelf: 'center', paddingTop: 32, paddingBottom: 48, gap: Espacio.s },
+  disparadorBarra: { flex: 1, minWidth: 0, flexDirection: 'column', gap: 4, paddingHorizontal: 4, paddingVertical: 8, minHeight: 64 },
+  textoBoton: { fontFamily: Tipos.textoMedio, fontSize: 12, lineHeight: 20 },
+  icono: { width: 22, height: 20, justifyContent: 'center' },
+  trazo: { height: 2, width: 22, borderRadius: 1 },
+  cabecera: { width: '100%', maxWidth: ANCHOS.portada, alignSelf: 'center', padding: Espacio.l, paddingHorizontal: Espacio.xl, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Espacio.m, borderBottomWidth: 1 },
+  contenido: { width: '100%', maxWidth: 1000, alignSelf: 'center', paddingTop: 32, paddingBottom: 48, gap: Espacio.s },
   destino: { flexDirection: 'row', alignItems: 'center', gap: Espacio.l, paddingVertical: Espacio.xl, paddingRight: Espacio.s, borderBottomWidth: 1, minHeight: 96 },
-  numero: { fontFamily: Tipos.numeros, fontSize: 12, alignSelf: 'flex-start', marginTop: 10 },
-  destinoTexto: { flex: 1, gap: Espacio.s },
-  nombre: { fontFamily: Tipos.lectura, letterSpacing: -0.6 },
+  numero: { fontFamily: Tipos.numeros, fontSize: 13, lineHeight: 22, alignSelf: 'flex-start', marginTop: 10 },
+  destinoTexto: { flex: 1, minWidth: 0, gap: Espacio.s },
+  nombre: { fontFamily: Tipos.titular, letterSpacing: -0.5 },
   detalle: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s },
-  descripcion: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 21, flexShrink: 1 },
+  descripcion: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 22, flexShrink: 1 },
   pie: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.xl, marginTop: Espacio.xl, paddingTop: Espacio.xl, borderTopWidth: 1 },
-  firma: { fontFamily: Tipos.lectura, fontSize: 28, lineHeight: 34 },
+  firma: { fontFamily: Tipos.titular, fontSize: 30, lineHeight: 37 },
 });

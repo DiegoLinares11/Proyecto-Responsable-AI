@@ -28,5 +28,5 @@ export function DatoEditorial({
 
 const estilos = StyleSheet.create({
   fila: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1, maxWidth: '100%' },
-  texto: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 19, flexShrink: 1 },
+  texto: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 20, flexShrink: 1 },
 });

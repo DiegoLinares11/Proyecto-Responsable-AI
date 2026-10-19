@@ -25,12 +25,12 @@ export function CierreDeEdicion({ cantidad, actualizadoEn, actualizar, cargando,
 }
 
 const estilos = StyleSheet.create({
-  cierre: { padding: Espacio.xl, paddingVertical: 40, alignItems: 'center', gap: Espacio.l, borderTopWidth: 1 },
-  marca: { width: 54, height: 54, borderRadius: 28, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginBottom: Espacio.s },
-  titulo: { fontFamily: Tipos.lectura, fontSize: 36, lineHeight: 42, textAlign: 'center' },
-  texto: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 23, maxWidth: 420, textAlign: 'center' },
+  cierre: { padding: Espacio.xl, paddingVertical: 40, alignItems: 'center', gap: Espacio.l, borderTopWidth: 3 },
+  marca: { width: 52, height: 52, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginBottom: Espacio.s },
+  titulo: { fontFamily: Tipos.titular, fontSize: 34, lineHeight: 42, textAlign: 'center' },
+  texto: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 24, maxWidth: 440, textAlign: 'center' },
   fila: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: Espacio.s },
-  fecha: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 19, flexShrink: 1 },
-  accion: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s, minHeight: 48, paddingHorizontal: Espacio.l, borderWidth: 1, marginTop: Espacio.s },
-  accionTexto: { fontFamily: Tipos.textoMedio, fontSize: 13 },
+  fecha: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 20, flexShrink: 1 },
+  accion: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s, minHeight: 48, paddingHorizontal: Espacio.l, paddingVertical: 10, borderWidth: 1, borderRadius: 6, marginTop: Espacio.s, maxWidth: '100%' },
+  accionTexto: { fontFamily: Tipos.textoMedio, fontSize: 13, lineHeight: 21, flexShrink: 1 },
 });

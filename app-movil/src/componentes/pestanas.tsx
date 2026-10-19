@@ -15,7 +15,7 @@ export default function Pestanas() {
   const { redaccion } = usePermisos();
 
   return (
-    <NativeTabs backgroundColor={c.papel} indicatorColor={c.verificadoFondo} tintColor={c.acento}>
+    <NativeTabs backgroundColor={c.papel} indicatorColor={c.marcaSuave} tintColor={c.acento}>
       <NativeTabs.Trigger name="index" disableAutomaticContentInsets={Platform.OS === 'ios'}>
         <NativeTabs.Trigger.Label>Chat</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="bubble.left.and.bubble.right.fill" md="chat" />

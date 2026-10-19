@@ -10,10 +10,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ReactNode } from 'react';
 
 import { FotoDeNoticia } from '@/componentes/foto';
+import { ReservaDeImagen } from '@/componentes/reserva-de-imagen';
 import { DatoEditorial } from '@/componentes/dato-editorial';
 import { AperturaTipografica } from '@/componentes/apertura-tipografica';
 import { MesaDeContexto } from '@/componentes/mesa-de-contexto';
-import { GestoDeSeccion } from '@/componentes/gesto-de-seccion';
 import { EnlaceDeNoticia } from '@/componentes/enlace-de-noticia';
 import { Abajo, Pin } from '@/componentes/iconos';
 import { SelectorDeApariencia } from '@/componentes/selector-de-apariencia';
@@ -27,7 +27,7 @@ import { nombreDeSeccion } from '@/lib/secciones';
 type Item = NoticiaPersonalizada<NoticiaDelFeed>;
 
 const MARGEN = 32;
-const SEPARACION = 40;
+const SEPARACION = 32;
 const DESTACADAS = 2;
 
 export function PortadaAncha({
@@ -146,6 +146,9 @@ function Principal({ item, ancho, abrir, e }: { item: Item; ancho: number; abrir
   const n = item.noticia;
   return (
     <EnlaceDeNoticia onPress={() => abrir(n.id)} style={[e.principal, { width: ancho }]}>
+      {n.imagen ? (
+        <FotoDeNoticia imagen={n.imagen} estilo={e.imagenPrincipal} />
+      ) : <ReservaDeImagen estilo={e.imagenPrincipal} />}
       {!n.imagen ? <AperturaTipografica noticia={n} ancha /> : (
         <View style={e.aperturaNota}>
           <View style={e.contexto}>
@@ -156,9 +159,6 @@ function Principal({ item, ancho, abrir, e }: { item: Item; ancho: number; abrir
           <Text style={e.resumen}>{n.resumen}</Text>
         </View>
       )}
-      {n.imagen ? (
-        <FotoDeNoticia imagen={n.imagen} estilo={e.imagenPrincipal} />
-      ) : null}
       <View style={e.meta}>
         <Sello puntaje={n.puntajeVeracidad} enDesarrollo={n.enDesarrollo} />
         <DatoEditorial tipo="fuente" texto={n.fuente ?? 'Fuente no registrada'} />
@@ -173,14 +173,21 @@ function Tarjeta({ item, ancho, abrir, e, lateral = false }: { item: Item; ancho
   const n = item.noticia;
   return (
     <EnlaceDeNoticia onPress={() => abrir(n.id)} style={[e.tarjeta, lateral && e.tarjetaLateral, { width: ancho }]}>
-      {n.imagen && !lateral ? (
-        <FotoDeNoticia imagen={n.imagen} estilo={e.imagenTarjeta} miniatura />
+      {!lateral ? (
+        n.imagen
+          ? <FotoDeNoticia imagen={n.imagen} estilo={e.imagenTarjeta} miniatura />
+          : <ReservaDeImagen estilo={e.imagenTarjeta} />
       ) : null}
-      {!n.imagen ? <GestoDeSeccion seccion={n.seccion} tamano={48} /> : null}
-      <Text style={e.antetitulo}>{antetitulo(n)}</Text>
       <View style={e.filaTitular}>
-        <Text style={[e.tituloTarjeta, { flex: 1 }]}>{n.titulo}</Text>
-        {n.imagen && lateral ? <FotoDeNoticia imagen={n.imagen} estilo={e.miniaturaLateral} miniatura /> : null}
+        {lateral ? (
+          n.imagen
+            ? <FotoDeNoticia imagen={n.imagen} estilo={e.miniaturaLateral} miniatura />
+            : <ReservaDeImagen estilo={e.miniaturaLateral} miniatura />
+        ) : null}
+        <View style={e.textoTitular}>
+          <Text style={e.antetitulo}>{antetitulo(n)}</Text>
+          <Text style={e.tituloTarjeta}>{n.titulo}</Text>
+        </View>
       </View>
       <Text style={e.resumenTarjeta} numberOfLines={3}>{n.resumen}</Text>
       <View style={e.meta}>
@@ -195,70 +202,38 @@ function Tarjeta({ item, ancho, abrir, e, lateral = false }: { item: Item; ancho
 
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
-    contenedor: {
-      width: '100%',
-      maxWidth: ANCHOS.portada,
-      alignSelf: 'center',
-      paddingHorizontal: MARGEN,
-      paddingTop: Espacio.xl,
-      paddingBottom: Espacio.xxl,
-    },
+    contenedor: { width: '100%', maxWidth: ANCHOS.portada, alignSelf: 'center', paddingHorizontal: MARGEN, paddingTop: Espacio.xl, paddingBottom: 48 },
     filaFecha: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: Espacio.l },
-    apertura: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: Espacio.xl, paddingTop: 36, paddingBottom: 28 },
+    apertura: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: Espacio.xl, paddingTop: Espacio.l, paddingBottom: Espacio.l },
     presentacion: { gap: Espacio.s },
-    tituloPortada: { fontFamily: Tipos.lectura, fontSize: 64, lineHeight: 70, letterSpacing: -2, color: c.tinta },
-    bajada: { fontFamily: Tipos.texto, fontSize: 15, lineHeight: 23, color: c.tintaSuave },
+    tituloPortada: { fontFamily: Tipos.titular, fontSize: 32, lineHeight: 40, letterSpacing: -0.8, color: c.tinta },
+    bajada: { fontFamily: Tipos.texto, fontSize: 15, lineHeight: 24, color: c.tintaSuave },
     derecha: { alignItems: 'flex-end', gap: Espacio.s },
-    fecha: { fontFamily: Tipos.textoMedio, fontSize: 13, color: c.tintaSuave },
-    ubicacion: {
-      minHeight: 44,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 12,
-      borderRadius: Radio.medio,
-      backgroundColor: c.papelHundido,
-    },
-    ubicacionTexto: { fontFamily: Tipos.textoMedio, fontSize: 13, color: c.tinta },
-    rayaFina: { height: 1, backgroundColor: c.bordeFuerte },
-
-    filaSuperior: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: SEPARACION,
-      paddingTop: SEPARACION,
-      paddingBottom: SEPARACION,
-      borderBottomWidth: 1,
-      borderBottomColor: c.borde,
-    },
-    principal: { gap: Espacio.l },
-    aperturaNota: { gap: Espacio.xl, paddingBottom: Espacio.s },
+    fecha: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 19, color: c.tintaSuave },
+    ubicacion: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, borderWidth: 1, borderColor: c.borde, borderRadius: Radio.medio, backgroundColor: c.papelHundido },
+    ubicacionTexto: { fontFamily: Tipos.textoMedio, fontSize: 13, lineHeight: 20, color: c.tinta },
+    rayaFina: { height: 1, backgroundColor: c.borde },
+    filaSuperior: { flexDirection: 'row', flexWrap: 'wrap', gap: SEPARACION, paddingTop: Espacio.xl, paddingBottom: Espacio.xl, borderBottomWidth: 1, borderBottomColor: c.borde },
+    principal: { gap: Espacio.m },
+    aperturaNota: { gap: Espacio.m, paddingBottom: Espacio.s },
     contexto: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.l },
     imagenPrincipal: { width: '100%', aspectRatio: 16 / 9, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
-    tituloPrincipal: { fontFamily: Tipos.titular, fontSize: 46, lineHeight: 51, letterSpacing: -0.5, color: c.tinta },
-    resumen: { fontFamily: Tipos.lectura, fontSize: 21, lineHeight: 30, color: c.tintaSuave },
+    tituloPrincipal: { fontFamily: Tipos.titular, fontSize: 36, lineHeight: 44, letterSpacing: -0.7, color: c.tinta },
+    resumen: { fontFamily: Tipos.lectura, fontSize: 17, lineHeight: 27, color: c.tintaSuave },
     lado: { flexDirection: 'row', flexWrap: 'wrap', gap: SEPARACION, alignContent: 'flex-start' },
-
-    tarjeta: { gap: Espacio.m, paddingBottom: Espacio.xl },
-    tarjetaLateral: { borderBottomWidth: 1, borderBottomColor: c.borde },
-    filaTitular: { flexDirection: 'row', gap: Espacio.l, alignItems: 'flex-start' },
-    miniaturaLateral: { width: 100, height: 84, backgroundColor: c.fotoVacia, borderRadius: Radio.chico },
-    imagenTarjeta: { width: '100%', aspectRatio: 2 / 1, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
-    tituloTarjeta: { fontFamily: Tipos.titular, fontSize: 25, lineHeight: 30, color: c.tinta },
-    resumenTarjeta: { fontFamily: Tipos.lectura, fontSize: 17, lineHeight: 25, color: c.tintaSuave },
-
-    antetitulo: { ...ROTULO, color: c.acento, marginTop: 4 },
-    meta: { flexDirection: 'row', alignItems: 'center', columnGap: 14, rowGap: 8, flexWrap: 'wrap' },
-
-    encabezado: { marginTop: Espacio.xl, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: c.bordeFuerte, marginBottom: SEPARACION },
+    tarjeta: { gap: Espacio.s, paddingBottom: Espacio.l, borderBottomWidth: 1, borderBottomColor: c.borde },
+    tarjetaLateral: { paddingTop: 4 },
+    filaTitular: { flexDirection: 'row', gap: Espacio.m, alignItems: 'flex-start' },
+    textoTitular: { flex: 1, minWidth: 0, gap: 6 },
+    miniaturaLateral: { width: 100, height: 100, backgroundColor: c.fotoVacia, borderRadius: Radio.chico },
+    imagenTarjeta: { width: '100%', aspectRatio: 16 / 10, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
+    tituloTarjeta: { fontFamily: Tipos.titular, fontSize: 21, lineHeight: 28, letterSpacing: -0.4, color: c.tinta },
+    resumenTarjeta: { fontFamily: Tipos.lectura, fontSize: 15, lineHeight: 23, color: c.tintaSuave },
+    antetitulo: { ...ROTULO, fontSize: 11, lineHeight: 17, letterSpacing: 0.5, color: c.acento },
+    meta: { flexDirection: 'row', alignItems: 'center', columnGap: 10, rowGap: 4, flexWrap: 'wrap' },
+    encabezado: { marginTop: Espacio.xxl, paddingBottom: Espacio.m, borderBottomWidth: 1, borderBottomColor: c.borde, marginBottom: SEPARACION },
     encabezadoTexto: { ...ROTULO, color: c.tinta },
     rejilla: { flexDirection: 'row', flexWrap: 'wrap', gap: SEPARACION },
-
-    pie: {
-      fontFamily: Tipos.texto,
-      fontSize: 14,
-      color: c.tintaTenue,
-      textAlign: 'center',
-    },
+    pie: { fontFamily: Tipos.texto, fontSize: 15, lineHeight: 24, color: c.tintaTenue, textAlign: 'center' },
   });
 }

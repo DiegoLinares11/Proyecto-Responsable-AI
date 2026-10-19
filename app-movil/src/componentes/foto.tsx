@@ -10,7 +10,7 @@
 import { Image, type ImageStyle } from 'expo-image';
 import { StyleSheet, Text, View, type StyleProp } from 'react-native';
 
-import { Radio, ROTULO, Tipos, useColores } from '@/constants/tema';
+import { PALETA_EDITORIAL, Radio, ROTULO, Tipos, useColores } from '@/constants/tema';
 import type { Imagen } from '@/lib/noticias';
 
 const ROTULO_DE_ORIGEN = {
@@ -67,8 +67,8 @@ const estilos = StyleSheet.create({
     top: 8,
     left: 8,
     right: 8,
-    backgroundColor: 'rgba(18, 22, 28, 0.88)',
-    color: '#FFFFFF',
+    backgroundColor: `${PALETA_EDITORIAL.negro}F0`,
+    color: PALETA_EDITORIAL.blanco,
     fontFamily: Tipos.textoMedio,
     fontSize: 12,
     lineHeight: 16,
@@ -81,11 +81,12 @@ const estilos = StyleSheet.create({
     position: 'absolute',
     left: 4,
     bottom: 4,
-    backgroundColor: 'rgba(18, 22, 28, 0.85)',
-    color: '#FFFFFF',
+    backgroundColor: `${PALETA_EDITORIAL.negro}F0`,
+    color: PALETA_EDITORIAL.blanco,
     fontFamily: Tipos.textoFuerte,
-    fontSize: 8,
-    letterSpacing: 0.8,
+    fontSize: 9,
+    lineHeight: 14,
+    letterSpacing: 0.6,
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 2,

@@ -39,7 +39,7 @@ export function IlustracionTipografica({
         <Text style={[estilos.tituloMedio, { color: c.ilustracionTexto }]} numberOfLines={3}>
           {titulo}
         </Text>
-        <Text style={estilos.etiquetaChica}>ILUSTRACIÓN TIPOGRÁFICA</Text>
+        <Text style={[estilos.etiquetaChica, { color: c.editorialSuave, borderColor: c.editorialBorde }]}>ILUSTRACIÓN TIPOGRÁFICA</Text>
       </View>
     );
   }
@@ -72,7 +72,7 @@ export function IlustracionTipografica({
       <Text style={[estilos.titulo, { color: c.ilustracionTexto }]} numberOfLines={3}>
         {titulo}
       </Text>
-      <Text style={estilos.etiqueta}>ILUSTRACIÓN TIPOGRÁFICA</Text>
+      <Text style={[estilos.etiqueta, { color: c.editorialSuave, borderColor: c.editorialBorde }]}>ILUSTRACIÓN TIPOGRÁFICA</Text>
     </View>
   );
 }
@@ -87,15 +87,13 @@ const estilos = StyleSheet.create({
     overflow: 'hidden',
   },
   cabecera: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  titulo: { fontFamily: Tipos.lecturaCursiva, fontSize: 26, lineHeight: 30 },
+  titulo: { fontFamily: Tipos.titular, fontSize: 26, lineHeight: 30 },
   etiqueta: {
     alignSelf: 'flex-start',
     fontFamily: Tipos.textoMedio,
     fontSize: 10,
     letterSpacing: 0.8,
-    color: '#C9D1DA',
     borderWidth: 1,
-    borderColor: '#4A5260',
     borderRadius: Radio.chico,
     paddingHorizontal: 7,
     paddingVertical: 3,
@@ -109,15 +107,13 @@ const estilos = StyleSheet.create({
     overflow: 'hidden',
   },
   rotuloMedio: { fontFamily: Tipos.textoFuerte, fontSize: 9, letterSpacing: 1.4 },
-  tituloMedio: { fontFamily: Tipos.lecturaCursiva, fontSize: 17, lineHeight: 20 },
+  tituloMedio: { fontFamily: Tipos.titular, fontSize: 17, lineHeight: 20 },
   etiquetaChica: {
     alignSelf: 'flex-start',
     fontFamily: Tipos.textoMedio,
     fontSize: 8,
     letterSpacing: 0.6,
-    color: '#C9D1DA',
     borderWidth: 1,
-    borderColor: '#4A5260',
     borderRadius: 2,
     paddingHorizontal: 5,
     paddingVertical: 2,
@@ -131,5 +127,5 @@ const estilos = StyleSheet.create({
     overflow: 'hidden',
   },
   rotuloChico: { fontFamily: Tipos.textoFuerte, fontSize: 7, letterSpacing: 1 },
-  tituloChico: { fontFamily: Tipos.lecturaCursiva, fontSize: 12, lineHeight: 13 },
+  tituloChico: { fontFamily: Tipos.titular, fontSize: 12, lineHeight: 13 },
 });

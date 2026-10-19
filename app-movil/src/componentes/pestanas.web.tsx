@@ -15,8 +15,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Logotipo } from '@/componentes/marca';
 import { MenuEditorial } from '@/componentes/menu-editorial';
+import { Asistente, Diario, Editar, Persona } from '@/componentes/iconos';
 import { ANCHOS, Espacio, Tipos, useColores, useDisposicion } from '@/constants/tema';
 import { usePermisos } from '@/lib/permisos';
+
+const ICONOS: Record<string, typeof Diario> = { Chat: Asistente, Portada: Diario, Perfil: Persona, Redacción: Editar };
 
 function Boton({
   children,
@@ -26,21 +29,25 @@ function Boton({
   ...props
 }: TabTriggerSlotProps & { ancha?: boolean; oculto?: boolean }) {
   const c = useColores();
+  const Icono = typeof children === 'string' ? ICONOS[children] : undefined;
   return (
     <Pressable
       {...props}
-      style={[
+      style={({ pressed }) => [
         ancha ? estilos.botonArriba : estilos.botonAbajo,
         ancha
           ? { borderBottomColor: isFocused ? c.marca : 'transparent' }
           : { borderTopColor: isFocused ? c.marca : 'transparent' },
         oculto && { display: 'none' },
+        { opacity: pressed ? 0.7 : 1 },
       ]}>
+      {!ancha && Icono ? <View aria-hidden><Icono color={isFocused ? c.acento : c.tintaSuave} tamano={22} /></View> : null}
       <Text
         style={{
-          color: isFocused ? c.tinta : c.tintaSuave,
+          color: isFocused ? c.acento : c.tintaSuave,
           fontFamily: isFocused ? Tipos.textoFuerte : Tipos.textoMedio,
-          fontSize: ancha ? 15 : 13,
+          fontSize: ancha ? 14 : 11,
+          lineHeight: ancha ? 22 : 17,
         }}>
         {children}
       </Text>
@@ -106,7 +113,7 @@ function ContenidoPestanas() {
           <View
             style={StyleSheet.flatten([
               estilos.cabecera,
-              { backgroundColor: c.papel, borderBottomColor: c.bordeFuerte, paddingHorizontal: margen },
+              { backgroundColor: c.papel, borderTopColor: c.editorial, borderBottomColor: c.borde, paddingHorizontal: margen },
             ])}>
             <Logotipo />
             <View style={{ flex: 1 }} />
@@ -123,7 +130,7 @@ function ContenidoPestanas() {
     <Tabs>
       <TabSlot style={{ flex: 1 }} />
       <TabList asChild>
-        <SafeAreaView edges={['bottom']} style={StyleSheet.flatten([estilos.barra, { backgroundColor: c.papel, borderTopColor: c.bordeFuerte }])}>
+        <SafeAreaView edges={['bottom']} style={StyleSheet.flatten([estilos.barra, { backgroundColor: c.papel, borderTopColor: c.borde }])}>
           {botones(false, redaccion)}
           <MenuEditorial barra />
         </SafeAreaView>
@@ -134,8 +141,8 @@ function ContenidoPestanas() {
 
 const estilos = StyleSheet.create({
   barra: { flexDirection: 'row', borderTopWidth: 1 },
-  botonAbajo: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 56, borderTopWidth: 2, marginTop: -1 },
+  botonAbajo: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 64, paddingVertical: 8 },
 
-  cabecera: { flexDirection: 'row', alignItems: 'stretch', minHeight: 68, borderBottomWidth: 1 },
-  botonArriba: { justifyContent: 'center', paddingHorizontal: Espacio.l, borderBottomWidth: 3, marginBottom: -1 },
+  cabecera: { flexDirection: 'row', alignItems: 'stretch', minHeight: 76, borderBottomWidth: 1 },
+  botonArriba: { justifyContent: 'center', paddingHorizontal: Espacio.xl, borderBottomWidth: 2, marginBottom: -1 },
 });

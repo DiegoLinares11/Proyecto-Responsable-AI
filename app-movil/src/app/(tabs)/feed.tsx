@@ -16,7 +16,6 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   Platform,
@@ -29,12 +28,13 @@ import {
 import { AreaDePestana } from '@/componentes/area-de-pestana';
 
 import { FotoDeNoticia } from '@/componentes/foto';
+import { ReservaDeImagen } from '@/componentes/reserva-de-imagen';
+import { CargaEditorial } from '@/componentes/carga-editorial';
 import { DatoEditorial } from '@/componentes/dato-editorial';
 import { AperturaTipografica } from '@/componentes/apertura-tipografica';
 import { IndiceDeSecciones } from '@/componentes/indice-de-secciones';
 import { MesaDeContexto } from '@/componentes/mesa-de-contexto';
 import { CierreDeEdicion } from '@/componentes/cierre-de-edicion';
-import { GestoDeSeccion } from '@/componentes/gesto-de-seccion';
 import { MenuEditorial } from '@/componentes/menu-editorial';
 import { EnlaceDeNoticia } from '@/componentes/enlace-de-noticia';
 import { Abajo, Pin } from '@/componentes/iconos';
@@ -135,7 +135,7 @@ export default function Portada() {
           {error && lista === null ? (
             <Text style={e.error}>{error}</Text>
           ) : lista === null ? (
-            <ActivityIndicator style={{ marginTop: 48 }} color={c.acento} />
+            <CargaEditorial />
           ) : lista.length === 0 ? (
             <Text style={e.vacio}>Todavía no hay noticias verificadas.</Text>
           ) : (
@@ -160,6 +160,7 @@ export default function Portada() {
   return (
     <AreaDePestana style={e.pantalla}>
       <FlatList
+        style={e.lista}
         data={visible ?? []}
         keyExtractor={(n) => n.noticia.id}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={refrescar} tintColor={c.acento} />}
@@ -181,11 +182,9 @@ export default function Portada() {
               </Pressable>
             </View>
             <View style={e.filaFecha}>
+              <Text style={e.tituloPortada} accessibilityRole="header">La portada</Text>
               <DatoEditorial tipo="fecha" texto={hoy} />
-              <Text style={e.fecha}>{orden}</Text>
             </View>
-            <Text style={e.tituloPortada} accessibilityRole="header">La portada</Text>
-            <View style={e.rayaFina} />
             {indice}
           </View>
         }
@@ -193,13 +192,16 @@ export default function Portada() {
           error ? (
             <Text style={e.error}>{error}</Text>
           ) : lista === null ? (
-            <ActivityIndicator style={{ marginTop: 48 }} color={c.acento} />
+            <CargaEditorial />
           ) : (
             <Text style={e.vacio}>{seccion === null ? 'Todavía no hay noticias verificadas.' : 'No hay noticias disponibles en esta sección.'}</Text>
           )
         }
         ListFooterComponent={
-          <View style={{ margin: Espacio.xl }}>{cierre}</View>
+          <View style={{ margin: Espacio.pagina, gap: Espacio.m }}>
+            <Text style={e.fecha}>{orden}</Text>
+            {cierre}
+          </View>
         }
         renderItem={({ item, index }) => {
           const props = { noticia: item.noticia, razon: porQue(item), e, onPress: () => abrir(item.noticia.id) };
@@ -207,7 +209,7 @@ export default function Portada() {
             <View>
               {index === 0 ? <Principal {...props} /> : index <= DESTACADAS ? <Destacada {...props} /> : <Titular {...props} primero={index === DESTACADAS + 1} />}
               {index === Math.min(2, (visible?.length ?? 1) - 1) ? (
-                <View style={{ marginHorizontal: Espacio.xl, marginBottom: Espacio.xxl }}><MesaDeContexto /></View>
+                <View style={{ marginHorizontal: Espacio.pagina, marginVertical: Espacio.l }}><MesaDeContexto /></View>
               ) : null}
             </View>
           );
@@ -243,8 +245,8 @@ function Meta({ noticia, e, compacta = false }: Pick<PropsDeTarjeta, 'noticia' |
   return (
     <View style={e.meta}>
       <Sello puntaje={noticia.puntajeVeracidad} compacto={compacta} enDesarrollo={noticia.enDesarrollo} />
-      <DatoEditorial tipo="fuente" texto={noticia.fuente ?? 'Fuente no registrada'} />
-      <DatoEditorial tipo="fecha" texto={haceCuanto(noticia.publicadaEn)} />
+      <Text style={e.fecha}>{noticia.fuente ?? 'Fuente no registrada'}</Text>
+      <Text style={e.fecha}>{haceCuanto(noticia.publicadaEn)}</Text>
     </View>
   );
 }
@@ -252,8 +254,13 @@ function Meta({ noticia, e, compacta = false }: Pick<PropsDeTarjeta, 'noticia' |
 function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
     <EnlaceDeNoticia onPress={onPress} style={e.principal}>
+      <View style={{ marginBottom: Espacio.m }}>
+        {noticia.imagen
+          ? <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenPrincipal} />
+          : <ReservaDeImagen estilo={e.imagenPrincipal} />}
+      </View>
       {!noticia.imagen ? (
-        <View style={{ marginBottom: Espacio.l }}><AperturaTipografica noticia={noticia} /></View>
+        <View style={{ marginBottom: Espacio.m }}><AperturaTipografica noticia={noticia} /></View>
       ) : (
         <View style={e.cuerpoPrincipal}>
           <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
@@ -262,13 +269,8 @@ function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
           <Text style={e.resumen}>{noticia.resumen}</Text>
         </View>
       )}
-      {noticia.imagen ? (
-        <View style={{ marginBottom: Espacio.l }}>
-          <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenPrincipal} />
-        </View>
-      ) : null}
       <View style={e.cuerpoPrincipal}>
-        <Meta noticia={noticia} e={e} />
+        <Meta noticia={noticia} e={e} compacta />
         <PorQue razon={razon} />
       </View>
     </EnlaceDeNoticia>
@@ -278,19 +280,18 @@ function Principal({ noticia, razon, e, onPress }: PropsDeTarjeta) {
 function Destacada({ noticia, razon, e, onPress }: PropsDeTarjeta) {
   return (
     <EnlaceDeNoticia onPress={onPress} style={e.destacada}>
-      <View style={{ flex: 1, gap: 6 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Espacio.s }}>
+      <View style={e.filaNoticia}>
+        {noticia.imagen ? (
+          <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenDestacada} miniatura />
+        ) : <ReservaDeImagen estilo={e.imagenDestacada} miniatura />}
+        <View style={e.textoNoticia}>
           <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
-          {!noticia.imagen ? <GestoDeSeccion seccion={noticia.seccion} tamano={40} /> : null}
+          <Text style={e.tituloDestacada}>{noticia.titulo}</Text>
+          {!noticia.imagen ? <Text style={e.resumenDestacada} numberOfLines={3}>{noticia.resumen}</Text> : null}
         </View>
-        <Text style={e.tituloDestacada}>{noticia.titulo}</Text>
-        {!noticia.imagen ? <Text style={e.resumenDestacada} numberOfLines={3}>{noticia.resumen}</Text> : null}
-        <Meta noticia={noticia} e={e} compacta />
-        <PorQue razon={razon} />
       </View>
-      {noticia.imagen ? (
-        <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenDestacada} miniatura />
-      ) : null}
+      <Meta noticia={noticia} e={e} compacta />
+      <PorQue razon={razon} />
     </EnlaceDeNoticia>
   );
 }
@@ -304,10 +305,15 @@ function Titular({ noticia, razon, e, onPress, primero }: PropsDeTarjeta & { pri
         </View>
       ) : null}
       <EnlaceDeNoticia onPress={onPress} style={e.titular}>
-        <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
-        <Text style={e.tituloTitular}>
-          {noticia.titulo}
-        </Text>
+        <View style={e.filaNoticia}>
+          {noticia.imagen
+            ? <FotoDeNoticia imagen={noticia.imagen} estilo={e.imagenDestacada} miniatura />
+            : <ReservaDeImagen estilo={e.imagenDestacada} miniatura />}
+          <View style={e.textoNoticia}>
+            <Text style={e.antetitulo}>{antetitulo(noticia)}</Text>
+            <Text style={e.tituloTitular}>{noticia.titulo}</Text>
+          </View>
+        </View>
         <Meta noticia={noticia} e={e} compacta />
         <PorQue razon={razon} />
       </EnlaceDeNoticia>
@@ -318,83 +324,32 @@ function Titular({ noticia, razon, e, onPress, primero }: PropsDeTarjeta & { pri
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
-    cabecera: { paddingHorizontal: Espacio.xl, paddingTop: Espacio.l, marginBottom: Espacio.xl },
-    filaMarca: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m },
-    ubicacion: {
-      marginLeft: 'auto',
-      flexShrink: 1,
-      minHeight: 44,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 10,
-      borderRadius: Radio.medio,
-      backgroundColor: c.papelHundido,
-    },
-    ubicacionTexto: { fontFamily: Tipos.textoMedio, fontSize: 13, color: c.tinta, flexShrink: 1 },
-    filaFecha: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-      gap: Espacio.s,
-      marginTop: Espacio.m,
-      marginBottom: 6,
-    },
-    fecha: { fontFamily: Tipos.textoMedio, fontSize: 12, color: c.tintaSuave },
-    tituloPortada: { fontFamily: Tipos.lectura, fontSize: 42, lineHeight: 48, letterSpacing: -1, color: c.tinta, marginTop: Espacio.xl },
-    rayaFina: { height: 1, backgroundColor: c.bordeFuerte, marginTop: Espacio.l },
-
-    antetitulo: { ...ROTULO, color: c.acento },
-    resumen: { fontFamily: Tipos.lectura, fontSize: 18, lineHeight: 26, color: c.tintaSuave },
-    meta: { flexDirection: 'row', alignItems: 'center', columnGap: 14, rowGap: 8, flexWrap: 'wrap' },
-
-    principal: {
-      marginHorizontal: Espacio.xl,
-      marginBottom: Espacio.xl,
-      paddingBottom: Espacio.xl,
-      borderBottomWidth: 1,
-      borderBottomColor: c.borde,
-    },
-    imagenPrincipal: {
-      width: '100%',
-      aspectRatio: 16 / 10,
-      borderRadius: Radio.chico,
-      backgroundColor: c.fotoVacia,
-    },
-    cuerpoPrincipal: { gap: Espacio.l, marginBottom: Espacio.l },
-    tituloPrincipal: { fontFamily: Tipos.titular, fontSize: 32, lineHeight: 36, color: c.tinta },
-
-    destacada: {
-      flexDirection: 'row',
-      gap: Espacio.m,
-      marginHorizontal: Espacio.xl,
-      marginBottom: Espacio.xl,
-      paddingBottom: Espacio.xl,
-      borderBottomWidth: 1,
-      borderBottomColor: c.borde,
-    },
-    tituloDestacada: { fontFamily: Tipos.titular, fontSize: 21, lineHeight: 26, color: c.tinta },
-    resumenDestacada: { fontFamily: Tipos.lectura, fontSize: 17, lineHeight: 25, color: c.tintaSuave },
-    imagenDestacada: { width: 92, height: 92, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
-
-    encabezadoTitulares: {
-      marginHorizontal: Espacio.xl,
-      marginTop: Espacio.s,
-      paddingBottom: 6,
-      borderBottomWidth: 1,
-      borderBottomColor: c.tinta,
-    },
+    lista: { width: '100%', maxWidth: 720, alignSelf: 'center' },
+    cabecera: { paddingHorizontal: Espacio.pagina, paddingTop: Espacio.s, marginBottom: Espacio.l },
+    filaMarca: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.s },
+    ubicacion: { marginLeft: 'auto', flexShrink: 1, minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8, borderRadius: Radio.medio },
+    ubicacionTexto: { fontFamily: Tipos.textoMedio, fontSize: 12, lineHeight: 19, color: c.tinta, flexShrink: 1 },
+    filaFecha: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: Espacio.s, marginTop: Espacio.s },
+    fecha: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 19, color: c.tintaSuave },
+    tituloPortada: { fontFamily: Tipos.titularMedio, fontSize: 14, lineHeight: 21, color: c.tinta },
+    antetitulo: { ...ROTULO, fontSize: 11, lineHeight: 17, letterSpacing: 0.5, color: c.acento },
+    resumen: { fontFamily: Tipos.lectura, fontSize: 15, lineHeight: 23, color: c.tintaSuave },
+    meta: { flexDirection: 'row', alignItems: 'center', columnGap: 10, rowGap: 4, flexWrap: 'wrap' },
+    principal: { marginHorizontal: Espacio.pagina, marginBottom: Espacio.l, paddingBottom: Espacio.l, borderBottomWidth: 1, borderBottomColor: c.borde },
+    imagenPrincipal: { width: '100%', aspectRatio: 16 / 9, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
+    cuerpoPrincipal: { gap: Espacio.s },
+    tituloPrincipal: { fontFamily: Tipos.titular, fontSize: 26, lineHeight: 33, letterSpacing: -0.7, color: c.tinta },
+    destacada: { gap: Espacio.s, marginHorizontal: Espacio.pagina, marginBottom: Espacio.l, paddingBottom: Espacio.l, borderBottomWidth: 1, borderBottomColor: c.borde },
+    filaNoticia: { flexDirection: 'row', alignItems: 'flex-start', gap: Espacio.m },
+    textoNoticia: { flex: 1, minWidth: 0, gap: 4 },
+    tituloDestacada: { fontFamily: Tipos.titular, fontSize: 18, lineHeight: 24, letterSpacing: -0.3, color: c.tinta },
+    resumenDestacada: { fontFamily: Tipos.lectura, fontSize: 14, lineHeight: 22, color: c.tintaSuave },
+    imagenDestacada: { width: 96, height: 96, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
+    encabezadoTitulares: { marginHorizontal: Espacio.pagina, marginTop: Espacio.s, paddingBottom: Espacio.m, borderBottomWidth: 1, borderBottomColor: c.borde },
     encabezadoTitularesTexto: { ...ROTULO, color: c.tinta },
-    titular: {
-      marginHorizontal: Espacio.xl,
-      paddingVertical: Espacio.l,
-      borderBottomWidth: 1,
-      borderBottomColor: c.borde,
-      gap: 6,
-    },
-    tituloTitular: { fontFamily: Tipos.titular, fontSize: 20, lineHeight: 25, color: c.tinta },
-
-    error: { margin: Espacio.l, fontFamily: Tipos.texto, color: c.peligro },
-    vacio: { margin: Espacio.l, fontFamily: Tipos.texto, color: c.tintaSuave, textAlign: 'center' },
+    titular: { marginHorizontal: Espacio.pagina, paddingVertical: Espacio.l, borderBottomWidth: 1, borderBottomColor: c.borde, gap: Espacio.s },
+    tituloTitular: { fontFamily: Tipos.titular, fontSize: 18, lineHeight: 24, letterSpacing: -0.3, color: c.tinta },
+    error: { margin: Espacio.xl, padding: Espacio.xl, borderLeftWidth: 3, borderLeftColor: c.peligro, backgroundColor: c.peligroFondo, fontFamily: Tipos.texto, fontSize: 15, lineHeight: 24, color: c.peligro },
+    vacio: { margin: Espacio.xl, paddingVertical: 40, paddingHorizontal: Espacio.xl, backgroundColor: c.papelHundido, fontFamily: Tipos.texto, fontSize: 15, lineHeight: 25, color: c.tintaSuave, textAlign: 'center' },
   });
 }

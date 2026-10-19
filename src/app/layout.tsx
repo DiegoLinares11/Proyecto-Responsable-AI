@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Newsreader, Public_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
 import "./globals.css";
 import { perfilDelVisitante } from "../lib/supabase-servidor.ts";
@@ -7,25 +7,38 @@ import { salir } from "./entrar/acciones.ts";
 import { URL_DE_LA_APP } from "../lib/app.ts";
 
 export const metadata: Metadata = {
-  title: "Noticias Verificadas · Redacción",
+  title: "NEXO · Redacción",
+  icons: { icon: "/marca/nexo-icono.png" },
   description:
-    "La redacción de Noticias Verificadas: publicar, moderar y administrar. Proyecto de CC3106 Responsible AI.",
+    "La redacción de NEXO: publicar, moderar y administrar. Proyecto de CC3106 Responsible AI.",
 };
 
-// Las letras de la identidad. next/font las baja al compilar y las sirve desde
-// este mismo portal: el navegador del lector no le pide nada a Google.
-const titulares = Newsreader({ subsets: ["latin"], style: ["normal", "italic"], variable: "--fuente-titulares", display: "swap" });
-const texto = Public_Sans({ subsets: ["latin"], style: ["normal", "italic"], variable: "--fuente-texto", display: "swap" });
-const numeros = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--fuente-numeros", display: "swap" });
+// Los mismos TTF locales que Expo, servidos desde el propio portal.
+const titulares = localFont({
+  src: [
+    { path: "../../app-movil/assets/fonts/Manrope_600SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "../../app-movil/assets/fonts/Manrope_700Bold.ttf", weight: "700", style: "normal" },
+  ],
+  variable: "--fuente-titulares", display: "swap", fallback: ["Arial"],
+});
+const texto = localFont({
+  src: [
+    { path: "../../app-movil/assets/fonts/Inter_400Regular.ttf", weight: "400", style: "normal" },
+    { path: "../../app-movil/assets/fonts/Inter_400Regular_Italic.ttf", weight: "400", style: "italic" },
+    { path: "../../app-movil/assets/fonts/Inter_600SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "../../app-movil/assets/fonts/Inter_700Bold.ttf", weight: "700", style: "normal" },
+  ],
+  variable: "--fuente-texto", display: "swap", fallback: ["Arial"],
+});
+const google = localFont({
+  src: "../../app-movil/assets/fonts/GoogleSans_500Medium.ttf",
+  weight: "500", variable: "--fuente-google", display: "swap", fallback: ["Arial"], preload: false,
+});
 
-/** El sello: un check en dos anillos, celeste y tinta. El mismo de la app. */
+/** El PNG suministrado, con su proporción y tipografía originales. */
 function Sello() {
   return (
-    <svg viewBox="0 0 64 64" aria-hidden="true">
-      <circle cx="32" cy="32" r="29" fill="none" stroke="#3b8fd0" strokeWidth="4" />
-      <circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M22 33 L29 40 L43 24" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <span className="nexo-logo" aria-hidden="true"><span className="nexo-arte" /></span>
   );
 }
 
@@ -36,18 +49,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const perfil = await perfilDelVisitante();
 
   return (
-    <html lang="es-GT" className={`${titulares.variable} ${texto.variable} ${numeros.variable}`}>
+    <html lang="es-GT" className={`${titulares.variable} ${texto.variable} ${google.variable}`}>
       <body>
         <div className="contenedor">
           <header className="marca">
             <div className="fila">
               <h1>
-                <a href="/" aria-label="Noticias Verificadas, redacción">
+                <a href="/" aria-label="NEXO, redacción">
                   <Sello />
-                  <span className="palabras">
-                    <span className="antes">NOTICIAS</span>
-                    <span className="nombre">Verificadas</span>
-                  </span>
                 </a>
               </h1>
               <p className="lema">

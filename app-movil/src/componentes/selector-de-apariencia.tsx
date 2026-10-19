@@ -38,6 +38,6 @@ export function SelectorDeApariencia() {
 
 const estilos = StyleSheet.create({
   grupo: { flexDirection: 'row', flexWrap: 'wrap', borderWidth: 1, borderRadius: Radio.medio, padding: 4, gap: 4, alignSelf: 'flex-start' },
-  opcion: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, paddingHorizontal: 12, borderRadius: Radio.chico },
-  texto: { fontSize: 13, lineHeight: 20 },
+  opcion: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44, paddingHorizontal: 12, paddingVertical: 8, borderRadius: Radio.chico },
+  texto: { fontSize: 12, lineHeight: 20 },
 });

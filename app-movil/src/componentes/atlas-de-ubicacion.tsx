@@ -43,8 +43,8 @@ export function AtlasDeUbicacion({ ubicacion }: { ubicacion: UbicacionDisponible
 }
 
 const estilos = StyleSheet.create({
-  atlas: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.l, padding: Espacio.l, margin: Espacio.l, borderWidth: 1 },
+  atlas: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.l, padding: Espacio.xl, margin: Espacio.l, borderWidth: 1, borderRadius: 8 },
   detalle: { flex: 1, minWidth: 120, gap: Espacio.s },
-  nombre: { fontFamily: Tipos.lectura, fontSize: 29, lineHeight: 34 },
-  nota: { fontFamily: Tipos.texto, fontSize: 11, lineHeight: 17 },
+  nombre: { fontFamily: Tipos.titular, fontSize: 31, lineHeight: 38 },
+  nota: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 20 },
 });

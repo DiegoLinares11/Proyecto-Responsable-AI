@@ -32,9 +32,9 @@ export function NotasAlMargen({ fuente, original, verificar, consultar, compacta
 }
 
 const estilos = StyleSheet.create({
-  margen: { gap: Espacio.m, paddingTop: Espacio.l, borderTopWidth: 1 },
+  margen: { gap: Espacio.m, paddingTop: Espacio.l, borderTopWidth: 3 },
   compacta: { flexDirection: 'row', flexWrap: 'wrap', columnGap: Espacio.l },
-  nota: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s, minHeight: 52, paddingVertical: Espacio.m, borderBottomWidth: 1, maxWidth: '100%' },
-  titulo: { fontFamily: Tipos.textoMedio, fontSize: 13, lineHeight: 20, flexShrink: 1 },
-  detalle: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 18 },
+  nota: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m, minHeight: 52, paddingVertical: Espacio.l, borderBottomWidth: 1, maxWidth: '100%' },
+  titulo: { fontFamily: Tipos.textoMedio, fontSize: 13, lineHeight: 22, flexShrink: 1 },
+  detalle: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 20 },
 });

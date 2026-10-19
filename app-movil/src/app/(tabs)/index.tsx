@@ -7,6 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AreaDePestana } from '@/componentes/area-de-pestana';
 
 import { BotonGoogle } from '@/componentes/boton-google';
+import { SelloMarca } from '@/componentes/marca';
+import { ACCESO_DE_ENLACE } from '@/componentes/acceso-de-enlace';
 import { Asistente, Derecha, Enviar, Pin } from '@/componentes/iconos';
 import { SelectorDeUbicacion } from '@/componentes/selector-de-ubicacion';
 import { ANCHOS, Espacio, ROTULO, Tipos, useColores, useDisposicion, type Paleta } from '@/constants/tema';
@@ -82,7 +84,7 @@ function Cuaderno() {
       <View style={e.columna}>
         <View style={e.cabecera}>
           <View style={e.filaTitulo}>
-            <View style={e.simbolo}><Asistente color={c.asistente} tamano={22} /></View>
+            <View style={e.simbolo}><SelloMarca tamano={26} /></View>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={e.titulo} accessibilityRole="header" accessibilityLabel="Cuaderno de contexto">{anchoVentana < 420 ? 'Cuaderno' : 'Cuaderno de contexto'}</Text>
               <Text style={e.lema}>Asistente de noticias</Text>
@@ -96,13 +98,13 @@ function Cuaderno() {
         {sesion === null ? (
           <ScrollView contentContainerStyle={e.bienvenida}>
             <Text style={e.rotulo}>UN ESPACIO PARA PREGUNTAR</Text>
-            <Text style={e.tituloBienvenida}>Entender también es informarse.</Text>
+            <Text style={e.tituloBienvenida}>Conecta con lo que pasa.</Text>
             <Text style={e.textoBienvenida}>Consultá las noticias de la plataforma, explorá su contexto y encontrá las fuentes de cada respuesta.</Text>
             {contexto ? <View style={e.consultaPreparada}><Text style={e.rotulo}>CONSULTA PREPARADA</Text><Text style={e.textoBienvenida}>{preguntaContextual}</Text></View> : <IndiceDeConsultas preguntas={sugerencias(ubicacion.nombre)} />}
             <View style={e.acceso}>
               <Text style={e.textoBienvenida}>Entrá con tu cuenta para empezar una consulta.</Text>
               <BotonGoogle />
-              <Pressable onPress={() => router.navigate('/feed')} style={e.enlaceToque} accessibilityRole="link">
+              <Pressable {...ACCESO_DE_ENLACE} onPress={() => router.navigate('/feed')} style={e.enlaceToque} accessibilityRole="link">
                 <Text style={e.enlace}>Leer la portada sin cuenta</Text><Derecha color={c.acento} />
               </Pressable>
             </View>
@@ -160,7 +162,7 @@ function Mensaje({ turno, e, reintentar, pensando }: { turno: Turno; e: ReturnTy
       {turno.texto.split(/\n\s*\n/).filter(Boolean).map((p, i) => <Text key={i} selectable style={e.textoAsistente}>{p}</Text>)}
       {turno.citadas.length > 0 ? <View style={e.referencias}>
         <Text style={e.rotulo}>FUENTES DE ESTA RESPUESTA</Text>
-        {turno.citadas.map((n, i) => <Pressable key={n.id} onPress={() => router.push({ pathname: '/noticia/[id]', params: { id: n.id } })} style={({ pressed }) => [e.fuente, pressed && { opacity: 0.65 }]} accessibilityRole="link">
+        {turno.citadas.map((n, i) => <Pressable {...ACCESO_DE_ENLACE} key={n.id} onPress={() => router.push({ pathname: '/noticia/[id]', params: { id: n.id } })} style={({ pressed }) => [e.fuente, pressed && { opacity: 0.65 }]} accessibilityRole="link">
           <Text style={e.numeroConsulta} aria-hidden>{String(i + 1).padStart(2, '0')}</Text><Text style={e.fuenteTitulo}>{n.titulo}</Text><Derecha color={c.asistente} tamano={16} />
         </Pressable>)}
       </View> : null}
@@ -176,41 +178,41 @@ function crearEstilos(c: Paleta) {
     centro: { alignItems: 'center', justifyContent: 'center' },
     cabecera: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m, padding: Espacio.l, borderBottomWidth: 1, borderBottomColor: c.borde },
     filaTitulo: { flex: 1, minWidth: 200, flexDirection: 'row', alignItems: 'center', gap: Espacio.m },
-    simbolo: { padding: 10, backgroundColor: c.asistenteFondo, borderRadius: 30 },
-    titulo: { fontFamily: Tipos.lectura, fontSize: 25, lineHeight: 30, color: c.tinta },
-    lema: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 18, color: c.tintaSuave },
-    zona: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, maxWidth: '100%', marginLeft: 'auto', paddingHorizontal: Espacio.s },
-    zonaTexto: { fontFamily: Tipos.textoMedio, fontSize: 12, color: c.acento, flexShrink: 1 },
-    bienvenida: { padding: Espacio.xl, paddingTop: 40, gap: Espacio.xl, paddingBottom: 48 },
-    rotulo: { ...ROTULO, color: c.tintaSuave, fontSize: 10 },
-    tituloBienvenida: { fontFamily: Tipos.lectura, fontSize: 43, lineHeight: 49, letterSpacing: -0.8, color: c.tinta },
-    textoBienvenida: { fontFamily: Tipos.texto, fontSize: 15, lineHeight: 24, color: c.tintaSuave },
-    acceso: { gap: Espacio.l, borderTopWidth: 2, borderTopColor: c.asistente, paddingTop: Espacio.xl },
-    enlaceToque: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: Espacio.m },
-    enlace: { fontFamily: Tipos.textoMedio, fontSize: 14, color: c.acento },
-    conversacion: { padding: Espacio.xl, gap: Espacio.xl, flexGrow: 1 },
+    simbolo: { backgroundColor: c.papel },
+    titulo: { fontFamily: Tipos.titular, fontSize: 26, lineHeight: 32, color: c.tinta },
+    lema: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 19, color: c.tintaSuave },
+    zona: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, maxWidth: '100%', marginLeft: 'auto', paddingHorizontal: Espacio.m, borderRadius: 8, borderWidth: 1, borderColor: c.borde, backgroundColor: c.papelHundido },
+    zonaTexto: { fontFamily: Tipos.textoMedio, fontSize: 12, lineHeight: 19, color: c.tinta, flexShrink: 1 },
+    bienvenida: { padding: Espacio.pagina, paddingTop: 40, gap: Espacio.xl, paddingBottom: 48 },
+    rotulo: { ...ROTULO, color: c.acento, fontSize: 10 },
+    tituloBienvenida: { fontFamily: Tipos.titular, fontSize: 36, lineHeight: 44, letterSpacing: -0.8, color: c.tinta },
+    textoBienvenida: { fontFamily: Tipos.texto, fontSize: 15, lineHeight: 25, color: c.tintaSuave },
+    acceso: { gap: Espacio.l, borderTopWidth: 1, borderTopColor: c.borde, paddingTop: Espacio.xl },
+    enlaceToque: { minHeight: 48, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m },
+    enlace: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 22, color: c.acento },
+    conversacion: { padding: Espacio.pagina, gap: Espacio.xl, flexGrow: 1 },
     vacio: { gap: Espacio.l, paddingVertical: Espacio.xl },
-    vacioTitulo: { fontFamily: Tipos.lectura, fontSize: 36, lineHeight: 42, color: c.tinta },
-    indice: { borderTopWidth: 1, borderTopColor: c.bordeFuerte },
-    consulta: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m, minHeight: 56, paddingVertical: Espacio.l, borderBottomWidth: 1, borderBottomColor: c.borde },
-    numeroConsulta: { fontFamily: Tipos.numeros, fontSize: 12, lineHeight: 20, color: c.asistente, minWidth: 24 },
-    consultaTexto: { flex: 1, fontFamily: Tipos.texto, fontSize: 14, lineHeight: 22, color: c.tinta },
-    consultaPreparada: { backgroundColor: c.asistenteFondo, padding: Espacio.l, gap: Espacio.m, borderLeftWidth: 2, borderLeftColor: c.asistente },
-    pregunta: { gap: Espacio.s, borderLeftWidth: 2, borderLeftColor: c.marca, paddingLeft: Espacio.l, paddingVertical: Espacio.s },
-    textoUsuario: { fontFamily: Tipos.lectura, fontSize: 23, lineHeight: 30, color: c.tinta },
-    respuesta: { gap: Espacio.l, paddingBottom: Espacio.xl, borderBottomWidth: 1, borderBottomColor: c.borde },
-    etiquetaIA: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s, alignSelf: 'flex-start', backgroundColor: c.asistenteFondo, paddingHorizontal: 10, paddingVertical: 6 },
-    identidadIA: { fontFamily: Tipos.textoMedio, fontSize: 12, color: c.asistente },
-    textoAsistente: { fontFamily: Tipos.texto, fontSize: 16, lineHeight: 26, color: c.tinta },
-    referencias: { gap: Espacio.m, paddingTop: Espacio.l, borderTopWidth: 1, borderTopColor: c.borde },
+    vacioTitulo: { fontFamily: Tipos.titular, fontSize: 34, lineHeight: 41, color: c.tinta },
+    indice: { borderWidth: 1, borderColor: c.borde, borderRadius: 8, paddingHorizontal: Espacio.l, backgroundColor: c.papelHundido },
+    consulta: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m, minHeight: 60, paddingVertical: Espacio.l, borderBottomWidth: 1, borderBottomColor: c.borde },
+    numeroConsulta: { fontFamily: Tipos.numeros, fontSize: 12, lineHeight: 20, color: c.acento, minWidth: 24 },
+    consultaTexto: { flex: 1, fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 23, color: c.tinta },
+    consultaPreparada: { backgroundColor: c.asistenteFondo, padding: Espacio.xl, gap: Espacio.m, borderLeftWidth: 3, borderLeftColor: c.asistente, borderRadius: 8 },
+    pregunta: { gap: Espacio.s, borderLeftWidth: 3, borderLeftColor: c.marca, padding: Espacio.l, backgroundColor: c.papelHundido, borderRadius: 8 },
+    textoUsuario: { fontFamily: Tipos.textoMedio, fontSize: 18, lineHeight: 28, color: c.tinta },
+    respuesta: { gap: Espacio.l, paddingVertical: Espacio.s, paddingBottom: Espacio.xl, borderBottomWidth: 1, borderBottomColor: c.borde },
+    etiquetaIA: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.s, alignSelf: 'flex-start', backgroundColor: c.asistenteFondo, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 6 },
+    identidadIA: { fontFamily: Tipos.textoMedio, fontSize: 12, lineHeight: 19, color: c.asistente },
+    textoAsistente: { fontFamily: Tipos.texto, fontSize: 16, lineHeight: 28, color: c.tinta },
+    referencias: { gap: Espacio.m, padding: Espacio.l, borderWidth: 1, borderColor: c.borde, backgroundColor: c.papelHundido, borderRadius: 8 },
     fuente: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m, minHeight: 48, paddingVertical: Espacio.s },
-    fuenteTitulo: { flex: 1, fontFamily: Tipos.titular, fontSize: 18, lineHeight: 24, color: c.tinta },
-    pie: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 19, color: c.tintaSuave },
+    fuenteTitulo: { flex: 1, fontFamily: Tipos.titular, fontSize: 19, lineHeight: 25, color: c.tinta },
+    pie: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 20, color: c.tintaSuave },
     pensando: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s, paddingVertical: Espacio.l },
-    error: { backgroundColor: c.alertaFondo, padding: Espacio.l, gap: Espacio.s },
-    textoError: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 22, color: c.alertaTexto },
-    barraDeEntrada: { flexDirection: 'row', alignItems: 'flex-end', gap: Espacio.s, padding: Espacio.m, borderTopWidth: 2, borderTopColor: c.asistente, backgroundColor: c.papel },
-    entrada: { flex: 1, minHeight: 48, maxHeight: 140, padding: Espacio.m, fontFamily: Tipos.texto, fontSize: 16, lineHeight: 23, color: c.tinta, backgroundColor: c.papelHundido },
-    enviar: { width: 48, height: 48, backgroundColor: c.primario, alignItems: 'center', justifyContent: 'center' },
+    error: { backgroundColor: c.alertaFondo, borderLeftWidth: 3, borderLeftColor: c.alerta, borderRadius: 8, padding: Espacio.l, gap: Espacio.s },
+    textoError: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 23, color: c.alertaTexto },
+    barraDeEntrada: { flexDirection: 'row', alignItems: 'flex-end', gap: Espacio.m, padding: Espacio.m, borderTopWidth: 1, borderTopColor: c.borde, backgroundColor: c.papel },
+    entrada: { flex: 1, minHeight: 50, maxHeight: 140, padding: Espacio.m, borderWidth: 1, borderColor: c.bordeFuerte, borderRadius: 8, fontFamily: Tipos.texto, fontSize: 16, lineHeight: 24, color: c.tinta, backgroundColor: c.papelHundido },
+    enviar: { width: 50, height: 50, borderRadius: 8, backgroundColor: c.primario, alignItems: 'center', justifyContent: 'center' },
   });
 }

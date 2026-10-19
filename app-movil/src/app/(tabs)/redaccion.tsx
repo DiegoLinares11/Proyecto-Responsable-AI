@@ -122,26 +122,11 @@ export default function Redaccion() {
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
-    contenido: {
-      padding: Espacio.l,
-      paddingBottom: 64,
-      gap: Espacio.l,
-      width: '100%',
-      maxWidth: ANCHOS.conversacion,
-      alignSelf: 'center',
-    },
-    titulo: {
-      fontFamily: Tipos.titular,
-      fontSize: 32,
-      lineHeight: 36,
-      color: c.tinta,
-      paddingBottom: Espacio.s,
-      borderBottomWidth: 3,
-      borderBottomColor: c.tinta,
-    },
-    texto: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 20, color: c.tintaSuave },
-    pestanas: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: c.borde, gap: Espacio.s },
-    pestana: { minHeight: 44, justifyContent: 'center', paddingHorizontal: Espacio.m, borderBottomWidth: 3, marginBottom: -1, borderRadius: Radio.chico },
-    pestanaTexto: { fontSize: 15 },
+    contenido: { padding: Espacio.xl, paddingBottom: 64, gap: Espacio.xl, width: '100%', maxWidth: ANCHOS.conversacion, alignSelf: 'center' },
+    titulo: { fontFamily: Tipos.titular, fontSize: 32, lineHeight: 40, letterSpacing: -0.8, color: c.tinta, paddingVertical: Espacio.m, paddingBottom: Espacio.xl, borderBottomWidth: 1, borderBottomColor: c.borde },
+    texto: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 24, color: c.tintaSuave },
+    pestanas: { flexDirection: 'row', flexWrap: 'wrap', borderBottomWidth: 1, borderBottomColor: c.borde, gap: Espacio.s },
+    pestana: { minHeight: 48, justifyContent: 'center', paddingHorizontal: Espacio.l, paddingVertical: Espacio.s, borderBottomWidth: 3, marginBottom: -1, borderRadius: Radio.chico },
+    pestanaTexto: { fontSize: 14, lineHeight: 22 },
   });
 }

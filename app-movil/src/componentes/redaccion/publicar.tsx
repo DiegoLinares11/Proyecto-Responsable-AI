@@ -255,9 +255,9 @@ export function Publicar() {
 }
 
 const estilos = StyleSheet.create({
-  nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 19 },
+  nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 23 },
   fotos: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  foto: { width: 150, borderRadius: Radio.medio, padding: 4, gap: 2 },
+  foto: { width: 150, maxWidth: '100%', borderRadius: Radio.medio, padding: 6, gap: 4 },
   fotoImagen: { width: '100%', aspectRatio: 4 / 3, borderRadius: 3 },
-  fotoTexto: { fontFamily: Tipos.texto, fontSize: 11 },
+  fotoTexto: { fontFamily: Tipos.texto, fontSize: 12, lineHeight: 20 },
 });

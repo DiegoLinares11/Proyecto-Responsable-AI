@@ -7,7 +7,7 @@ import { Comprobado, Contexto } from './iconos';
  * El sello de veracidad. Igual que en la web: el número nunca va solo —en la
  * lectura de la noticia está el desglose de las cinco señales que lo forman—.
  *
- * Verificada va en verde. Lo que se publicó por debajo del umbral (lo publicó
+ * Verificada lleva un escudo y su etiqueta. Lo que se publicó por debajo del umbral (lo publicó
  * una persona) se identifica como verificación incompleta. El número se reserva
  * para la ficha de lectura, acompañado de una explicación de qué mide.
  */
@@ -70,9 +70,9 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: Radio.chico,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: Radio.medio,
     alignSelf: 'flex-start',
   },
   palabra: { fontFamily: Tipos.textoMedio, fontSize: 12, lineHeight: 18, flexShrink: 1 },

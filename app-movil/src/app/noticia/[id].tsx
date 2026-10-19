@@ -1,10 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DatoEditorial } from '@/componentes/dato-editorial';
+import { CargaEditorial } from '@/componentes/carga-editorial';
 import { DetalleEditorial } from '@/componentes/detalle-editorial';
 import { FichaDeVerificacion } from '@/componentes/ficha-de-verificacion';
 import { FotoDeNoticia } from '@/componentes/foto';
@@ -43,7 +44,7 @@ export default function Lectura() {
   }, [id]);
 
   if (error) return <Text style={e.error}>{error}</Text>;
-  if (noticia === undefined) return <ActivityIndicator style={{ marginTop: 48 }} color={c.acento} />;
+  if (noticia === undefined) return <CargaEditorial articulo />;
   if (noticia === null) return <Text style={e.error}>Esta noticia no existe o no está publicada.</Text>;
 
   const parrafos = noticia.cuerpo.split(/\n{2,}/).filter(p => p.trim() !== '' && p.trim() !== noticia.resumen.trim());
@@ -77,12 +78,7 @@ export default function Lectura() {
             <Text style={e.antetitulo}>{nombreDeSeccion(noticia.seccion).toUpperCase()}</Text>
             {noticia.zona ? <DatoEditorial tipo="zona" texto={noticia.zona} /> : null}
           </View>
-          <Text style={[e.titulo, conMargen && { fontSize: 44, lineHeight: 49 }]} accessibilityRole="header">{noticia.titulo}</Text>
-          <View style={e.firma}>
-            <Sello puntaje={noticia.puntajeVeracidad} enDesarrollo={noticia.enDesarrollo} />
-            <DatoEditorial tipo="fuente" texto={notas.fuente} />
-            <DatoEditorial tipo="fecha" texto={fecha} />
-          </View>
+          <Text style={[e.titulo, conMargen && { fontSize: 44, lineHeight: 54 }]} accessibilityRole="header">{noticia.titulo}</Text>
           {/* R-13: lo no confirmado se dice con palabras, no con un puntaje. */}
           {noticia.enDesarrollo ? (
             <View style={[e.enDesarrollo, { backgroundColor: c.alertaFondo, borderLeftColor: c.alerta }]} accessibilityRole="alert">
@@ -91,9 +87,14 @@ export default function Lectura() {
               </Text>
             </View>
           ) : null}
-          {noticia.imagen ? <View style={{ marginBottom: Espacio.xl }}><FotoDeNoticia imagen={noticia.imagen} estilo={e.imagen} /></View> : null}
           <Text style={e.rotulo}>LO QUE DICE EL MEDIO</Text>
           <Text style={e.entradilla}>{noticia.resumen}</Text>
+          {noticia.imagen ? <View style={{ marginBottom: Espacio.l }}><FotoDeNoticia imagen={noticia.imagen} estilo={e.imagen} /></View> : null}
+          <View style={e.firma}>
+            <Sello puntaje={noticia.puntajeVeracidad} compacto enDesarrollo={noticia.enDesarrollo} />
+            <DatoEditorial tipo="fuente" texto={notas.fuente} />
+            <DatoEditorial tipo="fecha" texto={fecha} />
+          </View>
           {!conMargen ? <NotasAlMargen {...notas} compacta /> : null}
           {parrafos.map((p, i) => <Text key={i} style={e.parrafo}>{p}</Text>)}
           <View onLayout={evento => { posicionFicha.current = evento.nativeEvent.layout.y; }} style={{ marginTop: Espacio.xl }}>
@@ -114,20 +115,20 @@ export default function Lectura() {
 function crearEstilos(c: Paleta) {
   return StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: c.papel },
-    contenido: { padding: Espacio.xl, paddingBottom: 64, width: '100%', alignSelf: 'center' },
+    contenido: { padding: Espacio.pagina, paddingTop: Espacio.l, paddingBottom: 64, width: '100%', alignSelf: 'center' },
     disposicion: { flexDirection: 'row', gap: 48, alignItems: 'flex-start' },
     articulo: { flex: 1, minWidth: 0, maxWidth: ANCHOS.lectura },
     margen: { width: 208, paddingTop: Espacio.s },
-    contexto: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m, marginBottom: Espacio.l },
-    antetitulo: { ...ROTULO, color: c.acento },
-    titulo: { fontFamily: Tipos.titular, fontSize: 34, lineHeight: 39, color: c.tinta, marginBottom: Espacio.xl },
-    firma: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m, paddingVertical: Espacio.l, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.borde, marginBottom: Espacio.xl },
+    contexto: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.m, marginBottom: Espacio.s },
+    antetitulo: { ...ROTULO, fontSize: 11, lineHeight: 17, letterSpacing: 0.5, color: c.acento },
+    titulo: { fontFamily: Tipos.titular, fontSize: 29, lineHeight: 36, letterSpacing: -0.7, color: c.tinta, marginBottom: Espacio.l },
+    firma: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: Espacio.m, rowGap: Espacio.s, paddingVertical: Espacio.m, borderBottomWidth: 1, borderColor: c.borde, marginBottom: Espacio.l },
     imagen: { width: '100%', aspectRatio: 3 / 2, borderRadius: Radio.chico, backgroundColor: c.fotoVacia },
-    rotulo: { ...ROTULO, fontSize: 10, color: c.tintaSuave, marginBottom: Espacio.s },
     enDesarrollo: { borderLeftWidth: 3, padding: Espacio.m, marginBottom: Espacio.xl, borderRadius: Radio.chico },
     enDesarrolloTexto: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 21 },
-    entradilla: { fontFamily: Tipos.lectura, fontSize: 22, lineHeight: 31, color: c.tinta, marginBottom: Espacio.xl },
-    parrafo: { fontFamily: Tipos.lectura, fontSize: 19, lineHeight: 30, color: c.tinta, marginBottom: Espacio.xl },
-    error: { margin: Espacio.l, fontFamily: Tipos.texto, color: c.peligro },
+    rotulo: { ...ROTULO, fontSize: 10, lineHeight: 16, letterSpacing: 0.6, color: c.acento, marginBottom: 4 },
+    entradilla: { fontFamily: Tipos.lectura, fontSize: 16, lineHeight: 25, color: c.tintaSuave, marginBottom: Espacio.l },
+    parrafo: { fontFamily: Tipos.lectura, fontSize: 17, lineHeight: 29, color: c.tinta, marginBottom: Espacio.l },
+    error: { margin: Espacio.xl, padding: Espacio.xl, backgroundColor: c.peligroFondo, borderLeftWidth: 3, borderLeftColor: c.peligro, fontFamily: Tipos.texto, fontSize: 15, lineHeight: 24, color: c.peligro },
   });
 }

@@ -176,13 +176,13 @@ function FilaDeAlerta({ alerta, alCambiar }: { alerta: AlertaDeContenido; alCamb
 }
 
 const estilos = StyleSheet.create({
-  nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 19 },
-  vacio: { fontFamily: Tipos.texto, fontSize: 14, paddingVertical: Espacio.m },
-  cabecera: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s },
-  estado: { fontFamily: Tipos.textoMedio, fontSize: 12 },
-  titulo: { fontFamily: Tipos.titular, fontSize: 18, lineHeight: 22 },
-  resumen: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 19 },
-  aviso: { fontFamily: Tipos.textoMedio, fontSize: 13 },
-  evidencia: { fontFamily: Tipos.numeros, fontSize: 12, lineHeight: 17, padding: 8, borderRadius: 3, overflow: 'hidden' },
+  nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 23 },
+  vacio: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 24, paddingVertical: Espacio.xl },
+  cabecera: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Espacio.s },
+  estado: { fontFamily: Tipos.textoMedio, fontSize: 12, lineHeight: 20 },
+  titulo: { fontFamily: Tipos.titular, fontSize: 23, lineHeight: 29 },
+  resumen: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 23 },
+  aviso: { fontFamily: Tipos.textoMedio, fontSize: 13, lineHeight: 22 },
+  evidencia: { fontFamily: Tipos.numeros, fontSize: 12, lineHeight: 21, padding: 12, borderRadius: 4, overflow: 'hidden' },
   botones: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });

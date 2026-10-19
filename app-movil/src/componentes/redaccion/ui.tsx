@@ -1,5 +1,5 @@
 // Las piezas de los formularios de la redacción, con la identidad de la app:
-// rectas, en tinta, y con objetivos táctiles de al menos 44 px.
+// neutros, acentos naranja y objetivos táctiles amplios.
 
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
@@ -24,7 +24,7 @@ export function Entrada({
         {...props}
         style={[
           estilos.entrada,
-          { borderColor: c.bordeFuerte, color: c.tinta, backgroundColor: c.papel },
+          { borderColor: c.bordeFuerte, color: c.tinta, backgroundColor: c.papelHundido },
           props.multiline ? { minHeight: 96, textAlignVertical: 'top', paddingTop: 10 } : null,
         ]}
       />
@@ -56,11 +56,12 @@ export function Opciones<T extends string>({
               onPress={() => cambiar(o.valor)}
               accessibilityRole="radio"
               accessibilityState={{ selected: elegida }}
-              style={[
+              style={({ pressed }) => [
                 estilos.opcion,
                 elegida
-                  ? { backgroundColor: c.verificadoFondo, borderColor: c.acento }
+                  ? { backgroundColor: c.marcaSuave, borderColor: c.acento }
                   : { backgroundColor: c.papel, borderColor: c.bordeFuerte },
+                { opacity: pressed ? 0.75 : 1 },
               ]}>
               <Text style={[estilos.opcionTexto, { color: elegida ? c.acento : c.tinta }]}>{o.nombre}</Text>
             </Pressable>
@@ -97,7 +98,7 @@ export function Boton({
       style={({ pressed }) => [
         estilos.boton,
         { backgroundColor: fondo, borderColor: secundario ? (peligro ? c.peligro : c.tinta) : fondo },
-        { opacity: desactivado ? 0.4 : pressed ? 0.75 : 1 },
+        { opacity: desactivado ? 0.4 : pressed ? 0.75 : 1, transform: [{ scale: pressed ? 0.99 : 1 }] },
       ]}>
       {ocupado ? <ActivityIndicator color={tinta} /> : <Text style={[estilos.botonTexto, { color: tinta }]}>{texto}</Text>}
     </Pressable>
@@ -123,8 +124,8 @@ export function Mensaje({ resultado }: { resultado: { error: string } | { ok: st
 export function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
   const c = useColores();
   return (
-    <View style={{ gap: Espacio.m }}>
-      <Text style={[ROTULO, { color: c.acento }]}>{titulo}</Text>
+    <View style={{ gap: Espacio.l }}>
+      <Text style={[ROTULO, { color: c.acento, paddingBottom: Espacio.m, borderBottomWidth: 1, borderBottomColor: c.borde }]}>{titulo}</Text>
       {children}
     </View>
   );
@@ -136,27 +137,30 @@ export function Tarjeta({ children }: { children: ReactNode }) {
 }
 
 const estilos = StyleSheet.create({
-  etiqueta: { fontFamily: Tipos.textoMedio, fontSize: 14 },
+  etiqueta: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 23 },
   entrada: {
-    minHeight: 46,
+    minHeight: 52,
     borderWidth: 1,
     borderRadius: Radio.medio,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontFamily: Tipos.texto,
     fontSize: 15,
+    lineHeight: 24,
   },
   fila: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  opcion: { minHeight: 40, justifyContent: 'center', paddingHorizontal: 12, borderWidth: 1, borderRadius: Radio.medio },
-  opcionTexto: { fontFamily: Tipos.textoMedio, fontSize: 14 },
+  opcion: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderRadius: Radio.chico, maxWidth: '100%' },
+  opcionTexto: { fontFamily: Tipos.textoMedio, fontSize: 13, lineHeight: 21 },
   boton: {
-    minHeight: 46,
+    minHeight: 52,
     paddingHorizontal: 18,
+    paddingVertical: 12,
     borderRadius: Radio.medio,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  botonTexto: { fontFamily: Tipos.textoMedio, fontSize: 15 },
-  mensaje: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 20, padding: 12, borderRadius: Radio.medio, overflow: 'hidden' },
-  tarjeta: { borderWidth: 1, borderRadius: Radio.medio, padding: Espacio.m, gap: Espacio.s },
+  botonTexto: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 23, textAlign: 'center' },
+  mensaje: { fontFamily: Tipos.texto, fontSize: 14, lineHeight: 24, padding: 16, borderRadius: Radio.medio, overflow: 'hidden' },
+  tarjeta: { borderWidth: 1, borderRadius: Radio.medio, padding: Espacio.l, gap: Espacio.m },
 });

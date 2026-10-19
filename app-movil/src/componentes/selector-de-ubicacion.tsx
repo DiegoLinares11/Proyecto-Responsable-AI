@@ -139,8 +139,8 @@ function crearEstilos(c: Paleta) {
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.borde,
     },
-    titulo: { fontFamily: Tipos.lectura, fontSize: 33, lineHeight: 38, color: c.tinta },
-    nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 18, color: c.tintaSuave, marginTop: 4 },
+    titulo: { fontFamily: Tipos.titular, fontSize: 32, lineHeight: 39, color: c.tinta },
+    nota: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 22, color: c.tintaSuave, marginTop: 4 },
     listo: { fontFamily: Tipos.textoFuerte, fontSize: 16, color: c.acento, paddingTop: 4 },
     gps: {
       padding: Espacio.l,
@@ -149,7 +149,8 @@ function crearEstilos(c: Paleta) {
       borderBottomColor: c.borde,
     },
     botonGps: {
-      minHeight: 46,
+      minHeight: 52,
+      paddingVertical: 10,
       borderRadius: Radio.medio,
       borderWidth: 1,
       borderColor: c.tinta,
@@ -157,9 +158,9 @@ function crearEstilos(c: Paleta) {
       justifyContent: 'center',
       paddingHorizontal: Espacio.l,
     },
-    filaGps: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    botonGpsTexto: { fontFamily: Tipos.textoMedio, fontSize: 15, color: c.tinta },
-    aviso: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 18, color: c.tinta },
+    filaGps: { flexDirection: 'row', alignItems: 'center', gap: 8, maxWidth: '100%' },
+    botonGpsTexto: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 22, color: c.tinta, flexShrink: 1 },
+    aviso: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 22, color: c.tinta },
     grupo: {
       ...ROTULO,
       color: c.acento,
@@ -171,13 +172,14 @@ function crearEstilos(c: Paleta) {
     opcion: {
       flexDirection: 'row',
       alignItems: 'center',
-      minHeight: 48,
+      minHeight: 52,
+      paddingVertical: 12,
       paddingHorizontal: Espacio.l,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.borde,
     },
     opcionElegida: { backgroundColor: c.papelHundido },
-    opcionTexto: { flex: 1, fontFamily: Tipos.texto, fontSize: 16, color: c.tinta },
+    opcionTexto: { flex: 1, fontFamily: Tipos.texto, fontSize: 15, lineHeight: 24, color: c.tinta },
     marca: { fontSize: 18, color: c.acento, fontFamily: Tipos.textoFuerte },
   });
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 
-import { Radio, Tipos, useColores } from '@/constants/tema';
+import { Tipos, useColores } from '@/constants/tema';
 import { useSesion } from '@/lib/sesion';
 
 export function BotonGoogle() {
@@ -30,14 +31,14 @@ export function BotonGoogle() {
         accessibilityRole="button"
         style={({ pressed }) => [
           estilos.boton,
-          { borderColor: c.tinta, backgroundColor: c.papel, opacity: pressed || entrando ? 0.7 : 1 },
+          { opacity: pressed || entrando ? 0.7 : 1 },
         ]}>
         {entrando ? (
-          <ActivityIndicator color={c.tinta} />
+          <ActivityIndicator color="#1F1F1F" />
         ) : (
           <>
-            <Text style={estilos.g}>G</Text>
-            <Text style={[estilos.texto, { color: c.tinta }]}>Entrar con Google</Text>
+            <Image source={require('../../assets/images/google-g.png')} style={estilos.g} contentFit="contain" accessible={false} />
+            <Text style={estilos.texto}>Entrar con Google</Text>
           </>
         )}
       </Pressable>
@@ -47,17 +48,8 @@ export function BotonGoogle() {
 }
 
 const estilos = StyleSheet.create({
-  boton: {
-    minHeight: 48,
-    borderWidth: 1,
-    borderRadius: Radio.medio,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingHorizontal: 20,
-  },
-  g: { fontSize: 18, color: '#4285F4', fontFamily: Tipos.textoFuerte },
-  texto: { fontSize: 15, fontFamily: Tipos.textoMedio },
-  error: { fontSize: 13, textAlign: 'center', fontFamily: Tipos.texto },
+  boton: { minHeight: 48, borderWidth: 1, borderColor: '#747775', backgroundColor: '#FFFFFF', borderRadius: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Platform.OS === 'ios' ? 12 : 10, paddingHorizontal: Platform.OS === 'ios' ? 16 : 12, paddingVertical: 12 },
+  g: { width: 20, height: 20.4, flexShrink: 0 },
+  texto: { color: '#1F1F1F', fontSize: 14, lineHeight: 20, fontFamily: Tipos.google, flexShrink: 1 },
+  error: { fontSize: 13, lineHeight: 21, textAlign: 'center', fontFamily: Tipos.texto },
 });

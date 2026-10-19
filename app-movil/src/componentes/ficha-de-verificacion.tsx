@@ -24,7 +24,7 @@ export function FichaDeVerificacion({ noticia, abierto, alCambiar }: {
   const Icono = verificada ? Comprobado : Contexto;
   const estado = veto ? 'Con desmentido registrado' : noticia.puntajeVeracidad === null ? 'Sin evaluación registrada' : verificada ? 'Umbral de verificación alcanzado' : 'Verificación incompleta';
   return (
-    <View style={[estilos.ficha, { borderColor: c.bordeFuerte, backgroundColor: c.papelHundido }]}>
+    <View style={[estilos.ficha, { borderColor: c.borde, borderTopColor: c.asistente, backgroundColor: c.papelHundido }]}>
       <View style={[estilos.registro, { borderColor: c.bordeFuerte }]}>
         <Text style={[ROTULO, { color: c.tintaSuave }]}>Registro de evidencia</Text>
         <Text style={[estilos.folio, { color: c.tintaTenue }]}>REF / {noticia.id.slice(0, 8).toUpperCase()}</Text>
@@ -70,19 +70,19 @@ function Fila({ senal, indice }: { senal: Senal; indice: number }) {
 }
 
 const estilos = StyleSheet.create({
-  ficha: { padding: Espacio.xl, gap: Espacio.l, borderWidth: 1, borderTopWidth: 3 },
+  ficha: { padding: Espacio.xl, gap: Espacio.l, borderWidth: 1, borderTopWidth: 3, borderRadius: 4 },
   registro: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: Espacio.m, paddingBottom: Espacio.l, borderBottomWidth: 1 },
-  folio: { fontFamily: Tipos.numeros, fontSize: 10, lineHeight: 16 },
-  titulo: { fontFamily: Tipos.lectura, fontSize: 31, lineHeight: 36 },
-  estado: { flexDirection: 'row', alignItems: 'center', gap: Espacio.s },
-  estadoTexto: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 21, flex: 1 },
-  texto: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 21 },
-  fila: { flexDirection: 'row', gap: Espacio.m, borderBottomWidth: 1, paddingVertical: Espacio.l, paddingHorizontal: Espacio.s },
-  indice: { fontFamily: Tipos.numeros, fontSize: 12, paddingTop: 2 },
-  detalle: { flex: 1, gap: Espacio.s },
+  folio: { fontFamily: Tipos.numeros, fontSize: 10, lineHeight: 17 },
+  titulo: { fontFamily: Tipos.titular, fontSize: 30, lineHeight: 37 },
+  estado: { flexDirection: 'row', alignItems: 'center', gap: Espacio.m },
+  estadoTexto: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 23, flex: 1 },
+  texto: { fontFamily: Tipos.texto, fontSize: 13, lineHeight: 23 },
+  fila: { flexDirection: 'row', gap: Espacio.m, borderBottomWidth: 1, paddingVertical: Espacio.l, paddingHorizontal: Espacio.s, borderRadius: 4 },
+  indice: { fontFamily: Tipos.numeros, fontSize: 12, lineHeight: 21, paddingTop: 2 },
+  detalle: { flex: 1, minWidth: 0, gap: Espacio.s },
   cabeceraFila: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: Espacio.s },
-  nombre: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 21 },
-  valor: { fontFamily: Tipos.numeros, fontSize: 11, lineHeight: 18, flexShrink: 1 },
+  nombre: { fontFamily: Tipos.textoMedio, fontSize: 14, lineHeight: 23 },
+  valor: { fontFamily: Tipos.numeros, fontSize: 12, lineHeight: 20, flexShrink: 1 },
   puntaje: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: Espacio.l, paddingTop: Espacio.l, borderTopWidth: 1 },
-  numero: { fontFamily: Tipos.numeros, fontSize: 27, lineHeight: 34 },
+  numero: { fontFamily: Tipos.numeros, fontSize: 30, lineHeight: 38 },
 });

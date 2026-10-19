@@ -1,51 +1,51 @@
-/* Noticias Verificadas — hoja de estilos única.
-   Sin framework. Las letras (Newsreader, Public Sans, IBM Plex Mono) las baja
-   next/font al compilar y las sirve el propio portal: el navegador del lector
-   nunca le pide nada a Google, que es la fuga que la portada declara no querer.
-   Es la misma identidad de la app (app-movil/src/constants/tema.ts): lo del
-   medio en serif, lo de la plataforma en sans, los números de la verificación
-   en mono; celeste para lo verificado, naranja para lo no confirmado. */
+/* NEXO · Manrope e Inter locales. Tokens compartidos visualmente con tema.ts. */
 
 :root {
-  --tinta: #12161c;
-  --tinta-suave: #4a5260;
-  --tinta-tenue: #6b7380;
+  --tinta: #111318;
+  --tinta-suave: #5b616e;
+  --tinta-tenue: #626a78;
   --papel: #ffffff;
-  --papel-hundido: #f1f3f5;
-  --borde: #e1e5ea;
-  --borde-fuerte: #c3cad3;
-  --acento: #1a62a6;
-  --marca: #3b8fd0;
-  --verificado: #1a62a6;
-  --verificado-fondo: #e4f0fa;
-  --alerta: #b84e08;
-  --peligro: #8f1d14;
-  --radio: 4px;
+  --papel-hundido: #f3f4f6;
+  --borde: #e5e7eb;
+  --borde-fuerte: #7d8592;
+  --acento: #b94600;
+  --sobre-acento: #ffffff;
+  --marca: #ff6b00;
+  --verificado: #16803d;
+  --verificado-fondo: #f0fdf4;
+  --alerta: #84500a;
+  --peligro: #b42318;
+  --radio: 12px;
+  --primario: #c94f00;
+  --sobre-primario: #ffffff;
 
-  /* Los titulares van en serif. No es nostalgia: separa visualmente lo que el
-     medio afirma de lo que la plataforma calcula, que acá va todo en sans. */
-  --titulares: var(--fuente-titulares), Georgia, "Times New Roman", serif;
+  --editorial: #111318;
+  --sobre-editorial: #ffffff;
+  --titulares: var(--fuente-titulares), system-ui, -apple-system, "Segoe UI", sans-serif;
   --texto: var(--fuente-texto), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --numeros: var(--fuente-numeros), ui-monospace, "Cascadia Mono", monospace;
-  --ancho: 74rem;
+  --numeros: var(--texto);
+  --ancho: 80rem;
 
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --tinta: #e8ecf1;
-    --tinta-suave: #a1aab6;
-    --tinta-tenue: #8a93a0;
-    --papel: #0d1116;
-    --papel-hundido: #171c23;
-    --borde: #262d37;
-    --borde-fuerte: #3a4350;
-    --acento: #7db9ea;
-    --verificado: #9bcbf2;
-    --verificado-fondo: #12304a;
-    --alerta: #f2a65a;
-    --peligro: #f08a80;
+    --tinta: #f9fafb;
+    --tinta-suave: #b8bec9;
+    --tinta-tenue: #a6aebb;
+    --papel: #111318;
+    --papel-hundido: #1b1e24;
+    --borde: #343a45;
+    --borde-fuerte: #697587;
+    --acento: #ff8a3d;
+    --sobre-acento: #111318;
+    --verificado: #86efac;
+    --verificado-fondo: #142a1d;
+    --alerta: #f1c783;
+    --peligro: #fda29b;
+    --primario: #ff6b00;
+    --sobre-primario: #111318;
   }
 }
 
@@ -60,6 +60,7 @@ body {
 }
 
 a { color: var(--acento); }
+:is(h1, h2, h3, h4) { font-family: var(--titulares); font-weight: 700; letter-spacing: -0.02em; }
 
 .contenedor { max-width: var(--ancho); margin: 0 auto; padding: 0 1.25rem 5rem; }
 
@@ -71,12 +72,12 @@ a { color: var(--acento); }
 
 /* La doble raya de la cabecera de un diario, como en la app. */
 header.marca {
-  border-bottom: 4px double var(--tinta);
-  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--borde);
+  margin-bottom: 2rem;
 }
 .marca .fila {
-  display: flex; align-items: baseline; gap: 1.25rem;
-  padding: 1.15rem 0 0.9rem;
+  display: flex; align-items: center; gap: 1.25rem;
+  padding: 1.4rem 0 1.2rem;
 }
 .marca h1 { margin: 0; align-self: center; white-space: nowrap; }
 .marca h1 a {
@@ -86,7 +87,7 @@ header.marca {
 .marca h1 svg { width: 2.1rem; height: 2.1rem; flex: none; color: var(--tinta); }
 .marca h1 .palabras { display: flex; flex-direction: column; }
 .marca h1 .antes { font: 700 0.6rem/1 var(--texto); letter-spacing: 0.22em; color: var(--tinta-suave); }
-.marca h1 .nombre { font: 600 1.55rem/1.05 var(--titulares); letter-spacing: -0.01em; }
+.marca h1 .nombre { font: 600 1.75rem/1.1 var(--titulares); letter-spacing: -0.01em; }
 .marca .lema {
   margin: 0; color: var(--tinta-suave); font-size: 0.8125rem; line-height: 1.4;
   border-left: 1px solid var(--borde); padding-left: 1.25rem;
@@ -102,6 +103,29 @@ header.marca {
   background: none; border: none; color: var(--acento);
   cursor: pointer; font: inherit; padding: 0;
 }
+
+/* PNG original. Ventana que descuenta su margen transparente y variante
+   monocroma explícita para fondos oscuros, conservando su canal alfa. */
+.nexo-logo {
+  --alto-logo: 32px;
+  display: block; position: relative; flex: none; overflow: hidden;
+  width: calc(var(--alto-logo) * 1902 / 544); height: var(--alto-logo);
+  margin: calc(var(--alto-logo) / 4);
+}
+.nexo-arte {
+  display: block; position: absolute;
+  width: calc(var(--alto-logo) * 2172 / 544); height: calc(var(--alto-logo) * 724 / 544);
+  left: calc(var(--alto-logo) * -136 / 544); top: calc(var(--alto-logo) * -110 / 544);
+  background: url('/marca/nexo-horizontal.png') center / 100% 100% no-repeat;
+}
+@media (prefers-color-scheme: dark) {
+  .nexo-arte {
+    background: var(--tinta);
+    -webkit-mask: url('/marca/nexo-horizontal.png') center / 100% 100% no-repeat;
+    mask: url('/marca/nexo-horizontal.png') center / 100% 100% no-repeat;
+  }
+}
+@media (max-width: 48rem) { .nexo-logo { --alto-logo: 28px; } }
 
 /* La tira de secciones, como la de cualquier diario. */
 .marca nav {
@@ -184,7 +208,7 @@ figure.foto.con-aviso { position: relative; }
 figure.foto .sobre-imagen {
   position: absolute; left: 0.6rem; top: 0.6rem; right: 0.6rem;
   padding: 0.35rem 0.55rem; border-radius: 4px;
-  background: rgba(18, 22, 28, 0.88); color: #fff;
+  background: rgba(0, 24, 46, 0.94); color: #fff;
   font-size: 0.75rem; font-weight: 600; line-height: 1.3;
 }
 
@@ -195,11 +219,11 @@ figure.ilustracion {
   aspect-ratio: 16 / 9;
   display: flex; flex-direction: column; justify-content: space-between; gap: 0.6rem;
   padding: 1.1rem 1.25rem;
-  background: #12161c; color: #fff;
+  background: var(--editorial); color: var(--sobre-editorial);
   border-radius: var(--radio);
   overflow: hidden;
 }
-figure.ilustracion .rotulo { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.16em; color: #7db9ea; }
+figure.ilustracion .rotulo { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.16em; color: #ff8fa2; }
 figure.ilustracion .titular {
   font-family: var(--titulares); font-style: italic;
   font-size: clamp(1.05rem, 0.8rem + 1vw, 1.6rem); line-height: 1.15;
@@ -207,8 +231,8 @@ figure.ilustracion .titular {
 }
 figure.ilustracion .etiqueta {
   align-self: flex-start;
-  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.08em; color: #c9d1da;
-  border: 1px solid #4a5260; border-radius: 3px; padding: 0.15rem 0.45rem;
+  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.08em; color: #c7d4e2;
+  border: 1px solid #45586d; border-radius: 3px; padding: 0.15rem 0.45rem;
 }
 @media (prefers-color-scheme: dark) {
   figure.ilustracion { background: #1b2530; border: 1px solid #2e3a48; }
@@ -311,7 +335,7 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 /* --- Nota completa -------------------------------------------------------- */
 
 .nota-completa h1 {
-  font: 700 clamp(1.7rem, 1.2rem + 1.8vw, 2.4rem)/1.14 var(--titulares);
+  font: 700 clamp(1.85rem, 1.2rem + 1.8vw, 2.75rem)/1.24 var(--titulares);
   letter-spacing: -0.02em;
   margin: 0 0 0.8rem;
 }
@@ -319,7 +343,7 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 /* La entradilla: el resumen, con cuerpo mayor que el texto. Es el renglón que
    decide si la persona sigue leyendo. */
 .nota-completa .entradilla {
-  font-size: 1.1rem; line-height: 1.5; color: var(--tinta-suave);
+  font-size: 1.1rem; line-height: 1.75; color: var(--tinta-suave);
   margin: 0 0 1.1rem;
 }
 
@@ -390,7 +414,7 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 .formulario textarea { resize: vertical; min-height: 5rem; line-height: 1.5; }
 .formulario button {
   font: inherit; font-size: 0.925rem; padding: 0.6rem 1rem; align-self: flex-start;
-  border: none; border-radius: var(--radio); background: var(--acento); color: white; cursor: pointer;
+  border: none; border-radius: var(--radio); background: var(--acento); color: var(--sobre-acento); cursor: pointer;
 }
 .formulario button:disabled { opacity: 0.5; cursor: default; }
 .formulario .error { color: var(--peligro); font-size: 0.8125rem; margin: 0; }
@@ -408,7 +432,7 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 .fila-cola h3 { margin: 0 0 0.3rem; font-size: 0.95rem; }
 .fila-cola .acciones { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 .fila-cola .acciones button { font: inherit; font-size: 0.8125rem; padding: 0.35rem 0.75rem; border-radius: var(--radio); border: 1px solid var(--borde); background: var(--papel-hundido); color: var(--tinta); cursor: pointer; }
-.fila-cola .acciones button.principal { background: var(--verificado); border-color: var(--verificado); color: white; }
+.fila-cola .acciones button.principal { background: var(--primario); border-color: var(--primario); color: var(--sobre-primario); }
 .fila-cola .acciones button.peligro { background: var(--peligro); border-color: var(--peligro); color: white; }
 
 /* Una alerta no es una noticia en revisión: ya está publicada, y eso se tiene
@@ -436,11 +460,11 @@ details.porque .cierre { margin-top: 0.6rem; color: var(--tinta-suave); }
 figure.ilustracion.muestra, .ilustracion.muestra { max-width: 22rem; margin: 0; }
 .ilustracion.muestra {
   aspect-ratio: 16 / 9; display: flex; flex-direction: column; justify-content: space-between;
-  padding: 0.9rem 1rem; background: #12161c; color: #fff; border-radius: var(--radio);
+  padding: 0.9rem 1rem; background: var(--editorial); color: var(--sobre-editorial); border-radius: var(--radio);
 }
-.ilustracion.muestra .rotulo { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.16em; color: #7db9ea; }
+.ilustracion.muestra .rotulo { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.16em; color: #ff8fa2; }
 .ilustracion.muestra .titular { font-family: var(--titulares); font-style: italic; font-size: 1.1rem; line-height: 1.15; }
-.ilustracion.muestra .etiqueta { align-self: flex-start; font-size: 0.5625rem; letter-spacing: 0.08em; color: #c9d1da; border: 1px solid #4a5260; border-radius: 3px; padding: 0.1rem 0.4rem; }
+.ilustracion.muestra .etiqueta { align-self: flex-start; font-size: 0.5625rem; letter-spacing: 0.08em; color: #c7d4e2; border: 1px solid #45586d; border-radius: 3px; padding: 0.1rem 0.4rem; }
 .buscador-imagen { display: flex; flex-direction: column; gap: 0.7rem; }
 .buscador-imagen .fila-busqueda { display: flex; gap: 0.5rem; }
 .buscador-imagen .fila-busqueda input { flex: 1; }
@@ -463,9 +487,13 @@ figure.ilustracion.muestra, .ilustracion.muestra { max-width: 22rem; margin: 0; 
 /* Entrar con Google: con borde, no relleno, para no confundirse con el botón
    principal del formulario. */
 .formulario button.boton-google {
-  background: var(--papel); color: var(--tinta);
-  border: 1px solid var(--tinta);
+  background: #fff; color: #1f1f1f;
+  border: 1px solid #747775; border-radius: 24px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px; min-height: 48px;
+  font: 500 14px/20px var(--fuente-google), Arial, sans-serif;
 }
+.boton-google img { width: 20px; height: 20.4px; flex: none; }
 
 /* --- Administración ---------------------------------------------------------- */
 .tabla-con-desplazamiento { overflow-x: auto; }
@@ -508,12 +536,12 @@ ol.historial .motivo { display: block; color: var(--tinta-suave); margin-top: 0.
 .rejilla figure.ilustracion .rotulo { font-size: 0.5625rem; }
 
 /* --- La redacción (inicio del portal) ------------------------------------- */
-.redaccion { max-width: 52rem; }
-.redaccion h2 { font: 600 2rem/1.1 var(--titulares); margin: 0 0 0.6rem; }
+.redaccion { max-width: 54rem; padding-top: 1rem; }
+.redaccion h2 { font: 700 clamp(2rem, 4vw, 2.75rem)/1.2 var(--titulares); letter-spacing: -0.04em; margin: 0 0 1rem; }
 .redaccion .entrada { color: var(--tinta-suave); max-width: 40rem; }
 .boton-app {
   display: inline-block; padding: 0.6rem 1rem; border-radius: var(--radio);
-  background: var(--tinta); color: var(--papel); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+  background: var(--primario); color: var(--sobre-primario); text-decoration: none; font-weight: 600; font-size: 0.9rem;
 }
 .aviso-redaccion { margin-top: 1.5rem; padding: 0.9rem 1rem; background: var(--papel-hundido); border-radius: var(--radio); font-size: 0.9rem; }
 .tareas { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin-top: 1.75rem; }
@@ -528,3 +556,42 @@ a.tarea:hover { border-color: var(--tinta); }
 .tarea-texto { font-size: 0.875rem; color: var(--tinta-suave); line-height: 1.45; }
 .pie-redaccion { margin-top: 2.5rem; font-size: 0.875rem; }
 .marca nav a.a-la-app { margin-left: auto; }
+
+
+/* Controles y superficies del portal: la misma escala visual que la app. */
+:is(a, button, input, textarea, select, summary):focus-visible {
+  outline: 3px solid var(--marca); outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--papel);
+}
+:is(button, input, textarea, select) { font-family: var(--texto); }
+:is(button, select), .boton-app { min-height: 48px; }
+input:not([type="radio"]):not([type="checkbox"]), textarea { min-height: 48px; }
+.formulario input:not([type="radio"]), .formulario textarea, .formulario select {
+  background: var(--papel-hundido); border-color: var(--borde-fuerte);
+  padding: 0.8rem 0.9rem; line-height: 1.5;
+}
+.formulario { gap: 1.3rem; }
+.formulario > label { gap: 0.5rem; }
+.formulario button { min-height: 48px; padding: 0.75rem 1rem; }
+.marca .sesion :is(a, button) { display: inline-flex; align-items: center; min-height: 44px; }
+.marca nav a { display: inline-flex; align-items: center; min-height: 44px; }
+.fila-cola { padding: 1.5rem; border-color: var(--borde); }
+.fila-cola h3 { font: 600 1.35rem/1.3 var(--titulares); }
+.fila-cola .acciones button { min-height: 44px; padding: 0.6rem 0.85rem; }
+.aviso-redaccion { padding: 1.25rem 1.5rem; border-left: 3px solid var(--marca); line-height: 1.7; }
+a.tarea { padding: 1.5rem; gap: 0.75rem; border-top: 3px solid var(--primario); }
+a.tarea:hover { background: var(--papel-hundido); border-top-color: var(--marca); }
+.tarea-texto { line-height: 1.7; }
+::selection { background: #ffe2cc; color: #111318; }
+@media (prefers-reduced-motion: no-preference) {
+  :is(a.tarea, .boton-app, .formulario button) {
+    transition: background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+  }
+  :is(.boton-app, .formulario button):active { opacity: 0.8; }
+}
+@media (max-width: 30rem) {
+  .marca .sesion { white-space: normal; }
+  .formulario, .fila-cola { overflow-wrap: anywhere; }
+  .fila-cola { padding: 1rem; }
+  form.cambio-de-rol input { min-width: 0; width: 100%; }
+}

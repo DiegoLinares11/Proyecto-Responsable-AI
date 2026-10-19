@@ -1,61 +1,68 @@
-// El sello de la marca y el logotipo. El sello es un check dentro de dos
-// anillos: el de afuera en naranja, el de adentro en tinta. El naranja es la
-// identidad; los sellos de verificación usan un color semántico independiente.
+import { Image } from 'expo-image';
+import { StyleSheet, View } from 'react-native';
 
-import { StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
+import { useColores } from '@/constants/tema';
+import { useApariencia } from '@/lib/apariencia';
 
-import { Tipos, useColores } from '@/constants/tema';
+const LOGO = require('../../assets/marca/nexo-horizontal.png');
+const ICONO = require('../../assets/marca/nexo-icono.png');
 
-export function SelloMarca({
-  tamano = 30,
-  etiqueta,
-  tinta,
-}: {
+// El PNG individual original se conserva intacto. Esta ventana solo descuenta
+// su margen transparente; no se traza, estira ni reconstruye el símbolo.
+const ARTE = { ancho: 2172, alto: 724, x: 136, y: 110, anchoVisible: 1902, altoVisible: 544, anchoSimbolo: 632 };
+
+type Props = {
+  variante?: 'horizontal' | 'simbolo' | 'icono';
+  tono?: 'automatico' | 'claro' | 'oscuro' | 'monocromo' | 'naranja';
   tamano?: number;
   etiqueta?: string;
-  /** Sobre un fondo oscuro fijo (la ilustración), el check va claro. */
   tinta?: string;
-}) {
-  const c = useColores();
-  const trazo = tinta ?? c.tinta;
-  // Sin etiqueta es decoración: ni `accessible={false}`, que en la web llega
-  // al DOM como un atributo inválido.
-  const accesible = etiqueta === undefined ? {} : { accessible: true, accessibilityLabel: etiqueta };
-  return (
-    <Svg width={tamano} height={tamano} viewBox="0 0 64 64" {...accesible}>
-      <Circle cx={32} cy={32} r={29} fill="none" stroke={c.marca} strokeWidth={4} />
-      <Circle cx={32} cy={32} r={22} fill="none" stroke={trazo} strokeWidth={1.5} />
-      <Path
-        d="M22 33 L29 40 L43 24"
-        fill="none"
-        stroke={trazo}
-        strokeWidth={4.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
+};
 
-/** «NOTICIAS / Verificadas», con el sello al lado. */
-export function Logotipo({ grande = false }: { grande?: boolean }) {
+/** Marca compartida. El tamaño indica la altura visible, sin el espacio libre. */
+export function MarcaNexo({ variante = 'horizontal', tono = 'automatico', tamano = 30, etiqueta, tinta }: Props) {
   const c = useColores();
+  const { esquema } = useApariencia();
+  const monocroma = tinta ?? (tono === 'oscuro' || tono === 'naranja' || (tono === 'automatico' && esquema === 'dark')
+    ? '#FFFFFF' : tono === 'monocromo' ? c.tinta : undefined);
+  const escala = tamano / ARTE.altoVisible;
+  const ancho = variante === 'icono' ? tamano : escala * (variante === 'simbolo' ? ARTE.anchoSimbolo : ARTE.anchoVisible);
   return (
-    <View style={estilos.fila} accessible accessibilityRole="header" accessibilityLabel="Noticias Verificadas">
-      <SelloMarca tamano={grande ? 44 : 30} />
-      <View>
-        <Text style={[estilos.antes, { color: c.tintaSuave, fontSize: grande ? 11 : 9 }]}>NOTICIAS</Text>
-        <Text style={[estilos.nombre, { color: c.tinta, fontSize: grande ? 32 : 22, lineHeight: grande ? 34 : 24 }]}>
-          Verificadas
-        </Text>
+    <View
+      style={{ padding: tamano / 4, flexShrink: 0 }}
+      accessible={etiqueta !== undefined}
+      accessibilityLabel={etiqueta}
+      accessibilityRole={etiqueta ? 'image' : undefined}
+      aria-hidden={etiqueta === undefined}>
+      <View style={[estilos.ventana, { width: ancho, height: tamano }]}>
+        <Image
+          source={variante === 'icono' ? ICONO : LOGO}
+          alt=""
+          contentFit="contain"
+          tintColor={variante === 'icono' ? undefined : monocroma}
+          style={variante === 'icono' ? { width: tamano, height: tamano } : {
+            position: 'absolute', width: ARTE.ancho * escala, height: ARTE.alto * escala,
+            left: -ARTE.x * escala, top: -ARTE.y * escala,
+          }}
+        />
       </View>
     </View>
   );
 }
 
+/** Conserva el contrato de las ilustraciones y los sellos existentes. */
+export function SelloMarca({ tamano = 30, etiqueta, tinta }: { tamano?: number; etiqueta?: string; tinta?: string }) {
+  return <MarcaNexo variante="simbolo" tamano={tamano} etiqueta={etiqueta} tinta={tinta} />;
+}
+
+/** Encabezado accesible; el dibujo conserva la tipografía del logo suministrado. */
+export function Logotipo({ grande = false }: { grande?: boolean }) {
+  return <View style={estilos.fila} accessible accessibilityRole="header" accessibilityLabel="NEXO">
+    <MarcaNexo tamano={grande ? 40 : 30} />
+  </View>;
+}
+
 const estilos = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  antes: { fontFamily: Tipos.textoFuerte, letterSpacing: 2.2 },
-  nombre: { fontFamily: Tipos.titular },
+  fila: { flexDirection: 'row', alignItems: 'center', flexShrink: 0 },
+  ventana: { overflow: 'hidden' },
 });
