@@ -8,8 +8,12 @@
 .secret.local
 
 # La app se compila aparte, con EAS. Y las pruebas no van a producción: algunas
-# importan código de la app, que tampoco sube.
-app-movil
+# importan código de la app, que tampoco sube. De la app solo suben las
+# tipografías, que el portal comparte (src/app/layout.tsx).
+app-movil/*
+!app-movil/assets
+app-movil/assets/*
+!app-movil/assets/fonts
 tests
 
 .claude
